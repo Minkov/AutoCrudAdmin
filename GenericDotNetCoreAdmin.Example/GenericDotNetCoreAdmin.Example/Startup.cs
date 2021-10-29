@@ -41,6 +41,8 @@ namespace GenericDotNetCoreAdmin.Example
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
 
+            app.AddGenericDotNetCorAdmin("admin");
+
             this.FillData(app);
         }
 

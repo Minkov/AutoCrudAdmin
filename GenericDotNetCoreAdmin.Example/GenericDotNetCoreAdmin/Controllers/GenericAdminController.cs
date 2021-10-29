@@ -22,7 +22,7 @@
         Delete = 3,
     }
 
-    [GenericAdminControllerNameConvention]
+    // [GenericAdminControllerNameConvention]
     public class GenericAdminController<TEntity>
         : Controller
         where TEntity : class
