@@ -1,11 +1,9 @@
-namespace GenericDotNetCoreAdmin
+namespace GenericDotNetCoreAdmin.Example
 {
     using System;
     using System.Linq;
-    using GenericDotNetCoreAdmin.Attributes;
-    using GenericDotNetCoreAdmin.Helpers;
-    using GenericDotNetCoreAdmin.Helpers.Implementations;
-    using GenericDotNetCoreAdmin.Models;
+    using GenericDotNetCoreAdmin.Example.Models;
+    using GenericDotNetCoreAdmin.Extensions;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.EntityFrameworkCore;
@@ -14,23 +12,14 @@ namespace GenericDotNetCoreAdmin
 
     public class Startup
     {
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<TaskSystemDbContext>(options =>
                 options.UseInMemoryDatabase("AdminCoreTest.TaskSystem"));
 
             services.AddScoped<DbContext, TaskSystemDbContext>();
-            services.AddTransient<IFormControlsHelper, FormControlsHelper>();
-            services.AddHttpContextAccessor();
 
-            services.AddControllersWithViews()
-                .AddMvcOptions(o => o.Conventions.Add(new GenericAdminControllerNameConvention()))
-                .ConfigureApplicationPartManager(c =>
-                {
-                    c.FeatureProviders.Add(new GenericAdminControllerFeatureProvider());
-                });
+            services.UseGenericDotNetCorAdmin();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -71,7 +60,7 @@ namespace GenericDotNetCoreAdmin
 
             context.Tasks.AddRange(
                 Enumerable.Range(1, 1 << 6)
-                    .Select(index => new Task()
+                    .Select(index => new Task
                     {
                         Name = $"Task {index}",
                         OpenDate = DateTime.Now.AddDays(index % 100),

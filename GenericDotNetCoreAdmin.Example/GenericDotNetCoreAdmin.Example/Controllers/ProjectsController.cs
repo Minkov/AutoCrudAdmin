@@ -1,9 +1,10 @@
-﻿namespace GenericDotNetCoreAdmin.Controllers
+﻿namespace GenericDotNetCoreAdmin.Example.Controllers
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using GenericDotNetCoreAdmin.Models;
+    using GenericDotNetCoreAdmin.Controllers;
+    using GenericDotNetCoreAdmin.Example.Models;
     using GenericDotNetCoreAdmin.ViewModels;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;

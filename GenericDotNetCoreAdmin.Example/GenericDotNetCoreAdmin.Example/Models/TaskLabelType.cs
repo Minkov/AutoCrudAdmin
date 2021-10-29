@@ -1,4 +1,4 @@
-﻿namespace GenericDotNetCoreAdmin.Models
+﻿namespace GenericDotNetCoreAdmin.Example.Models
 {
     public enum TaskLabelType
     {

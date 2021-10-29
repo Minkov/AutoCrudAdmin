@@ -1,4 +1,4 @@
-﻿namespace GenericDotNetCoreAdmin.Models
+﻿namespace GenericDotNetCoreAdmin.Example.Models
 {
     using System;
     using System.Collections.Generic;

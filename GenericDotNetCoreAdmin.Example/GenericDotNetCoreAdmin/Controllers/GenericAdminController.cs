@@ -156,7 +156,7 @@
         {
             Func<PropertyInfo, bool> filter = this.ColumnNames.Any()
                 ? x => this.ColumnNames.Contains(x.Name)
-                : x => true;
+                : _ => true;
 
             return EntityType
                 .GetProperties()
