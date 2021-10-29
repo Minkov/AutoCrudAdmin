@@ -15,4 +15,20 @@
       <_ContentIncludedByDefault Remove="Views\ProjectsAdmin\Index.cshtml" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="Utils\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Utils\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Utils\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Remove="Utils\**" />
+    </ItemGroup>
+
 </Project>

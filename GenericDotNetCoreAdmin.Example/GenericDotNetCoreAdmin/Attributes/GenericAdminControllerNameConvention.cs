@@ -21,6 +21,7 @@ namespace GenericDotNetCoreAdmin.Attributes
                 .Where(p => p.IsSubclassOfRawGeneric(typeof(GenericAdminController<>)))
                 .ToList();
 
+            // TODO:  Must be extracted, as it is repeated in GenericAdminControllerFeatureProvider
             EntityTypeToNameMap = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
                 .Where(t => t.IsSubclassOf(typeof(DbContext)))

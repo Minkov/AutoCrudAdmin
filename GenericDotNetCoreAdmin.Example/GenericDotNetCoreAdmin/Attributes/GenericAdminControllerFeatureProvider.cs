@@ -5,16 +5,14 @@ namespace GenericDotNetCoreAdmin.Attributes
     using System.Linq;
     using System.Reflection;
     using GenericDotNetCoreAdmin.Controllers;
-    using GenericDotNetCoreAdmin.Models;
     using Microsoft.AspNetCore.Mvc.ApplicationParts;
     using Microsoft.AspNetCore.Mvc.Controllers;
     using Microsoft.EntityFrameworkCore;
 
     public class GenericAdminControllerFeatureProvider : IApplicationFeatureProvider<ControllerFeature>
     {
-        private readonly DbContext db;
-
         static GenericAdminControllerFeatureProvider()
+            // TODO:  Must be extracted, as it is repeated in GenericAdminControllerNameConvention
             => Types = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(s => s.GetTypes())
                 .Where(t => t.IsSubclassOf(typeof(DbContext)))
