@@ -1,0 +1,1 @@
+# generic-dotnetcore-admin
