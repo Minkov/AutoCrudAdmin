@@ -6,7 +6,7 @@ namespace GenericDotNetCoreAdmin.Extensions
     using Microsoft.AspNetCore.Builder;
     using Microsoft.Extensions.DependencyInjection;
 
-    public static class ServiceCollectionExtensions
+    public static class GenericDotNetCoreAdminExtensions
     {
         public static IServiceCollection UseGenericDotNetCorAdmin(
             this IServiceCollection services)
