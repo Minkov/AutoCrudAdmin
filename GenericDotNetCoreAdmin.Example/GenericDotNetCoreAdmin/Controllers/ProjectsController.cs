@@ -28,12 +28,11 @@
             {
                 new GridAction
                 {
-                    Name = nameof(this.This),
                     Action = nameof(this.This),
                 },
                 new GridAction
                 {
-                    Name = nameof(this.That),
+                    Name = nameof(this.That) + " with Id",
                     Action = nameof(this.That),
                 },
             };

@@ -3,7 +3,8 @@ namespace GenericDotNetCoreAdmin
     using System;
     using System.Linq;
     using GenericDotNetCoreAdmin.Attributes;
-    using GenericDotNetCoreAdmin.Controllers;
+    using GenericDotNetCoreAdmin.Helpers;
+    using GenericDotNetCoreAdmin.Helpers.Implementations;
     using GenericDotNetCoreAdmin.Models;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -21,6 +22,7 @@ namespace GenericDotNetCoreAdmin
                 options.UseInMemoryDatabase("AdminCoreTest.TaskSystem"));
 
             services.AddScoped<DbContext, TaskSystemDbContext>();
+            services.AddTransient<IFormControlsHelper, FormControlsHelper>();
             services.AddHttpContextAccessor();
 
             services.AddControllersWithViews()

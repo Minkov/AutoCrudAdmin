@@ -2,10 +2,13 @@ namespace GenericDotNetCoreAdmin.ViewModels
 {
     using System;
     using System.Collections.Generic;
+    using GenericDotNetCoreAdmin.Controllers;
 
     public class GenericAdminEntityFormViewModel
     {
         public IEnumerable<FormControlViewModel> FormControls { get; set; }
+
+        public EntityAction Action { get; set; }
     }
 
     public class FormControlViewModel

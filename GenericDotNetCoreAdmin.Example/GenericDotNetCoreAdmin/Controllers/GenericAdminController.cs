@@ -7,13 +7,20 @@
     using System.Reflection;
     using GenericDotNetCoreAdmin.Attributes;
     using GenericDotNetCoreAdmin.Extensions;
+    using GenericDotNetCoreAdmin.Helpers;
     using GenericDotNetCoreAdmin.ViewModels;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Rendering;
-    using Microsoft.AspNetCore.Mvc.ViewFeatures;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using NonFactors.Mvc.Grid;
+
+    public enum EntityAction
+    {
+        Create = 1,
+        Edit = 2,
+        Delete = 3,
+    }
 
     [GenericAdminControllerNameConvention]
     public class GenericAdminController<TEntity>
@@ -22,15 +29,28 @@
     {
         private static readonly Type EntityType = typeof(TEntity);
 
-        private static readonly MethodInfo GenerateColumnExpressionMethod = typeof(GenericAdminController<TEntity>)
-            .GetMethod(nameof(GenerateColumnConfiguration), BindingFlags.NonPublic | BindingFlags.Static);
-
         private DbContext DbContext
-            => this.HttpContext
+            => this.db ??= this.HttpContext
                 .RequestServices
                 .GetService<DbContext>();
 
+        protected virtual IQueryable<TEntity> Set
+            => this.set ??= this.DbContext
+                ?.Set<TEntity>();
+
+        private IFormControlsHelper FormControlsHelper
+            => this.formControlsHelper ??= this.HttpContext
+                .RequestServices
+                .GetService<IFormControlsHelper>();
+
+        private static MethodInfo GenerateColumnExpressionMethod =>
+            typeof(GenericAdminController<TEntity>)
+                .GetMethod(nameof(GenerateColumnConfiguration),
+                    BindingFlags.NonPublic | BindingFlags.Static);
+
         private IQueryable<TEntity> set;
+        private DbContext db;
+        private IFormControlsHelper formControlsHelper;
 
         protected virtual IEnumerable<string> ColumnNames
             => Enumerable.Empty<string>();
@@ -38,25 +58,18 @@
         protected virtual IEnumerable<Func<TEntity, ValidatorResult>> EntityValidators
             => Array.Empty<Func<TEntity, ValidatorResult>>();
 
-        private IEnumerable<GridAction> DefaultActions
-            => new[]
-            {
-                new GridAction()
-                {
-                    Name = "Edit",
-                    Action = "Edit",
-                }
-            };
-
         protected virtual IEnumerable<GridAction> CustomActions
             => Enumerable.Empty<GridAction>();
 
-        protected IEnumerable<GridAction> Actions
-            => this.DefaultActions.Concat(this.CustomActions);
+        private static IEnumerable<GridAction> DefaultActions
+            => new[]
+            {
+                new GridAction { Action = nameof(Edit) },
+                new GridAction { Action = nameof(Delete) },
+            };
 
-        protected virtual IQueryable<TEntity> Set
-            => this.set ??= this.DbContext
-                ?.Set<TEntity>();
+        private IEnumerable<GridAction> Actions
+            => DefaultActions.Concat(this.CustomActions);
 
         [HttpGet]
         public virtual IActionResult Index()
@@ -67,48 +80,64 @@
 
         [HttpGet]
         public virtual IActionResult Create()
-            => this.GetEntityForm(Activator.CreateInstance<TEntity>());
+            => this.GetEntityForm(
+                Activator.CreateInstance<TEntity>(),
+                EntityAction.Create);
 
         [HttpGet]
         public virtual IActionResult Edit(string id)
             => this.GetEntityForm(this.Set
-                .FirstOrDefault(this.GetObjectByIdLambda(id)));
+                    .FirstOrDefault(GetObjectByIdLambda(id)),
+                EntityAction.Edit);
+
+        [HttpGet]
+        public virtual IActionResult Delete(string id)
+            => this.GetEntityForm(this.Set
+                    .FirstOrDefault(GetObjectByIdLambda(id)),
+                EntityAction.Delete);
 
         [HttpPost]
         public virtual IActionResult Create(TEntity entity)
-            => this.PostEntityForm(entity, EntityState.Added);
+            => this.PostEntityForm(entity, EntityAction.Create);
 
         [HttpPost]
         public virtual IActionResult Edit(TEntity entity)
-            => this.PostEntityForm(entity, EntityState.Modified);
+            => this.PostEntityForm(entity, EntityAction.Edit);
 
-        protected virtual IActionResult GetEntityForm(TEntity entity)
-            => this.View("../GenericAdmin/EntityForm", new GenericAdminEntityFormViewModel
+        [HttpPost]
+        public virtual IActionResult Delete(TEntity entity)
+            => this.PostEntityForm(entity, EntityAction.Delete);
+
+        protected virtual IActionResult GetEntityForm(TEntity entity, EntityAction action)
+        {
+            var formControls = this.FormControlsHelper.GenerateFormControls(entity)
+                .ToList();
+
+            if (action == EntityAction.Delete)
             {
-                FormControls = GenerateFormControls(entity)
-            });
+                formControls.ForEach(fc => fc.IsReadOnly = true);
+            }
 
-        protected virtual IActionResult PostEntityForm(TEntity entity, EntityState state)
+            return this.View("../GenericAdmin/EntityForm", new GenericAdminEntityFormViewModel
+            {
+                FormControls = formControls,
+                Action = action,
+            });
+        }
+
+        protected virtual IActionResult PostEntityForm(TEntity entity, EntityAction action)
         {
             this.ValidateBeforeSave(entity);
-            // EntityType.GetPrimaryKeyPropertyInfo().SetValue(entity, 0);
-            this.DbContext.Entry(entity).State = state;
+            this.DbContext.Entry(entity).State = action switch
+            {
+                EntityAction.Create => EntityState.Added,
+                EntityAction.Edit => EntityState.Modified,
+                var _ => EntityState.Deleted
+            };
+
             this.DbContext.SaveChanges();
 
             return this.RedirectToAction("Index");
-        }
-
-        private static IEnumerable<FormControlViewModel> GenerateFormControls(TEntity entity)
-        {
-            var primaryKeyProperty = EntityType.GetPrimaryKeyPropertyInfo();
-            return EntityType.GetProperties()
-                .Select(property => new FormControlViewModel
-                {
-                    Name = property.Name,
-                    Type = property.PropertyType,
-                    Value = property.GetValue(entity),
-                    IsReadOnly = property == primaryKeyProperty,
-                });
         }
 
         protected virtual IHtmlGrid<TEntity> GenerateGrid(IHtmlHelper<GenericAdminIndexViewModel> htmlHelper)
@@ -132,9 +161,10 @@
             return EntityType
                 .GetProperties()
                 .Where(filter)
-                .Aggregate(columns, (currentColumns, prop) => (IGridColumnsOf<TEntity>)GenerateColumnExpressionMethod
-                    .MakeGenericMethod(prop.PropertyType)
-                    .Invoke(null, new object[] { currentColumns, prop }));
+                .Aggregate(columns, (currentColumns, prop) => (IGridColumnsOf<TEntity>)
+                    GenerateColumnExpressionMethod
+                        .MakeGenericMethod(prop.PropertyType)
+                        .Invoke(null, new object[] { currentColumns, prop }));
         }
 
         protected virtual IGridColumnsOf<TEntity> BuildGridActions(
@@ -160,10 +190,23 @@
             return columns;
         }
 
-        // This method is called via reflection.
+        private void ValidateBeforeSave(TEntity entity)
+        {
+            var errors = this.EntityValidators
+                .Select(v => v(entity))
+                .Where(x => !x.IsValid)
+                .Select(x => x.Message)
+                .ToList();
+
+            if (errors.Any())
+            {
+                throw new Exception(string.Join(", ", errors));
+            }
+        }
+
         private static IGridColumnsOf<TEntity> GenerateColumnConfiguration<TProperty>(
             IGridColumnsOf<TEntity> columns,
-            PropertyInfo property)
+            MemberInfo property)
         {
             var parameter = Expression.Parameter(EntityType, "model");
 
@@ -184,21 +227,7 @@
             return columns;
         }
 
-        private void ValidateBeforeSave(TEntity entity)
-        {
-            var errors = this.EntityValidators
-                .Select(v => v(entity))
-                .Where(x => !x.IsValid)
-                .Select(x => x.Message)
-                .ToList();
-
-            if (errors.Any())
-            {
-                throw new Exception(string.Join(", ", errors));
-            }
-        }
-
-        private Expression<Func<TEntity, bool>> GetObjectByIdLambda(object entityId)
+        private static Expression<Func<TEntity, bool>> GetObjectByIdLambda(object entityId)
         {
             var primaryKeyProperty = EntityType
                 .GetPrimaryKeyPropertyInfo();

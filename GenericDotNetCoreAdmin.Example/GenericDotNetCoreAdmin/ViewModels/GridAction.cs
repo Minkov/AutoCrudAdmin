@@ -2,8 +2,14 @@ namespace GenericDotNetCoreAdmin.ViewModels
 {
     public class GridAction
     {
-        public string Name { get; set; }
+        private string name;
 
         public string Action { get; set; }
+
+        public string Name
+        {
+            get => this.name ??= this.Action;
+            init => this.name = value;
+        }
     }
 }
