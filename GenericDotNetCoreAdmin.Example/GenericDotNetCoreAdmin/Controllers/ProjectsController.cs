@@ -1,5 +1,6 @@
 ﻿namespace GenericDotNetCoreAdmin.Controllers
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using GenericDotNetCoreAdmin.Models;
@@ -15,6 +16,13 @@
             => base.Set.Include(x => x.Tasks)
                 .ThenInclude(t => t.EmployeeTasks)
                 .ThenInclude(et => et.Employee);
+
+        protected override IEnumerable<Func<Project, ValidatorResult>> EntityValidators
+            => new Func<Project, ValidatorResult>[]
+            {
+                ValidateProjectNameLength,
+                ValidateProjectNameCharacters,
+            };
 
         protected override IEnumerable<string> ColumnNames
             => new[]
@@ -57,5 +65,16 @@
 
         public IActionResult That(string id)
             => this.Ok($"It works with Id: {id}");
+
+
+        private static ValidatorResult ValidateProjectNameLength(Project project)
+            => project.Name.Length <= 20
+                ? ValidatorResult.Success()
+                : ValidatorResult.Error("Name must be at max 20 characters");
+
+        private static ValidatorResult ValidateProjectNameCharacters(Project project)
+            => project.Name.Contains('@')
+                ? ValidatorResult.Error("Name cannot contain '@'")
+                : ValidatorResult.Success();
     }
 }
