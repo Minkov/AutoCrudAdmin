@@ -4,6 +4,7 @@ namespace GenericDotNetCoreAdmin.Extensions
     using System.ComponentModel.DataAnnotations;
     using System.Linq;
     using System.Reflection;
+    using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     public static class TypeExtensions
     {
@@ -11,6 +12,10 @@ namespace GenericDotNetCoreAdmin.Extensions
             => type
                 .GetProperties()
                 .FirstOrDefault(pi => Attribute.IsDefined(pi, typeof(KeyAttribute)));
+
+        public static object GetPrimaryKeyValue(this Type type, object value)
+            => type.GetPrimaryKeyPropertyInfo()
+                .GetValue(value);
 
         public static bool IsSubclassOfRawGeneric(this Type type, Type genericParent)
         {

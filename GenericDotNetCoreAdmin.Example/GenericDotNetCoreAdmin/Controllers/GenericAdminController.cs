@@ -10,6 +10,7 @@
     using GenericDotNetCoreAdmin.ViewModels;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Rendering;
+    using Microsoft.AspNetCore.Mvc.ViewFeatures;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using NonFactors.Mvc.Grid;
@@ -37,6 +38,22 @@
         protected virtual IEnumerable<Func<TEntity, ValidatorResult>> EntityValidators
             => Array.Empty<Func<TEntity, ValidatorResult>>();
 
+        private IEnumerable<GridAction> DefaultActions
+            => new[]
+            {
+                new GridAction()
+                {
+                    Name = "Edit",
+                    Action = "Edit",
+                }
+            };
+
+        protected virtual IEnumerable<GridAction> CustomActions
+            => Enumerable.Empty<GridAction>();
+
+        protected IEnumerable<GridAction> Actions
+            => this.DefaultActions.Concat(this.CustomActions);
+
         protected virtual IQueryable<TEntity> Set
             => this.set ??= this.DbContext
                 ?.Set<TEntity>();
@@ -45,7 +62,7 @@
         public virtual IActionResult Index()
             => this.View("../GenericAdmin/Index", new GenericAdminIndexViewModel
             {
-                GenerateGrid = this.GenerateGrid
+                GenerateGrid = this.GenerateGrid,
             });
 
         [HttpGet]
@@ -97,23 +114,50 @@
         protected virtual IHtmlGrid<TEntity> GenerateGrid(IHtmlHelper<GenericAdminIndexViewModel> htmlHelper)
             => htmlHelper
                 .Grid(this.Set)
-                .Build(columns => this.BuildGridColumns(columns))
+                .Build(columns =>
+                {
+                    this.BuildGridColumns(columns);
+                    this.BuildGridActions(columns, htmlHelper);
+                })
                 .Using(GridFilterMode.Header)
                 .Empty("No data found")
                 .Pageable();
 
-        protected virtual void BuildGridColumns(IGridColumnsOf<TEntity> columns)
+        protected virtual IGridColumnsOf<TEntity> BuildGridColumns(IGridColumnsOf<TEntity> columns)
         {
             Func<PropertyInfo, bool> filter = this.ColumnNames.Any()
                 ? x => this.ColumnNames.Contains(x.Name)
                 : x => true;
 
-            EntityType
+            return EntityType
                 .GetProperties()
                 .Where(filter)
                 .Aggregate(columns, (currentColumns, prop) => (IGridColumnsOf<TEntity>)GenerateColumnExpressionMethod
                     .MakeGenericMethod(prop.PropertyType)
                     .Invoke(null, new object[] { currentColumns, prop }));
+        }
+
+        protected virtual IGridColumnsOf<TEntity> BuildGridActions(
+            IGridColumnsOf<TEntity> columns,
+            IHtmlHelper htmlHelper)
+        {
+            this.Actions
+                .ToList()
+                .ForEach(action =>
+                {
+                    columns.Add(model => htmlHelper.ActionLink(
+                        action.Name,
+                        action.Action,
+                        this.RouteData.Values["controller"].ToString(),
+                        new
+                        {
+                            id = EntityType.GetPrimaryKeyValue(model),
+                        },
+                        new { }
+                    ));
+                });
+
+            return columns;
         }
 
         // This method is called via reflection.

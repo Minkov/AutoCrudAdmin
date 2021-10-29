@@ -3,6 +3,7 @@ namespace GenericDotNetCoreAdmin
     using System;
     using System.Linq;
     using GenericDotNetCoreAdmin.Attributes;
+    using GenericDotNetCoreAdmin.Controllers;
     using GenericDotNetCoreAdmin.Models;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;

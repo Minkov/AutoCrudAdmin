@@ -3,6 +3,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using GenericDotNetCoreAdmin.Models;
+    using GenericDotNetCoreAdmin.ViewModels;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using NonFactors.Mvc.Grid;
 
@@ -21,7 +23,22 @@
                 nameof(Project.Id),
             };
 
-        protected override void BuildGridColumns(IGridColumnsOf<Project> columns)
+        protected override IEnumerable<GridAction> CustomActions
+            => new[]
+            {
+                new GridAction
+                {
+                    Name = nameof(this.This),
+                    Action = nameof(this.This),
+                },
+                new GridAction
+                {
+                    Name = nameof(this.That),
+                    Action = nameof(this.That),
+                },
+            };
+
+        protected override IGridColumnsOf<Project> BuildGridColumns(IGridColumnsOf<Project> columns)
         {
             base.BuildGridColumns(columns);
             columns.Add(c => c.Tasks.Count).Titled("Tasks Count");
@@ -32,6 +49,14 @@
                         .Select(et => et.Employee)
                         .Select(e => e.Username)))
                 .Titled("Project Employees");
+
+            return columns;
         }
+
+        public IActionResult This()
+            => this.Ok("It works!");
+
+        public IActionResult That(string id)
+            => this.Ok($"It works with Id: {id}");
     }
 }
