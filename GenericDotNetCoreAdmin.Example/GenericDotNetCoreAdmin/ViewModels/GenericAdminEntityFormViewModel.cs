@@ -11,14 +11,25 @@ namespace GenericDotNetCoreAdmin.ViewModels
         public EntityAction Action { get; set; }
     }
 
-    public class FormControlViewModel
+    public abstract class FormControlViewModel
     {
         public string Name { get; set; }
 
         public Type Type { get; set; }
 
-        public object Value { get; set; }
-
         public bool IsReadOnly { get; set; }
+    }
+
+    public class SimpleFormControlViewModel
+        : FormControlViewModel
+    {
+        public object Value { get; set; }
+    }
+
+    public class ComplexFormControlViewModel
+        : FormControlViewModel
+    {
+        public IEnumerable<object> Keys { get; set; }
+        public IEnumerable<object> Values { get; set; }
     }
 }

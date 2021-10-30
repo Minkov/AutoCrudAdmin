@@ -1,3 +1,4 @@
+@using GenericDotNetCoreAdmin.ViewModels
 @model GenericDotNetCoreAdmin.ViewModels.GenericAdminEntityFormViewModel
 
 @{
@@ -8,26 +9,27 @@
     @foreach (var formControl in Model.FormControls)
     {
         @Html.Label(formControl.Name, formControl.Name)
-        <formInput
-            for-type="@formControl.Type"
-            for-name="@formControl.Name"
-            with-value="@formControl.Value"
-            readonly="@formControl.IsReadOnly"
-            class="form-control">
-        </formInput>
+        if (formControl is SimpleFormControlViewModel simpleFormControlViewModel)
+        {
+            <formInput
+                for-type="@simpleFormControlViewModel.Type"
+                for-name="@simpleFormControlViewModel.Name"
+                with-value="@simpleFormControlViewModel.Value"
+                readonly="@simpleFormControlViewModel.IsReadOnly"
+                class="form-control">
+            </formInput>
+        }
+        else if (formControl is ComplexFormControlViewModel complexFormControlViewModel)
+        {
+            <formInput
+                for-type="@complexFormControlViewModel.Type"
+                for-name="@complexFormControlViewModel.Name"
+                with-values="@complexFormControlViewModel.Values"
+                with-keys="@complexFormControlViewModel.Keys"
+                readonly="@complexFormControlViewModel.IsReadOnly"
+                class="form-control">
+            </formInput>
+        }
     }
-    @* *@
-    @* @foreach (var property in Model.ComplexProperties) *@
-    @* { *@
-    @*     @Html.Label(property.Name, property.Name) *@
-    @*     @Html.DropDownList( *@
-    @*         property.Name, *@
-    @*         property.Values, *@
-    @*         new *@
-    @*         { *@
-    @*             @class = "form-select" *@
-    @*         }) *@
-    @*     ; *@
-    @* } *@
     <button class="btn btn-dark">@Model.Action</button>
 </form>

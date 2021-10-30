@@ -2,6 +2,7 @@
 namespace GenericDotNetCoreAdmin.TagHelpers
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Razor.TagHelpers;
@@ -17,8 +18,15 @@ namespace GenericDotNetCoreAdmin.TagHelpers
 
         [HtmlAttributeName("with-value")] public object Value { get; set; }
 
+        [HtmlAttributeName("with-keys")] public IEnumerable<object> Keys { get; set; }
+
+        [HtmlAttributeName("with-values")] public IEnumerable<object> Values { get; set; }
+
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
+            Console.WriteLine($"Value: {this.Value}");
+            Console.WriteLine($"Keys: {this.Keys}");
+            Console.WriteLine($"Values: {this.Values}");
             output.Attributes.SetAttribute("name", this.Name);
             if (this.Type.IsEnum)
             {
