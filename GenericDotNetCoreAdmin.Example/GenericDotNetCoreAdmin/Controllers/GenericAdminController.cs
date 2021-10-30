@@ -8,6 +8,7 @@
     using GenericDotNetCoreAdmin.Attributes;
     using GenericDotNetCoreAdmin.Extensions;
     using GenericDotNetCoreAdmin.Helpers;
+    using GenericDotNetCoreAdmin.Helpers.Implementations;
     using GenericDotNetCoreAdmin.ViewModels;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Rendering;
@@ -87,13 +88,13 @@
         [HttpGet]
         public virtual IActionResult Edit(string id)
             => this.GetEntityForm(this.Set
-                    .FirstOrDefault(GetObjectByIdLambda(id)),
+                    .FirstOrDefault(ExpressionsBuilder.ForByEntityId<TEntity>(id)),
                 EntityAction.Edit);
 
         [HttpGet]
         public virtual IActionResult Delete(string id)
             => this.GetEntityForm(this.Set
-                    .FirstOrDefault(GetObjectByIdLambda(id)),
+                    .FirstOrDefault(ExpressionsBuilder.ForByEntityId<TEntity>(id)),
                 EntityAction.Delete);
 
         [HttpPost]
@@ -208,16 +209,7 @@
             IGridColumnsOf<TEntity> columns,
             MemberInfo property)
         {
-            var parameter = Expression.Parameter(EntityType, "model");
-
-            // model.Column
-            var memberAccess = Expression.MakeMemberAccess(
-                parameter,
-                property);
-
-            // model => model.Column
-            var lambda = Expression.Lambda<Func<TEntity, TProperty>>(memberAccess, parameter);
-
+            var lambda = ExpressionsBuilder.ForGetProperty<TEntity, TProperty>(property);
             columns
                 .Add(lambda)
                 .Titled(property.Name)
@@ -225,41 +217,6 @@
                 .Sortable(true);
 
             return columns;
-        }
-
-        private static Expression<Func<TEntity, bool>> GetObjectByIdLambda(object entityId)
-        {
-            var primaryKeyProperty = EntityType
-                .GetPrimaryKeyPropertyInfo();
-            var parameter = Expression.Parameter(typeof(object), "model");
-            var convertedParameter = Expression.Convert(
-                parameter,
-                EntityType
-            );
-
-            var memberAccess = Expression.MakeMemberAccess(
-                convertedParameter,
-                primaryKeyProperty
-            );
-
-            var cast = Expression.Call(
-                Expression.Convert(memberAccess, typeof(object)),
-                typeof(object).GetMethod("ToString")!);
-
-            var id = Expression.Call(
-                Expression.Convert(
-                    Expression.Constant(entityId),
-                    typeof(object)),
-                typeof(object).GetMethod("ToString")!);
-
-            var equals = Expression.Equal(
-                cast,
-                id
-            );
-
-            return Expression.Lambda<Func<TEntity, bool>>(
-                equals,
-                parameter);
         }
     }
 }
