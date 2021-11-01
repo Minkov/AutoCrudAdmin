@@ -25,6 +25,17 @@ namespace GenericDotNetCoreAdmin.TagHelpers
                 httpContext.Response.StatusCode = statusCode;
                 return;
             }
+
+            foreach (var filter in this.options.AsyncAuthorization)
+            {
+                if (!await filter.Authorize(httpContext))
+                {
+                    var statusCode = GetUnauthorizedStatusCode(httpContext);
+                    httpContext.Response.StatusCode = statusCode;
+                    return;
+                }
+            }
+
             await this.next.Invoke(httpContext);
         }
 
