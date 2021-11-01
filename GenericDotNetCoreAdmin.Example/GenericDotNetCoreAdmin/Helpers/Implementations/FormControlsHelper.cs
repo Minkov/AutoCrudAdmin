@@ -11,7 +11,7 @@ namespace GenericDotNetCoreAdmin.Helpers.Implementations
     public class FormControlsHelper
         : IFormControlsHelper
     {
-        private static ISet<Type> PrimitiveTypes = new HashSet<Type>
+        private static readonly ISet<Type> PrimitiveTypes = new HashSet<Type>
         {
             typeof(string),
             typeof(int),
@@ -19,6 +19,8 @@ namespace GenericDotNetCoreAdmin.Helpers.Implementations
             typeof(bool),
             typeof(DateTime),
         };
+
+        private readonly DbContext dbContext;
 
         private static ISet<Type> Types { get; set; }
 
@@ -35,25 +37,31 @@ namespace GenericDotNetCoreAdmin.Helpers.Implementations
                 .ToHashSet();
         }
 
+        public FormControlsHelper(DbContext dbContext)
+            => this.dbContext = dbContext;
+
         public IEnumerable<FormControlViewModel> GenerateFormControls<TEntity>(TEntity entity)
             => GeneratePrimitiveFormControls(entity)
-                .Concat(GenerateComplexFormControls(entity));
+                .Concat(this.GenerateComplexFormControls(entity));
 
-        private static IEnumerable<FormControlViewModel> GenerateComplexFormControls<TEntity>(TEntity entity)
+        private IEnumerable<FormControlViewModel> GenerateComplexFormControls<TEntity>(TEntity entity)
         {
             var entityType = typeof(TEntity);
 
             var primaryKeyProperty = entityType.GetPrimaryKeyPropertyInfo();
-            return entityType.GetProperties()
+            var result = entityType.GetProperties()
                 .Where(property => IsDbContextEntity(property, entity))
-                .Select(property => new ComplexFormControlViewModel()
+                .Select(property => new FormControlViewModel()
                 {
                     Name = property.Name,
                     Type = property.PropertyType,
-                    Keys = new object[] { 1, 2, 3 },
-                    Values = new object[] { 1, 2, 3, 4 },
+                    Value = this.dbContext.Set(property.PropertyType),
+                    IsComplex = true,
                     IsReadOnly = property == primaryKeyProperty,
-                });
+                })
+                .ToList();
+
+            return result;
         }
 
         private static IEnumerable<FormControlViewModel> GeneratePrimitiveFormControls<TEntity>(TEntity entity)
@@ -63,12 +71,13 @@ namespace GenericDotNetCoreAdmin.Helpers.Implementations
             var primaryKeyProperty = entityType.GetPrimaryKeyPropertyInfo();
             return entityType.GetProperties()
                 .Where(property => IsPrimitiveProperty(property, entityType))
-                .Select(property => new SimpleFormControlViewModel
+                .Select(property => new FormControlViewModel
                 {
                     Name = property.Name,
                     Type = property.PropertyType,
                     IsReadOnly = property == primaryKeyProperty,
                     Value = property.GetValue(entity),
+                    IsComplex = false,
                 });
         }
 

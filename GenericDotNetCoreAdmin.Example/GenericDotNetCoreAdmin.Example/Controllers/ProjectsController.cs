@@ -25,7 +25,7 @@
                 ValidateProjectNameCharacters,
             };
 
-        protected override IEnumerable<string> ColumnNames
+        protected override IEnumerable<string> ShownColumnNames
             => new[]
             {
                 nameof(Project.Name),

@@ -3,7 +3,9 @@ namespace GenericDotNetCoreAdmin.Extensions
     using GenericDotNetCoreAdmin.Attributes;
     using GenericDotNetCoreAdmin.Helpers;
     using GenericDotNetCoreAdmin.Helpers.Implementations;
+    using GenericDotNetCoreAdmin.TagHelpers;
     using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.DependencyInjection;
 
     public static class GenericDotNetCoreAdminExtensions
@@ -28,14 +30,20 @@ namespace GenericDotNetCoreAdmin.Extensions
 
     public static class ApplicationBuilderExtensions
     {
-        public static void AddGenericDotNetCorAdmin(this IApplicationBuilder app, string urlPrefix = null)
+        public static void AddGenericDotNetCorAdmin(
+            this IApplicationBuilder app,
+            string urlPrefix = null,
+            AutoCrudAdminOptions options = null)
         {
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    name: "genericDotNetCoreAdmin",
-                    pattern: urlPrefix + "/{controller=GenericAdminController}/{action=Index}/{id?}");
-            });
+            app.MapWhen(context => context.Request.Path.StartsWithSegments("/" + urlPrefix),
+                x =>
+                {
+                    x.UseRouting();
+                    x.UseMiddleware<AuthMiddleware>(options ?? new AutoCrudAdminOptions());
+                    x.UseEndpoints(endpoints => endpoints.MapControllerRoute(
+                        name: "genericDotNetCoreAdmin",
+                        pattern: urlPrefix + "/{controller=GenericAdminController}/{action=Index}/{id?}"));
+                });
         }
     }
 }

@@ -16,5 +16,8 @@
         public DateTime DueDate { get; set; }
         
         public ICollection<Task> Tasks { get; set; }
+
+        public override string ToString()
+            => this.Name;
     }
 }

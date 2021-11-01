@@ -2,6 +2,7 @@ namespace GenericDotNetCoreAdmin.Example
 {
     using System;
     using System.Linq;
+    using GenericDotNetCoreAdmin.Example.Filters;
     using GenericDotNetCoreAdmin.Example.Models;
     using GenericDotNetCoreAdmin.Extensions;
     using Microsoft.AspNetCore.Builder;
@@ -33,7 +34,6 @@ namespace GenericDotNetCoreAdmin.Example
 
             app.UseRouting();
 
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -41,7 +41,12 @@ namespace GenericDotNetCoreAdmin.Example
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            app.AddGenericDotNetCorAdmin("admin");
+            app.AddGenericDotNetCorAdmin(
+                "admin",
+                new AutoCrudAdminOptions
+                {
+                    Authorization = new[] { new AutoCrudAuthFilter(), }
+                });
 
             this.FillData(app);
         }
@@ -52,7 +57,7 @@ namespace GenericDotNetCoreAdmin.Example
             var context = scope?.ServiceProvider.GetRequiredService<TaskSystemDbContext>();
 
             context.Projects.AddRange(
-                Enumerable.Range(1, 1 << 6)
+                Enumerable.Range(1, 1 << 5)
                     .Select(index => new Project
                     {
                         Name = $"Project {index}",
@@ -61,7 +66,7 @@ namespace GenericDotNetCoreAdmin.Example
                     }));
 
             context.Tasks.AddRange(
-                Enumerable.Range(1, 1 << 6)
+                Enumerable.Range(1, 1 << 5)
                     .Select(index => new Task
                     {
                         Name = $"Task {index}",
@@ -73,7 +78,7 @@ namespace GenericDotNetCoreAdmin.Example
                     }));
 
             context.Employees.AddRange(
-                Enumerable.Range(1, 1 << 6)
+                Enumerable.Range(1, 1 << 5)
                     .Select(index => new Employee
                     {
                         Username = $"employee#{index + 1}",
@@ -82,7 +87,7 @@ namespace GenericDotNetCoreAdmin.Example
                     }));
 
             context.EmployeeTasks.AddRange(
-                Enumerable.Range(1, 1 << 6)
+                Enumerable.Range(1, 1 << 5)
                     .Select(index => new EmployeeTasks()
                     {
                         TaskId = (index + 1) % 10,

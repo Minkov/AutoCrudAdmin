@@ -5,6 +5,7 @@ namespace GenericDotNetCoreAdmin.TagHelpers
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using GenericDotNetCoreAdmin.Extensions;
     using Microsoft.AspNetCore.Razor.TagHelpers;
 
     [HtmlTargetElement("formInput", TagStructure = TagStructure.NormalOrSelfClosing)]
@@ -18,15 +19,9 @@ namespace GenericDotNetCoreAdmin.TagHelpers
 
         [HtmlAttributeName("with-value")] public object Value { get; set; }
 
-        [HtmlAttributeName("with-keys")] public IEnumerable<object> Keys { get; set; }
-
-        [HtmlAttributeName("with-values")] public IEnumerable<object> Values { get; set; }
-
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
-            Console.WriteLine($"Value: {this.Value}");
-            Console.WriteLine($"Keys: {this.Keys}");
-            Console.WriteLine($"Values: {this.Values}");
+            Console.WriteLine(this.Type);
             output.Attributes.SetAttribute("name", this.Name);
             if (this.Type.IsEnum)
             {
@@ -49,6 +44,41 @@ namespace GenericDotNetCoreAdmin.TagHelpers
             {
                 output.Attributes.SetAttribute("type", "number");
             }
+            else
+            {
+                this.PrepareComplex(output);
+            }
+        }
+
+        private void PrepareComplex(TagHelperOutput output)
+        {
+            output.TagName = "select";
+            
+            output.Attributes.SetAttribute("name", this.Name + "Id");
+            var valuesList = (this.Value as IEnumerable<object>)!
+                .ToList();
+            var values = valuesList
+                .Select(x => x.GetType().GetPrimaryKeyValue(x))
+                .ToList();
+            var names = valuesList
+                .Select(x => x.ToString())
+                .ToList();
+
+            var options =
+                values
+                    .Cast<object>()
+                    .Select((t, i) => new
+                    {
+                        Text = names[i],
+                        Value = values[i],
+                    })
+                    .Select(x =>
+                        x.Value.ToString() == this.Value.ToString()
+                            ? $"<option value='{x.Value}' selected>{x.Text}</option>"
+                            : $"<option value='{x.Value}'>{x.Text}</option>")
+                    .ToList();
+            output.Content.SetHtmlContent(
+                string.Join("", options));
         }
 
         private void PrepareEnum(TagHelperOutput output)

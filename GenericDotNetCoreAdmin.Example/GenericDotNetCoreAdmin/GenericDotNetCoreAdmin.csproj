@@ -3,8 +3,8 @@
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <OutputType>Library</OutputType>
-        <PackageId>generic.dotnet.core.admin</PackageId>
-        <Version>1.0.1</Version>
+        <PackageId>AutoCrudAdmin</PackageId>
+        <Version>1.0.0</Version>
         <Authors>Doncho Minkov</Authors>
         <Company>Minkov</Company>
         <IsPackable>true</IsPackable>
@@ -73,6 +73,10 @@
 
     <ItemGroup>
         <Content Remove="Utils\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Middlewares" />
     </ItemGroup>
 
 </Project>

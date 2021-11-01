@@ -53,7 +53,10 @@
         private DbContext db;
         private IFormControlsHelper formControlsHelper;
 
-        protected virtual IEnumerable<string> ColumnNames
+        protected virtual IEnumerable<string> ShownColumnNames
+            => Enumerable.Empty<string>();
+
+        protected virtual IEnumerable<string> HiddenColumnNames
             => Enumerable.Empty<string>();
 
         protected virtual IEnumerable<Func<TEntity, ValidatorResult>> EntityValidators
@@ -155,9 +158,16 @@
 
         protected virtual IGridColumnsOf<TEntity> BuildGridColumns(IGridColumnsOf<TEntity> columns)
         {
-            Func<PropertyInfo, bool> filter = this.ColumnNames.Any()
-                ? x => this.ColumnNames.Contains(x.Name)
-                : _ => true;
+            if (this.ShownColumnNames.Any() && this.HiddenColumnNames.Any())
+            {
+                throw new Exception("Both shown and hidden column names are declared. Leave only one of them");
+            }
+
+            Func<PropertyInfo, bool> filter = this.ShownColumnNames.Any()
+                ? x => this.ShownColumnNames.Contains(x.Name)
+                : this.HiddenColumnNames.Any()
+                    ? x => !this.HiddenColumnNames.Contains(x.Name)
+                    : _ => true;
 
             return EntityType
                 .GetProperties()
