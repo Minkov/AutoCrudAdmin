@@ -20,7 +20,6 @@ namespace AutoCrudAdmin.TagHelpers
 
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
-            Console.WriteLine(this.Type);
             output.Attributes.SetAttribute("name", this.Name);
             if (this.Type.IsEnum)
             {

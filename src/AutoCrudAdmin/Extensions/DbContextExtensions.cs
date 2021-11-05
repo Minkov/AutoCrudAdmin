@@ -2,11 +2,13 @@ namespace AutoCrudAdmin.Extensions
 {
     using System;
     using System.Linq;
+    using AutoCrudAdmin.Helpers;
     using Microsoft.EntityFrameworkCore;
 
     public static class DbContextExtensions
     {
-        public static object Set(this DbContext dbContext, Type entityType)
+        public static object Set<TDbContext>(this TDbContext dbContext, Type entityType)
+            where TDbContext : DbContext
         {
             var set = dbContext.GetType()
                 .GetProperties()
@@ -14,8 +16,8 @@ namespace AutoCrudAdmin.Extensions
                             && p.PropertyType.Name.StartsWith("DbSet"))
                 .FirstOrDefault(property => property.PropertyType.GetGenericArguments().FirstOrDefault() == entityType);
 
-            var result = set.GetValue(dbContext);
-            return result;
+            return set?.GetValue(dbContext);
+            // return ExpressionsBuilder.ForGetPropertyValue<TDbContext>(set)(dbContext);
         }
     }
 }

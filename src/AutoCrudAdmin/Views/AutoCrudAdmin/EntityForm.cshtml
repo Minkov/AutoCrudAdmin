@@ -1,7 +1,7 @@
 @model AutoCrudAdmin.ViewModels.AutoCrudAdminEntityFormViewModel
 
 @{
-    Layout = null;
+    Layout = ViewBag.LayoutName;
 }
 
 <form asp-action="@ViewContext.RouteData.Values["action"]" style="display: flex; flex-direction: column">

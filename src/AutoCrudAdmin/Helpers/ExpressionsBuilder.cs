@@ -1,4 +1,4 @@
-namespace AutoCrudAdmin.Helpers.Implementations
+namespace AutoCrudAdmin.Helpers
 {
     using System;
     using System.Linq.Expressions;
@@ -23,15 +23,13 @@ namespace AutoCrudAdmin.Helpers.Implementations
                 primaryKeyProperty
             );
 
-            var cast = Expression.Call(
-                Expression.Convert(memberAccess, typeof(object)),
-                typeof(object).GetMethod("ToString")!);
+            var cast = Expression.Convert(
+                memberAccess,
+                typeof(object));
 
-            var id = Expression.Call(
-                Expression.Convert(
-                    Expression.Constant(entityId),
-                    typeof(object)),
-                typeof(object).GetMethod("ToString")!);
+            var id = Expression.Convert(
+                Expression.Constant(entityId),
+                typeof(object));
 
             var equals = Expression.Equal(
                 cast,
@@ -55,6 +53,24 @@ namespace AutoCrudAdmin.Helpers.Implementations
 
             // model => model.Column
             return Expression.Lambda<Func<TEntity, TProperty>>(memberAccess, parameter);
+        }
+
+        public static Func<TEntity> ForCreateInstance<TEntity>()
+            => Expression.Lambda<Func<TEntity>>(Expression.New(typeof(TEntity)))
+                .Compile();
+
+        public static Func<TEntity, object> ForGetPropertyValue<TEntity>(PropertyInfo property)
+        {
+            var type = typeof(TEntity);
+            var instanceParam = Expression.Parameter(type);
+            return Expression.Lambda<Func<TEntity, object>>(
+                Expression.Convert(
+                    Expression.Call(
+                        instanceParam,
+                        property.GetGetMethod()),
+                    typeof(object)
+                ),
+                instanceParam).Compile();
         }
     }
 }

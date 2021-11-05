@@ -4,7 +4,7 @@
         <TargetFramework>net5.0</TargetFramework>
         <OutputType>Library</OutputType>
         <PackageId>AutoCrudAdmin</PackageId>
-        <Version>1.1.4</Version>
+        <Version>1.1.6</Version>
         <Authors>Doncho Minkov</Authors>
         <Company>Minkov</Company>
         <IsPackable>true</IsPackable>

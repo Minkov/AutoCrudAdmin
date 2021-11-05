@@ -21,13 +21,7 @@ namespace AutoCrudAdmin.Attributes
                 .Where(p => p.IsSubclassOfRawGeneric(typeof(AutoCrudAdminController<>)))
                 .ToList();
 
-            // TODO:  Must be extracted, as it is repeated in GenericAdminControllerFeatureProvider
-            EntityTypeToNameMap = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(s => s.GetTypes())
-                .Where(t => t.IsSubclassOf(typeof(DbContext)))
-                .SelectMany(t => t.GetProperties())
-                .Where(p => p.PropertyType.IsGenericType
-                            && p.PropertyType.Name.StartsWith("DbSet"))
+            EntityTypeToNameMap = ReflectionHelper.DbSetProperties
                 .ToDictionary(
                     set => set.PropertyType.GetGenericArguments().FirstOrDefault(),
                     set => set.Name

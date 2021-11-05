@@ -5,20 +5,14 @@ namespace AutoCrudAdmin.Attributes
     using System.Linq;
     using System.Reflection;
     using AutoCrudAdmin.Controllers;
+    using AutoCrudAdmin.Extensions;
     using Microsoft.AspNetCore.Mvc.ApplicationParts;
     using Microsoft.AspNetCore.Mvc.Controllers;
-    using Microsoft.EntityFrameworkCore;
 
     public class AutoCrudAdminControllerFeatureProvider : IApplicationFeatureProvider<ControllerFeature>
     {
         static AutoCrudAdminControllerFeatureProvider()
-            // TODO:  Must be extracted, as it is repeated in GenericAdminControllerNameConvention
-            => Types = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(s => s.GetTypes())
-                .Where(t => t.IsSubclassOf(typeof(DbContext)))
-                .SelectMany(t => t.GetProperties())
-                .Where(p => p.PropertyType.IsGenericType
-                            && p.PropertyType.Name.StartsWith("DbSet"))
+            => Types = ReflectionHelper.DbSetProperties
                 .Select(p => p.PropertyType)
                 .Select(dt => dt.GetGenericArguments().FirstOrDefault())
                 .ToList();

@@ -1,4 +1,4 @@
-﻿namespace GenericDotNetCoreAdmin.Example.Models
+﻿namespace AutoCrudAdmin.Demo.Models
 {
     using System.ComponentModel.DataAnnotations;
 

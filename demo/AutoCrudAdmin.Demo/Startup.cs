@@ -1,11 +1,11 @@
-namespace GenericDotNetCoreAdmin.Example
+namespace AutoCrudAdmin.Demo
 {
     using System;
     using System.Linq;
     using AutoCrudAdmin;
+    using AutoCrudAdmin.Demo.Filters;
+    using AutoCrudAdmin.Demo.Models;
     using AutoCrudAdmin.Extensions;
-    using GenericDotNetCoreAdmin.Example.Filters;
-    using GenericDotNetCoreAdmin.Example.Models;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.EntityFrameworkCore;
@@ -23,7 +23,7 @@ namespace GenericDotNetCoreAdmin.Example
 
             services.AddScoped<DbContext, TaskSystemDbContext>();
 
-            services.UseGenericDotNetCorAdmin();
+            services.UseAutoCrudAdmin();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -44,12 +44,13 @@ namespace GenericDotNetCoreAdmin.Example
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            app.AddGenericDotNetCorAdmin();
-            app.AddGenericDotNetCorAdmin(
+            app.AddAutoCrudAdmin(
                 "admin",
                 new AutoCrudAdminOptions
                 {
-                    Authorization = new[] { new AutoCrudAuthFilter(), }
+                    Authorization = new[] { new AutoCrudAuthFilter(), },
+                    // LayoutName = "_Layout",
+                    ApplicationName = "AutoCrudAdmin Demo"  
                 });
 
             this.InitDb(app);
@@ -68,7 +69,7 @@ namespace GenericDotNetCoreAdmin.Example
         private void FillTestData(TaskSystemDbContext context)
         {
             context.Projects.AddRange(
-                new []
+                new[]
                 {
                     new Project
                     {
@@ -90,7 +91,7 @@ namespace GenericDotNetCoreAdmin.Example
                     },
                 }
             );
-            
+
             context.Projects.AddRange(
                 Enumerable.Range(1, 1 << 5)
                     .Select(index => new Project
@@ -99,7 +100,7 @@ namespace GenericDotNetCoreAdmin.Example
                         OpenDate = DateTime.Now.AddDays(index % 100),
                         DueDate = DateTime.Now.AddDays(index % 100 + 15),
                     }));
-    
+
             context.Tasks.AddRange(
                 Enumerable.Range(1, 1 << 5)
                     .Select(index => new Task

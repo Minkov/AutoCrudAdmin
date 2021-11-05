@@ -1,11 +1,11 @@
-﻿namespace GenericDotNetCoreAdmin.Example.Controllers
+﻿namespace AutoCrudAdmin.Demo.Controllers
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using AutoCrudAdmin.Controllers;
+    using AutoCrudAdmin.Demo.Models;
     using AutoCrudAdmin.ViewModels;
-    using GenericDotNetCoreAdmin.Example.Models;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using NonFactors.Mvc.Grid;
@@ -69,9 +69,9 @@
 
 
         private static ValidatorResult ValidateProjectNameLength(Project project)
-            => project.Name.Length <= 20
+            => project.Name.Length <= 40
                 ? ValidatorResult.Success()
-                : ValidatorResult.Error("Name must be at max 20 characters");
+                : ValidatorResult.Error("Name must be at max 40 characters");
 
         private static ValidatorResult ValidateProjectNameCharacters(Project project)
             => project.Name.Contains('@')

@@ -7,9 +7,9 @@
     using AutoCrudAdmin.Attributes;
     using AutoCrudAdmin.Extensions;
     using AutoCrudAdmin.Helpers;
-    using AutoCrudAdmin.Helpers.Implementations;
     using AutoCrudAdmin.ViewModels;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Filters;
     using Microsoft.AspNetCore.Mvc.Rendering;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
@@ -85,6 +85,13 @@
         private IEnumerable<GridAction> Actions
             => DefaultActions.Concat(this.CustomActions);
 
+        public override void OnActionExecuting(ActionExecutingContext context)
+        {
+            this.ViewBag.LayoutName = context.HttpContext.Items["layout_name"];
+            this.ViewBag.ApplicationName = context.HttpContext.Items["application_name"];
+            base.OnActionExecuting(context);
+        }
+
         [HttpGet]
         public virtual IActionResult Index()
             => this.View("../AutoCrudAdmin/Index", new AutoCrudAdminIndexViewModel
@@ -95,7 +102,7 @@
         [HttpGet]
         public virtual IActionResult Create()
             => this.GetEntityForm(
-                Activator.CreateInstance<TEntity>(),
+                ExpressionsBuilder.ForCreateInstance<TEntity>()(),
                 EntityAction.Create);
 
         [HttpGet]

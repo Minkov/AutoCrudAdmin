@@ -16,5 +16,9 @@ namespace AutoCrudAdmin
 
 
         public IEnumerable<IAsyncAuthCrudFilter> AsyncAuthorization { get; set; }
+
+        public string LayoutName { get; set; }
+
+        public string ApplicationName { get; set; }
     }
 }

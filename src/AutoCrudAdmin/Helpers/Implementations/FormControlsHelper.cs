@@ -26,12 +26,7 @@ namespace AutoCrudAdmin.Helpers.Implementations
 
         static FormControlsHelper()
         {
-            Types = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(s => s.GetTypes())
-                .Where(t => t.IsSubclassOf(typeof(DbContext)))
-                .SelectMany(t => t.GetProperties())
-                .Where(p => p.PropertyType.IsGenericType
-                            && p.PropertyType.Name.StartsWith("DbSet"))
+            Types = ReflectionHelper.DbSetProperties
                 .Select(p => p.PropertyType)
                 .Select(dt => dt.GetGenericArguments().FirstOrDefault())
                 .ToHashSet();
@@ -43,6 +38,24 @@ namespace AutoCrudAdmin.Helpers.Implementations
         public IEnumerable<FormControlViewModel> GenerateFormControls<TEntity>(TEntity entity)
             => GeneratePrimitiveFormControls(entity)
                 .Concat(this.GenerateComplexFormControls(entity));
+
+
+        private static IEnumerable<FormControlViewModel> GeneratePrimitiveFormControls<TEntity>(TEntity entity)
+        {
+            var entityType = typeof(TEntity);
+
+            var primaryKeyProperty = entityType.GetPrimaryKeyPropertyInfo();
+            return entityType.GetProperties()
+                .Where(property => IsPrimitiveProperty(property, entityType))
+                .Select(property => new FormControlViewModel
+                {
+                    Name = property.Name,
+                    Type = property.PropertyType,
+                    IsReadOnly = property == primaryKeyProperty,
+                    Value = ExpressionsBuilder.ForGetPropertyValue<TEntity>(property)(entity),
+                    IsComplex = false,
+                });
+        }
 
         private IEnumerable<FormControlViewModel> GenerateComplexFormControls<TEntity>(TEntity entity)
         {
@@ -62,23 +75,6 @@ namespace AutoCrudAdmin.Helpers.Implementations
                 .ToList();
 
             return result;
-        }
-
-        private static IEnumerable<FormControlViewModel> GeneratePrimitiveFormControls<TEntity>(TEntity entity)
-        {
-            var entityType = typeof(TEntity);
-
-            var primaryKeyProperty = entityType.GetPrimaryKeyPropertyInfo();
-            return entityType.GetProperties()
-                .Where(property => IsPrimitiveProperty(property, entityType))
-                .Select(property => new FormControlViewModel
-                {
-                    Name = property.Name,
-                    Type = property.PropertyType,
-                    IsReadOnly = property == primaryKeyProperty,
-                    Value = property.GetValue(entity),
-                    IsComplex = false,
-                });
         }
 
         private static bool IsDbContextEntity<TEntity>(PropertyInfo property, TEntity entity)

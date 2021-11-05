@@ -1,4 +1,4 @@
-namespace GenericDotNetCoreAdmin.Example.Filters
+namespace AutoCrudAdmin.Demo.Filters
 {
     using AutoCrudAdmin.Filters;
     using Microsoft.AspNetCore.Http;

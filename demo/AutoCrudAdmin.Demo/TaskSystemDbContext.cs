@@ -1,6 +1,6 @@
-﻿namespace GenericDotNetCoreAdmin.Example
+﻿namespace AutoCrudAdmin.Demo
 {
-    using GenericDotNetCoreAdmin.Example.Models;
+    using AutoCrudAdmin.Demo.Models;
     using Microsoft.EntityFrameworkCore;
 
     public class TaskSystemDbContext : DbContext
