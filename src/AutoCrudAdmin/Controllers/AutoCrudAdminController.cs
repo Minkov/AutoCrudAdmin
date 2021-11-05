@@ -15,13 +15,6 @@
     using Microsoft.Extensions.DependencyInjection;
     using NonFactors.Mvc.Grid;
 
-    public enum EntityAction
-    {
-        Create = 1,
-        Edit = 2,
-        Delete = 3,
-    }
-
     [AutoCrudAdminControllerNameConvention]
     public class AutoCrudAdminController<TEntity>
         : Controller

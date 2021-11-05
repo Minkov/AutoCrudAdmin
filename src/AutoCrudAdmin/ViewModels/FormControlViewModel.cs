@@ -1,15 +1,6 @@
 namespace AutoCrudAdmin.ViewModels
 {
     using System;
-    using System.Collections.Generic;
-    using AutoCrudAdmin.Controllers;
-
-    public class AutoCrudAdminEntityFormViewModel
-    {
-        public IEnumerable<FormControlViewModel> FormControls { get; set; }
-
-        public EntityAction Action { get; set; }
-    }
 
     public class FormControlViewModel
     {
