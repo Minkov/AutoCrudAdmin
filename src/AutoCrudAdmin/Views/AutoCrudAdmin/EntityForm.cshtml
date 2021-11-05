@@ -1,0 +1,20 @@
+@model AutoCrudAdmin.ViewModels.AutoCrudAdminEntityFormViewModel
+
+@{
+    Layout = ViewBag.LayoutName;
+}
+
+<form asp-action="@ViewContext.RouteData.Values["action"]" style="display: flex; flex-direction: column">
+    @foreach (var formControl in Model.FormControls)
+    {
+        @Html.Label(formControl.Name, formControl.Name)
+        <formInput
+            for-type="@formControl.Type"
+            for-name="@formControl.Name"
+            with-value="@formControl.Value"
+            readonly="@formControl.IsReadOnly"
+            class="form-control">
+        </formInput>
+    }
+    <button class="btn btn-dark">@Model.Action</button>
+</form>

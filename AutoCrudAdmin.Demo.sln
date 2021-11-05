@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoCrudAdmin", "src\AutoCrudAdmin\AutoCrudAdmin.csproj", "{F99F2442-CD0D-41DB-AC11-F3A56C1C219A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoCrudAdmin.Demo", "demo\AutoCrudAdmin.Demo\AutoCrudAdmin.Demo.csproj", "{32BFD1FE-2923-468D-93C0-7FED0FCC2F77}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F99F2442-CD0D-41DB-AC11-F3A56C1C219A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F99F2442-CD0D-41DB-AC11-F3A56C1C219A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F99F2442-CD0D-41DB-AC11-F3A56C1C219A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F99F2442-CD0D-41DB-AC11-F3A56C1C219A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32BFD1FE-2923-468D-93C0-7FED0FCC2F77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32BFD1FE-2923-468D-93C0-7FED0FCC2F77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32BFD1FE-2923-468D-93C0-7FED0FCC2F77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32BFD1FE-2923-468D-93C0-7FED0FCC2F77}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

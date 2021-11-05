@@ -1,0 +1,32 @@
+@using AutoCrudAdmin.Helpers
+
+<nav>
+    <ul class="list-group">
+        @foreach (var item in NavHelper.GetNavItems())
+        {
+            var link = Html.ActionLink(
+                item,
+                actionName: "Index",
+                controllerName: item);
+
+            if (item.ToLower() == Model.ToLower())
+            {
+                <li class="list-group-item list-group-item-light">
+                    @item
+                    <ul class="list-group-flush">
+                        <li class="list-group-item">
+                            @Html.ActionLink(
+                                "Create",
+                                actionName: "Create",
+                                controllerName: item)
+                        </li>
+                    </ul>
+                </li>
+            }
+            else
+            {
+                <li class="list-group-item">@link</li>
+            }
+        }
+    </ul>
+</nav>

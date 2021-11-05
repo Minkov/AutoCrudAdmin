@@ -1,0 +1,24 @@
+@model AutoCrudAdmin.ViewModels.AutoCrudAdminIndexViewModel
+
+@{
+    Layout = ViewBag.LayoutName;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>title</title>
+    <link href="/css/mvc-grid.css" rel="stylesheet">
+</head>
+<body>
+<div>
+    @Model.GenerateGrid(Html)
+</div>
+<script src="/js/mvc-grid.js"></script>
+<script>
+
+           document.querySelectorAll(".mvc-grid").forEach(element => new MvcGrid(element));
+        </script>
+</body>
+</html>
