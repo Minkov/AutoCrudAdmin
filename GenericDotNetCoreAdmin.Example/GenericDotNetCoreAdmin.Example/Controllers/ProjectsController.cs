@@ -3,15 +3,15 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using GenericDotNetCoreAdmin.Controllers;
+    using AutoCrudAdmin.Controllers;
+    using AutoCrudAdmin.ViewModels;
     using GenericDotNetCoreAdmin.Example.Models;
-    using GenericDotNetCoreAdmin.ViewModels;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using NonFactors.Mvc.Grid;
 
     public class ProjectsController
-        : GenericAdminController<Project>
+        : AutoCrudAdminController<Project>
     {
         protected override IQueryable<Project> Set
             => base.Set.Include(x => x.Tasks)
