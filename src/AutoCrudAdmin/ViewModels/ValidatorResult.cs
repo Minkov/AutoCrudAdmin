@@ -7,13 +7,13 @@ namespace AutoCrudAdmin.ViewModels
         public string Message { get; set; }
 
         public static ValidatorResult Success()
-            => new()
+            => new ()
             {
                 IsValid = true,
             };
 
         public static ValidatorResult Error(string message)
-            => new()
+            => new ()
             {
                 IsValid = false,
                 Message = message,

@@ -22,28 +22,13 @@
     {
         private static readonly Type EntityType = typeof(TEntity);
 
-        private DbContext DbContext
-            => this.db ??= this.HttpContext
-                .RequestServices
-                .GetService<DbContext>();
+        private IQueryable<TEntity> set;
+        private DbContext db;
+        private IFormControlsHelper formControlsHelper;
 
         protected virtual IQueryable<TEntity> Set
             => this.set ??= this.DbContext
                 ?.Set<TEntity>();
-
-        private IFormControlsHelper FormControlsHelper
-            => this.formControlsHelper ??= this.HttpContext
-                .RequestServices
-                .GetService<IFormControlsHelper>();
-
-        private static MethodInfo GenerateColumnExpressionMethod =>
-            typeof(AutoCrudAdminController<TEntity>)
-                .GetMethod(nameof(GenerateColumnConfiguration),
-                    BindingFlags.NonPublic | BindingFlags.Static);
-
-        private IQueryable<TEntity> set;
-        private DbContext db;
-        private IFormControlsHelper formControlsHelper;
 
         protected virtual IEnumerable<string> ShownColumnNames
             => Enumerable.Empty<string>();
@@ -68,6 +53,12 @@
         protected virtual IEnumerable<Tuple<int, string>> PageSizes
             => Enumerable.Empty<Tuple<int, string>>();
 
+        private static MethodInfo GenerateColumnExpressionMethod =>
+            typeof(AutoCrudAdminController<TEntity>)
+                .GetMethod(
+                    nameof(GenerateColumnConfiguration),
+                    BindingFlags.NonPublic | BindingFlags.Static);
+
         private static IEnumerable<GridAction> DefaultActions
             => new[]
             {
@@ -77,6 +68,16 @@
 
         private IEnumerable<GridAction> Actions
             => DefaultActions.Concat(this.CustomActions);
+
+        private DbContext DbContext
+            => this.db ??= this.HttpContext
+                .RequestServices
+                .GetService<DbContext>();
+
+        private IFormControlsHelper FormControlsHelper
+            => this.formControlsHelper ??= this.HttpContext
+                .RequestServices
+                .GetService<IFormControlsHelper>();
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
@@ -100,13 +101,15 @@
 
         [HttpGet]
         public virtual IActionResult Edit(string id)
-            => this.GetEntityForm(this.Set
+            => this.GetEntityForm(
+                this.Set
                     .FirstOrDefault(ExpressionsBuilder.ForByEntityId<TEntity>(id)),
                 EntityAction.Edit);
 
         [HttpGet]
         public virtual IActionResult Delete(string id)
-            => this.GetEntityForm(this.Set
+            => this.GetEntityForm(
+                this.Set
                     .FirstOrDefault(ExpressionsBuilder.ForByEntityId<TEntity>(id)),
                 EntityAction.Delete);
 
@@ -207,8 +210,9 @@
             return EntityType
                 .GetProperties()
                 .Where(filter)
-                .Aggregate(columns, (currentColumns, prop) => (IGridColumnsOf<TEntity>)
-                    GenerateColumnExpressionMethod
+                .Aggregate(
+                    columns,
+                    (currentColumns, prop) => (IGridColumnsOf<TEntity>)GenerateColumnExpressionMethod
                         .MakeGenericMethod(prop.PropertyType)
                         .Invoke(null, new object[] { currentColumns, prop }));
         }
@@ -229,10 +233,23 @@
                             {
                                 id = EntityType.GetPrimaryKeyValue(model),
                             },
-                            new { }
-                        ))
+                            new { }))
                         .Titled("Action");
                 });
+
+            return columns;
+        }
+
+        private static IGridColumnsOf<TEntity> GenerateColumnConfiguration<TProperty>(
+            IGridColumnsOf<TEntity> columns,
+            MemberInfo property)
+        {
+            var lambda = ExpressionsBuilder.ForGetProperty<TEntity, TProperty>(property);
+            columns
+                .Add(lambda)
+                .Titled(property.Name)
+                .Filterable(true)
+                .Sortable(true);
 
             return columns;
         }
@@ -249,20 +266,6 @@
             {
                 throw new Exception(string.Join(", ", errors));
             }
-        }
-
-        private static IGridColumnsOf<TEntity> GenerateColumnConfiguration<TProperty>(
-            IGridColumnsOf<TEntity> columns,
-            MemberInfo property)
-        {
-            var lambda = ExpressionsBuilder.ForGetProperty<TEntity, TProperty>(property);
-            columns
-                .Add(lambda)
-                .Titled(property.Name)
-                .Filterable(true)
-                .Sortable(true);
-
-            return columns;
         }
     }
 }

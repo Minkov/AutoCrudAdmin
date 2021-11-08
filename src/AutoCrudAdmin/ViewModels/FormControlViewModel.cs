@@ -9,8 +9,9 @@ namespace AutoCrudAdmin.ViewModels
         public Type Type { get; set; }
 
         public bool IsReadOnly { get; set; }
+
         public object Value { get; set; }
-        
+
         public bool IsComplex { get; set; }
     }
 }

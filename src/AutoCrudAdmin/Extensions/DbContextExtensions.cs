@@ -16,8 +16,8 @@ namespace AutoCrudAdmin.Extensions
                             && p.PropertyType.Name.StartsWith("DbSet"))
                 .FirstOrDefault(property => property.PropertyType.GetGenericArguments().FirstOrDefault() == entityType);
 
-            return set?.GetValue(dbContext);
             // return ExpressionsBuilder.ForGetPropertyValue<TDbContext>(set)(dbContext);
+            return set?.GetValue(dbContext);
         }
     }
 }

@@ -5,7 +5,7 @@ namespace AutoCrudAdmin.Extensions
     using AutoCrudAdmin.Helpers.Implementations;
     using Microsoft.Extensions.DependencyInjection;
 
-    public static class ServicesExtensions
+    public static class ServiceCollectionExtensions
     {
         public static IServiceCollection UseAutoCrudAdmin(
             this IServiceCollection services)

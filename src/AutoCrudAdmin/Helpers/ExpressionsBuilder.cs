@@ -10,18 +10,15 @@ namespace AutoCrudAdmin.Helpers
         public static Expression<Func<TEntity, bool>> ForByEntityId<TEntity>(object entityId)
         {
             var entityType = typeof(TEntity);
-            var primaryKeyProperty = entityType
-                .GetPrimaryKeyPropertyInfo();
+            var primaryKeyProperty = entityType.GetPrimaryKeyPropertyInfo();
             var parameter = Expression.Parameter(typeof(object), "model");
             var convertedParameter = Expression.Convert(
                 parameter,
-                entityType
-            );
+                entityType);
 
             var memberAccess = Expression.MakeMemberAccess(
                 convertedParameter,
-                primaryKeyProperty
-            );
+                primaryKeyProperty);
 
             var cast = Expression.Convert(
                 memberAccess,
@@ -33,8 +30,7 @@ namespace AutoCrudAdmin.Helpers
 
             var equals = Expression.Equal(
                 cast,
-                id
-            );
+                id);
 
             return Expression.Lambda<Func<TEntity, bool>>(
                 equals,
@@ -68,8 +64,7 @@ namespace AutoCrudAdmin.Helpers
                     Expression.Call(
                         instanceParam,
                         property.GetGetMethod()),
-                    typeof(object)
-                ),
+                    typeof(object)),
                 instanceParam).Compile();
         }
     }

@@ -10,21 +10,25 @@ namespace AutoCrudAdmin.TagHelpers
     [HtmlTargetElement("formInput", TagStructure = TagStructure.NormalOrSelfClosing)]
     public class FormInputTagHelper : TagHelper
     {
-        [HtmlAttributeName("for-name")] public string Name { get; set; }
+        [HtmlAttributeName("for-name")]
+        public string Name { get; set; }
 
-        [HtmlAttributeName("for-type")] public Type Type { get; set; }
+        [HtmlAttributeName("for-type")]
+        public Type Type { get; set; }
 
-        [HtmlAttributeName("with-label")] public string LabelText { get; set; }
+        [HtmlAttributeName("with-label")]
+        public string LabelText { get; set; }
 
-        [HtmlAttributeName("with-value")] public object Value { get; set; }
+        [HtmlAttributeName("with-value")]
+        public object Value { get; set; }
 
-        public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
+        public override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             output.Attributes.SetAttribute("name", this.Name);
             if (this.Type.IsEnum)
             {
                 this.PrepareEnum(output);
-                return;
+                return Task.CompletedTask;
             }
 
             output.TagName = "input";
@@ -46,15 +50,17 @@ namespace AutoCrudAdmin.TagHelpers
             {
                 this.PrepareComplex(output);
             }
+
+            return Task.CompletedTask;
         }
 
         private void PrepareComplex(TagHelperOutput output)
         {
             output.TagName = "select";
-            
+
             output.Attributes.SetAttribute("name", this.Name + "Id");
-            var valuesList = (this.Value as IEnumerable<object>)!
-                .ToList();
+            var valuesList = (this.Value as IEnumerable<object>)
+                !.ToList();
             var values = valuesList
                 .Select(x => x.GetType().GetPrimaryKeyValue(x))
                 .ToList();
@@ -76,7 +82,7 @@ namespace AutoCrudAdmin.TagHelpers
                             : $"<option value='{x.Value}'>{x.Text}</option>")
                     .ToList();
             output.Content.SetHtmlContent(
-                string.Join("", options));
+                string.Join(string.Empty, options));
         }
 
         private void PrepareEnum(TagHelperOutput output)
@@ -99,7 +105,7 @@ namespace AutoCrudAdmin.TagHelpers
                             : $"<option value='{x.Value}'>{x.Text}</option>")
                     .ToList();
             output.Content.SetHtmlContent(
-                string.Join("", options));
+                string.Join(string.Empty, options));
         }
     }
 }

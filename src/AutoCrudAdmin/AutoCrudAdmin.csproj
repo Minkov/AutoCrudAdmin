@@ -17,7 +17,18 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.11" />
         <PackageReference Include="NonFactors.Grid.Core.Mvc6" Version="6.2.4" />
+        <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>
+
+    <PropertyGroup>
+        <AnalysisLevel>5.0</AnalysisLevel>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <CodeAnalysisRuleSet>AutoCrudAdmin.ruleset</CodeAnalysisRuleSet>
+    </PropertyGroup>
+
 
     <ItemGroup>
         <_ContentIncludedByDefault Remove="Pages\Admin\Index.cshtml" />

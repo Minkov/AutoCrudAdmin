@@ -10,7 +10,8 @@ namespace AutoCrudAdmin.Extensions
             string urlPrefix = null,
             AutoCrudAdminOptions options = null)
         {
-            app.MapWhen(context => context.Request.Path.StartsWithSegments("/" + urlPrefix),
+            app.MapWhen(
+                context => context.Request.Path.StartsWithSegments("/" + urlPrefix),
                 x =>
                 {
                     x.UseRouting()

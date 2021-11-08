@@ -22,8 +22,6 @@ namespace AutoCrudAdmin.Helpers.Implementations
 
         private readonly DbContext dbContext;
 
-        private static ISet<Type> Types { get; set; }
-
         static FormControlsHelper()
         {
             Types = ReflectionHelper.DbSetProperties
@@ -35,10 +33,11 @@ namespace AutoCrudAdmin.Helpers.Implementations
         public FormControlsHelper(DbContext dbContext)
             => this.dbContext = dbContext;
 
+        private static ISet<Type> Types { get; set; }
+
         public IEnumerable<FormControlViewModel> GenerateFormControls<TEntity>(TEntity entity)
             => GeneratePrimitiveFormControls(entity)
                 .Concat(this.GenerateComplexFormControls(entity));
-
 
         private static IEnumerable<FormControlViewModel> GeneratePrimitiveFormControls<TEntity>(TEntity entity)
         {
@@ -56,6 +55,14 @@ namespace AutoCrudAdmin.Helpers.Implementations
                     IsComplex = false,
                 });
         }
+
+        private static bool IsDbContextEntity<TEntity>(PropertyInfo property, TEntity entity)
+            => Types.Contains(property.PropertyType);
+
+        private static bool IsPrimitiveProperty(PropertyInfo property, Type entityType)
+            => entityType.GetPrimaryKeyPropertyInfo() == property
+               || property.PropertyType.IsEnum
+               || (PrimitiveTypes.Contains(property.PropertyType) && !property.Name.ToLower().EndsWith("id"));
 
         private IEnumerable<FormControlViewModel> GenerateComplexFormControls<TEntity>(TEntity entity)
         {
@@ -76,13 +83,5 @@ namespace AutoCrudAdmin.Helpers.Implementations
 
             return result;
         }
-
-        private static bool IsDbContextEntity<TEntity>(PropertyInfo property, TEntity entity)
-            => Types.Contains(property.PropertyType);
-
-        private static bool IsPrimitiveProperty(PropertyInfo property, Type entityType)
-            => entityType.GetPrimaryKeyPropertyInfo() == property
-               || property.PropertyType.IsEnum
-               || (PrimitiveTypes.Contains(property.PropertyType) && !property.Name.ToLower().EndsWith("id"));
     }
 }

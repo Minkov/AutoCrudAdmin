@@ -11,9 +11,6 @@ namespace AutoCrudAdmin.Attributes
     [AttributeUsage(AttributeTargets.Class)]
     public class AutoCrudAdminControllerNameConvention : Attribute, IControllerModelConvention
     {
-        private static IEnumerable<Type> Controllers { get; set; }
-        private static Dictionary<Type, string> EntityTypeToNameMap { get; set; }
-
         static AutoCrudAdminControllerNameConvention()
         {
             Controllers = AppDomain.CurrentDomain.GetAssemblies()
@@ -24,9 +21,12 @@ namespace AutoCrudAdmin.Attributes
             EntityTypeToNameMap = ReflectionHelper.DbSetProperties
                 .ToDictionary(
                     set => set.PropertyType.GetGenericArguments().FirstOrDefault(),
-                    set => set.Name
-                );
+                    set => set.Name);
         }
+
+        private static IEnumerable<Type> Controllers { get; set; }
+
+        private static Dictionary<Type, string> EntityTypeToNameMap { get; set; }
 
         public void Apply(ControllerModel controller)
         {
