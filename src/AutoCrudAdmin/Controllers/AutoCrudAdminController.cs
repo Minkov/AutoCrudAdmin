@@ -155,8 +155,25 @@
         }
 
         protected virtual IHtmlGrid<TEntity> GenerateGrid(IHtmlHelper<AutoCrudAdminIndexViewModel> htmlHelper)
-            => htmlHelper
-                .Grid(this.Set)
+        {
+            var types = ReflectionHelper.DbSetProperties
+                .Select(p => p.PropertyType)
+                .Select(t => t.GetGenericArguments())
+                .Select(a => a.FirstOrDefault())
+                .ToHashSet();
+
+            var names = this.Set.GetType()
+                .GetGenericArguments()
+                .FirstOrDefault()
+                ?.GetProperties()
+                .Where(prop => types.Contains(prop.PropertyType))
+                .Select(prop => prop.Name);
+
+            var setForGrid = names
+                !.Aggregate(this.Set, (current, name) => current.Include(name));
+
+            return htmlHelper
+                .Grid(setForGrid)
                 .Build(columns =>
                 {
                     this.BuildGridColumns(columns);
@@ -172,6 +189,7 @@
                     pager.ShowPageSizes = this.ShowPageSizes;
                     pager.RowsPerPage = this.RowsPerPage;
                 });
+        }
 
         protected virtual IGridColumnsOf<TEntity> BuildGridColumns(IGridColumnsOf<TEntity> columns)
         {
