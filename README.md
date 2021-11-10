@@ -26,4 +26,4 @@ The following is supported out-of-the-box:
 5. Navigate to `{APPLICATION_URL}/{ENTITY_NAME_IN_PLURAL}`
 6. You get:
 
- ![AutoCrudAdmin Grid](https://raw.githubusercontent.com/Minkov/generic-dotnetcore-admin/export-as-package/docs/grid.png)
+ ![AutoCrudAdmin Grid](https://raw.githubusercontent.com/Minkov/AutoCrudAdmin/main/docs/grid.png)

@@ -2,7 +2,15 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoCrudAdmin", "src\AutoCrudAdmin\AutoCrudAdmin.csproj", "{F99F2442-CD0D-41DB-AC11-F3A56C1C219A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoCrudAdmin.Demo", "demo\AutoCrudAdmin.Demo\AutoCrudAdmin.Demo.csproj", "{32BFD1FE-2923-468D-93C0-7FED0FCC2F77}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoCrudAdmin.Demo.SqlServer", "demo\AutoCrudAdmin.Demo.SqlServer\AutoCrudAdmin.Demo.SqlServer.csproj", "{32BFD1FE-2923-468D-93C0-7FED0FCC2F77}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoCrudAdmin.Demo.Models", "demo\AutoCrudAdmin.Demo.Models\AutoCrudAdmin.Demo.Models.csproj", "{F9DC587B-E2AF-48D8-8A26-AACBC2F268D8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demos", "Demos", "{54C80D9E-2664-431C-A8AC-0D490C119760}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoCrudAdmin.Demo.PostgreSQL", "demo\AutoCrudAdmin.Demo.PostgreSQL\AutoCrudAdmin.Demo.PostgreSQL.csproj", "{4A584F16-FABE-4D30-AC34-958D04E5CDDE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoCrudAdmin.Demo.Sqlite", "demo\AutoCrudAdmin.Demo.Sqlite\AutoCrudAdmin.Demo.Sqlite.csproj", "{24C3C7CC-79CF-4498-A7F8-B4B4C4E0F4C9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +26,23 @@ Global
 		{32BFD1FE-2923-468D-93C0-7FED0FCC2F77}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{32BFD1FE-2923-468D-93C0-7FED0FCC2F77}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{32BFD1FE-2923-468D-93C0-7FED0FCC2F77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9DC587B-E2AF-48D8-8A26-AACBC2F268D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9DC587B-E2AF-48D8-8A26-AACBC2F268D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9DC587B-E2AF-48D8-8A26-AACBC2F268D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9DC587B-E2AF-48D8-8A26-AACBC2F268D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A584F16-FABE-4D30-AC34-958D04E5CDDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A584F16-FABE-4D30-AC34-958D04E5CDDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A584F16-FABE-4D30-AC34-958D04E5CDDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A584F16-FABE-4D30-AC34-958D04E5CDDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24C3C7CC-79CF-4498-A7F8-B4B4C4E0F4C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24C3C7CC-79CF-4498-A7F8-B4B4C4E0F4C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24C3C7CC-79CF-4498-A7F8-B4B4C4E0F4C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24C3C7CC-79CF-4498-A7F8-B4B4C4E0F4C9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{32BFD1FE-2923-468D-93C0-7FED0FCC2F77} = {54C80D9E-2664-431C-A8AC-0D490C119760}
+		{F9DC587B-E2AF-48D8-8A26-AACBC2F268D8} = {54C80D9E-2664-431C-A8AC-0D490C119760}
+		{4A584F16-FABE-4D30-AC34-958D04E5CDDE} = {54C80D9E-2664-431C-A8AC-0D490C119760}
+		{24C3C7CC-79CF-4498-A7F8-B4B4C4E0F4C9} = {54C80D9E-2664-431C-A8AC-0D490C119760}
 	EndGlobalSection
 EndGlobal
