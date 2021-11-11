@@ -94,14 +94,6 @@
                 ExpressionsBuilder.ForCreateInstance<TEntity>()(),
                 EntityAction.Create);
 
-        // [HttpGet]
-        // public virtual IActionResult Edit(string id)
-        //     => this.GetEntityForm(
-        //         this.Set
-        //             .FirstOrDefault(ExpressionsBuilder.ForByEntityId<TEntity>(id)),
-        //         EntityAction.Edit);
-
-
         [HttpGet]
         public virtual IActionResult Edit([FromQuery] IDictionary<string, string> complexId)
             => this.GetEntityForm(
@@ -110,10 +102,10 @@
                 EntityAction.Edit);
 
         [HttpGet]
-        public virtual IActionResult Delete(string id)
+        public virtual IActionResult Delete([FromQuery] IDictionary<string, string> complexId)
             => this.GetEntityForm(
                 this.Set
-                    .FirstOrDefault(ExpressionsBuilder.ForByEntityId<TEntity>(id)),
+                    .FirstOrDefault(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(complexId)),
                 EntityAction.Delete);
 
         [HttpPost]
