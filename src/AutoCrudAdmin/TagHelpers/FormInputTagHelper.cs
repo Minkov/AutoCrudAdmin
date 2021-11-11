@@ -62,14 +62,14 @@ namespace AutoCrudAdmin.TagHelpers
             var valuesList = (this.Value as IEnumerable<object>)
                 !.ToList();
             var values = valuesList
-                .Select(x => x.GetType().GetPrimaryKeyValue(x))
+                .Select(x => x.GetType().GetPrimaryKeyValue(x).FirstOrDefault())
+                .Select(x => x.Value)
                 .ToList();
             var names = valuesList
                 .Select(x => x.ToString())
                 .ToList();
 
             var options = values
-                .Cast<object>()
                 .Select((t, i) => new { Text = names[i], Value = values[i], })
                 .Select(x =>
                     x.Value.ToString() == this.Value.ToString()

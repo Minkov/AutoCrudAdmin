@@ -44,10 +44,15 @@ namespace AutoCrudAdmin.Helpers.Implementations
                 .GetPrimaryKeyValue(entity)
                 .Select(pair => new FormControlViewModel
                 {
-                    Name = pair.Key,
+                    Name = pair.Key == "pk"
+                        ? typeof(TEntity).GetPrimaryKeyPropertyInfo().Name
+                        : pair.Key,
                     Type = pair.Value.GetType(),
-                    Value =
-                        ExpressionsBuilder.ForGetPropertyValue<TEntity>(typeof(TEntity).GetProperty(pair.Key))(entity),
+                    Value = pair.Key == "pk"
+                        ? ExpressionsBuilder.ForGetPropertyValue<TEntity>(typeof(TEntity).GetPrimaryKeyPropertyInfo())(
+                            entity)
+                        : ExpressionsBuilder.ForGetPropertyValue<TEntity>(
+                            typeof(TEntity).GetProperty(pair.Key))(entity),
                     IsComplex = false,
                     IsReadOnly = true,
                 });

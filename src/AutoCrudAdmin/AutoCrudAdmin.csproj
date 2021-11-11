@@ -90,8 +90,4 @@
     <ItemGroup>
         <Content Remove="Utils\**" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Entities" />
-    </ItemGroup>
 </Project>
