@@ -4,6 +4,8 @@ namespace AutoCrudAdmin.Helpers
     using System.Linq.Expressions;
     using System.Reflection;
     using AutoCrudAdmin.Extensions;
+    using System.Collections.Generic;
+    using System.Linq;
 
     public class ExpressionsBuilder
     {
@@ -31,6 +33,54 @@ namespace AutoCrudAdmin.Helpers
             var equals = Expression.Equal(
                 cast,
                 id);
+
+            return Expression.Lambda<Func<TEntity, bool>>(
+                equals,
+                parameter);
+        }
+
+        public static Expression<Func<TEntity, bool>> ForByEntityPrimaryKey<TEntity>(
+            IDictionary<string, string> keyPairs)
+            where TEntity : class
+        {
+            if (keyPairs.Count == 1)
+            {
+                return ForByEntityId<TEntity>(keyPairs.FirstOrDefault().Value);
+            }
+
+            var entityType = typeof(TEntity);
+            var parameter = Expression.Parameter(typeof(object), "model");
+            var convertedParameter = Expression.Convert(
+                parameter,
+                entityType);
+
+            var equals = Expression.Equal(
+                Expression.Constant(true),
+                Expression.Constant(true));
+
+            keyPairs
+                .ToList()
+                .ForEach(pair =>
+                {
+                    var name = pair.Key;
+                    var value = pair.Value;
+                    var memberAccess = Expression.MakeMemberAccess(
+                        convertedParameter,
+                        entityType.GetProperty(name));
+
+                    var cast = Expression.Convert(
+                        memberAccess,
+                        typeof(object));
+                    var id = Expression.Convert(
+                        Expression.Constant(value),
+                        typeof(object));
+
+                    equals = Expression.And(
+                        equals,
+                        Expression.Equal(
+                            cast,
+                            id));
+                });
 
             return Expression.Lambda<Func<TEntity, bool>>(
                 equals,

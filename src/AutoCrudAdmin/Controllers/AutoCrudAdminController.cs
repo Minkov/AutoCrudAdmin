@@ -11,6 +11,7 @@
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Filters;
     using Microsoft.AspNetCore.Mvc.Rendering;
+    using Microsoft.AspNetCore.Routing;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using NonFactors.Mvc.Grid;
@@ -60,11 +61,7 @@
                     BindingFlags.NonPublic | BindingFlags.Static);
 
         private static IEnumerable<GridAction> DefaultActions
-            => new[]
-            {
-                new GridAction { Action = nameof(Edit) },
-                new GridAction { Action = nameof(Delete) },
-            };
+            => new[] { new GridAction { Action = nameof(Edit) }, new GridAction { Action = nameof(Delete) }, };
 
         private IEnumerable<GridAction> Actions
             => DefaultActions.Concat(this.CustomActions);
@@ -88,10 +85,8 @@
 
         [HttpGet]
         public virtual IActionResult Index()
-            => this.View("../AutoCrudAdmin/Index", new AutoCrudAdminIndexViewModel
-            {
-                GenerateGrid = this.GenerateGrid,
-            });
+            => this.View("../AutoCrudAdmin/Index",
+                new AutoCrudAdminIndexViewModel { GenerateGrid = this.GenerateGrid, });
 
         [HttpGet]
         public virtual IActionResult Create()
@@ -99,11 +94,19 @@
                 ExpressionsBuilder.ForCreateInstance<TEntity>()(),
                 EntityAction.Create);
 
+        // [HttpGet]
+        // public virtual IActionResult Edit(string id)
+        //     => this.GetEntityForm(
+        //         this.Set
+        //             .FirstOrDefault(ExpressionsBuilder.ForByEntityId<TEntity>(id)),
+        //         EntityAction.Edit);
+
+
         [HttpGet]
-        public virtual IActionResult Edit(string id)
+        public virtual IActionResult Edit([FromQuery] IDictionary<string, string> complexId)
             => this.GetEntityForm(
                 this.Set
-                    .FirstOrDefault(ExpressionsBuilder.ForByEntityId<TEntity>(id)),
+                    .FirstOrDefault(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(complexId)),
                 EntityAction.Edit);
 
         [HttpGet]
@@ -135,11 +138,8 @@
                 formControls.ForEach(fc => fc.IsReadOnly = true);
             }
 
-            return this.View("../AutoCrudAdmin/EntityForm", new AutoCrudAdminEntityFormViewModel
-            {
-                FormControls = formControls,
-                Action = action,
-            });
+            return this.View("../AutoCrudAdmin/EntityForm",
+                new AutoCrudAdminEntityFormViewModel { FormControls = formControls, Action = action, });
         }
 
         protected virtual IActionResult PostEntityForm(TEntity entity, EntityAction action)
@@ -229,10 +229,8 @@
                             action.Name,
                             action.Action,
                             this.RouteData.Values["controller"].ToString(),
-                            new
-                            {
-                                id = EntityType.GetPrimaryKeyValue(model),
-                            },
+                            RouteValueDictionary.FromArray(
+                                EntityType.GetPrimaryKeyValue(model).ToArray()),
                             new { }))
                         .Titled("Action");
                 });
