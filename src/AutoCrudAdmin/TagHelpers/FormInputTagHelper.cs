@@ -46,6 +46,10 @@ namespace AutoCrudAdmin.TagHelpers
             {
                 output.Attributes.SetAttribute("type", "number");
             }
+            else if (this.Type == typeof(bool))
+            {
+                output.Attributes.SetAttribute("type", "checkbox");
+            }
             else
             {
                 this.PrepareComplex(output);

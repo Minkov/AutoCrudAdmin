@@ -23,12 +23,10 @@ namespace AutoCrudAdmin.Helpers.Implementations
         private readonly DbContext dbContext;
 
         static FormControlsHelper()
-        {
-            Types = ReflectionHelper.DbSetProperties
+            => Types = ReflectionHelper.DbSetProperties
                 .Select(p => p.PropertyType)
                 .Select(dt => dt.GetGenericArguments().FirstOrDefault())
                 .ToHashSet();
-        }
 
         public FormControlsHelper(DbContext dbContext)
             => this.dbContext = dbContext;
