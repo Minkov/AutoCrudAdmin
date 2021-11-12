@@ -1,6 +1,7 @@
 ﻿namespace AutoCrudAdmin.Controllers
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
@@ -15,7 +16,6 @@
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using NonFactors.Mvc.Grid;
-    using System.Collections;
 
     [AutoCrudAdminControllerNameConvention]
     public class AutoCrudAdminController<TEntity>
@@ -86,7 +86,8 @@
 
         [HttpGet]
         public virtual IActionResult Index()
-            => this.View("../AutoCrudAdmin/Index",
+            => this.View(
+                "../AutoCrudAdmin/Index",
                 new AutoCrudAdminIndexViewModel { GenerateGrid = this.GenerateGrid, });
 
         [HttpGet]
@@ -136,7 +137,8 @@
                 formControls.ForEach(fc => fc.IsReadOnly = true);
             }
 
-            return this.View("../AutoCrudAdmin/EntityForm",
+            return this.View(
+                "../AutoCrudAdmin/EntityForm",
                 new AutoCrudAdminEntityFormViewModel { FormControls = formControls, Action = action, });
         }
 
@@ -216,7 +218,8 @@
                 .Aggregate(
                     properties,
                     (current, pk)
-                        => current.ThenBy(property => property != pk));
+                        => current.ThenBy(property => property != pk))
+                .ThenBy(property => property.Name);
 
             return properties
                 .Aggregate(

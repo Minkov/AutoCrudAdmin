@@ -84,10 +84,12 @@ namespace AutoCrudAdmin.TagHelpers
                 .Select(x => x.ToString())
                 .ToList();
 
+            var value = this.Value?.ToString();
+
             var options = values
                 .Select((t, i) => new { Text = names[i], Value = values[i], })
                 .Select(x =>
-                    x.Value.ToString() == this.Value.ToString()
+                    x.Value.ToString() == value
                         ? $"<option value='{x.Value}' selected>{x.Text}</option>"
                         : $"<option value='{x.Value}'>{x.Text}</option>")
                 .ToList();
