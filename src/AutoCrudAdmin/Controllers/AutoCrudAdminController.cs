@@ -100,14 +100,16 @@
             => this.GetEntityForm(
                 this.Set
                     .FirstOrDefault(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(complexId)),
-                EntityAction.Edit);
+                EntityAction.Edit,
+                complexId);
 
         [HttpGet]
         public virtual IActionResult Delete([FromQuery] IDictionary<string, string> complexId)
             => this.GetEntityForm(
                 this.Set
                     .FirstOrDefault(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(complexId)),
-                EntityAction.Delete);
+                EntityAction.Delete,
+                complexId);
 
         [HttpPost]
         public virtual IActionResult Create(TEntity entity)
@@ -121,7 +123,10 @@
         public virtual IActionResult Delete(TEntity entity)
             => this.PostEntityForm(entity, EntityAction.Delete);
 
-        protected virtual IActionResult GetEntityForm(TEntity entity, EntityAction action)
+        protected virtual IActionResult GetEntityForm(
+            TEntity entity,
+            EntityAction action,
+            IDictionary<string, string> complexId = null)
         {
             var formControls = this.FormControlsHelper.GenerateFormControls(entity)
                 .ToList();

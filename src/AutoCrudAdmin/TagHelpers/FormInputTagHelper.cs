@@ -10,13 +10,20 @@ namespace AutoCrudAdmin.TagHelpers
     [HtmlTargetElement("formInput", TagStructure = TagStructure.NormalOrSelfClosing)]
     public class FormInputTagHelper : TagHelper
     {
-        [HtmlAttributeName("for-name")] public string Name { get; set; }
+        [HtmlAttributeName("for-name")]
+        public string Name { get; set; }
 
-        [HtmlAttributeName("for-type")] public Type Type { get; set; }
+        [HtmlAttributeName("for-type")]
+        public Type Type { get; set; }
 
-        [HtmlAttributeName("with-label")] public string LabelText { get; set; }
+        [HtmlAttributeName("with-label")]
+        public string LabelText { get; set; }
 
-        [HtmlAttributeName("with-value")] public object Value { get; set; }
+        [HtmlAttributeName("with-value")]
+        public object Value { get; set; }
+
+        [HtmlAttributeName("with-options")]
+        public IEnumerable<object> Options { get; set; }
 
         public override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
@@ -67,7 +74,7 @@ namespace AutoCrudAdmin.TagHelpers
             output.TagName = "select";
 
             output.Attributes.SetAttribute("name", this.Name + "Id");
-            var valuesList = (this.Value as IEnumerable<object>)
+            var valuesList = this.Options
                 !.ToList();
             var values = valuesList
                 .Select(x => x.GetType().GetPrimaryKeyValue(x).FirstOrDefault())

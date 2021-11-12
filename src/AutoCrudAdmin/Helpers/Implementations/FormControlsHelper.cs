@@ -103,11 +103,12 @@ namespace AutoCrudAdmin.Helpers.Implementations
                 .ToHashSet();
             var result = entityType.GetProperties()
                 .Where(property => IsDbContextEntity(property, entity))
-                .Select(property => new FormControlViewModel()
+                .Select(property => new FormControlViewModel
                 {
                     Name = property.Name,
                     Type = property.PropertyType,
-                    Value = this.dbContext.Set(property.PropertyType),
+                    Value = ExpressionsBuilder.ForGetPropertyValue<TEntity>(entityType.GetProperty(property.Name + "Id"))(entity),
+                    Options = this.dbContext.Set(property.PropertyType) as IEnumerable<object>,
                     IsComplex = true,
                     IsReadOnly = primaryKeyProperty.Contains(property),
                 })
