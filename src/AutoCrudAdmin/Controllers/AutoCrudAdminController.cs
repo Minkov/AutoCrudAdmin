@@ -15,6 +15,7 @@
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using NonFactors.Mvc.Grid;
+    using System.Collections;
 
     [AutoCrudAdminControllerNameConvention]
     public class AutoCrudAdminController<TEntity>
@@ -197,12 +198,22 @@
                 ? x => this.ShownColumnNames.Contains(x.Name)
                 : this.HiddenColumnNames.Any()
                     ? x => !this.HiddenColumnNames.Contains(x.Name)
-                    : _ => true;
+                    : x => !typeof(IEnumerable).IsAssignableFrom(x.PropertyType);
 
-            return EntityType
+            var primaryKeys = EntityType.GetPrimaryKeyPropertyInfos();
+
+            var properties = EntityType
                 .GetProperties()
                 .Where(filter)
-                .OrderBy(property => EntityType.GetPrimaryKeyPropertyInfos() != property)
+                .OrderBy(property => property != primaryKeys.FirstOrDefault());
+
+            properties = primaryKeys.Skip(1)
+                .Aggregate(
+                    properties,
+                    (current, pk)
+                        => current.ThenBy(property => property != pk));
+
+            return properties
                 .Aggregate(
                     columns,
                     (currentColumns, prop) => (IGridColumnsOf<TEntity>)GenerateColumnExpressionMethod

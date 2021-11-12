@@ -11,7 +11,7 @@ namespace AutoCrudAdmin.Helpers
     public class ExpressionsBuilder
     {
         public static Expression<Func<TEntity, bool>> ForByEntityPrimaryKey<TEntity>(
-            IDictionary<string, string> keyPairs)
+            IDictionary<string, string> primaryKeys)
             where TEntity : class
         {
             var entityType = typeof(TEntity);
@@ -24,7 +24,7 @@ namespace AutoCrudAdmin.Helpers
                 Expression.Constant(true),
                 Expression.Constant(true));
 
-            keyPairs
+            primaryKeys
                 .Select(pair =>
                 {
                     var key = pair.Key == SinglePrimaryKeyName
@@ -35,28 +35,17 @@ namespace AutoCrudAdmin.Helpers
 
                     return new KeyValuePair<string, string>(key, pair.Value);
                 })
-                .ToList()
-                .ForEach(pair =>
-                {
-                    var name = pair.Key;
-                    var value = pair.Value;
-                    var memberAccess = Expression.MakeMemberAccess(
+                .Select(pair =>
+                    ForPrimaryKeySubExpression(
+                        pair.Key,
+                        pair.Value,
                         convertedParameter,
-                        entityType.GetProperty(name));
-
-                    var cast = Expression.Convert(
-                        memberAccess,
-                        typeof(object));
-                    var id = Expression.Convert(
-                        Expression.Constant(value),
-                        typeof(object));
-
+                        entityType))
+                .ToList()
+                .ForEach(expression =>
                     equals = Expression.And(
                         equals,
-                        Expression.Equal(
-                            cast,
-                            id));
-                });
+                        expression));
 
             return Expression.Lambda<Func<TEntity, bool>>(
                 equals,
@@ -92,6 +81,26 @@ namespace AutoCrudAdmin.Helpers
                         property.GetGetMethod()),
                     typeof(object)),
                 instanceParam).Compile();
+        }
+
+        private static Expression ForPrimaryKeySubExpression(
+            string name,
+            string value,
+            Expression parameter,
+            Type entityType)
+        {
+            var memberAccess = Expression.MakeMemberAccess(
+                parameter,
+                entityType.GetProperty(name));
+
+            var cast = Expression.Convert(
+                memberAccess,
+                typeof(object));
+            var id = Expression.Convert(
+                Expression.Constant(value),
+                typeof(object));
+
+            return Expression.Equal(cast, id);
         }
     }
 }
