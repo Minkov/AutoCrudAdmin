@@ -14,6 +14,7 @@ namespace AutoCrudAdmin.Extensions
                 string.IsNullOrEmpty(urlPrefix)
                     ? string.Empty
                     : "/" + urlPrefix;
+
             app.MapWhen(
                 context => context.Request.Path.StartsWithSegments(segment),
                 x =>

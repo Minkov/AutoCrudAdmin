@@ -45,6 +45,14 @@ namespace AutoCrudAdmin.TagHelpers
             else if (this.Type == typeof(bool))
             {
                 output.Attributes.SetAttribute("type", "checkbox");
+                output.Attributes.SetAttribute("value", "true");
+
+                if (this.Value is not true)
+                {
+                    return Task.CompletedTask;
+                }
+
+                output.Attributes.SetAttribute("checked", "checked");
             }
             else
             {
