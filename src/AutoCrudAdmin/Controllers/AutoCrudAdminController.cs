@@ -1,6 +1,7 @@
 ﻿namespace AutoCrudAdmin.Controllers
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
@@ -11,6 +12,7 @@
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Filters;
     using Microsoft.AspNetCore.Mvc.Rendering;
+    using Microsoft.AspNetCore.Routing;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using NonFactors.Mvc.Grid;
@@ -60,11 +62,7 @@
                     BindingFlags.NonPublic | BindingFlags.Static);
 
         private static IEnumerable<GridAction> DefaultActions
-            => new[]
-            {
-                new GridAction { Action = nameof(Edit) },
-                new GridAction { Action = nameof(Delete) },
-            };
+            => new[] { new GridAction { Action = nameof(Edit) }, new GridAction { Action = nameof(Delete) }, };
 
         private IEnumerable<GridAction> Actions
             => DefaultActions.Concat(this.CustomActions);
@@ -88,10 +86,9 @@
 
         [HttpGet]
         public virtual IActionResult Index()
-            => this.View("../AutoCrudAdmin/Index", new AutoCrudAdminIndexViewModel
-            {
-                GenerateGrid = this.GenerateGrid,
-            });
+            => this.View(
+                "../AutoCrudAdmin/Index",
+                new AutoCrudAdminIndexViewModel { GenerateGrid = this.GenerateGrid, });
 
         [HttpGet]
         public virtual IActionResult Create()
@@ -100,18 +97,20 @@
                 EntityAction.Create);
 
         [HttpGet]
-        public virtual IActionResult Edit(string id)
+        public virtual IActionResult Edit([FromQuery] IDictionary<string, string> complexId)
             => this.GetEntityForm(
                 this.Set
-                    .FirstOrDefault(ExpressionsBuilder.ForByEntityId<TEntity>(id)),
-                EntityAction.Edit);
+                    .FirstOrDefault(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(complexId)),
+                EntityAction.Edit,
+                complexId);
 
         [HttpGet]
-        public virtual IActionResult Delete(string id)
+        public virtual IActionResult Delete([FromQuery] IDictionary<string, string> complexId)
             => this.GetEntityForm(
                 this.Set
-                    .FirstOrDefault(ExpressionsBuilder.ForByEntityId<TEntity>(id)),
-                EntityAction.Delete);
+                    .FirstOrDefault(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(complexId)),
+                EntityAction.Delete,
+                complexId);
 
         [HttpPost]
         public virtual IActionResult Create(TEntity entity)
@@ -125,7 +124,10 @@
         public virtual IActionResult Delete(TEntity entity)
             => this.PostEntityForm(entity, EntityAction.Delete);
 
-        protected virtual IActionResult GetEntityForm(TEntity entity, EntityAction action)
+        protected virtual IActionResult GetEntityForm(
+            TEntity entity,
+            EntityAction action,
+            IDictionary<string, string> complexId = null)
         {
             var formControls = this.FormControlsHelper.GenerateFormControls(entity)
                 .ToList();
@@ -135,11 +137,9 @@
                 formControls.ForEach(fc => fc.IsReadOnly = true);
             }
 
-            return this.View("../AutoCrudAdmin/EntityForm", new AutoCrudAdminEntityFormViewModel
-            {
-                FormControls = formControls,
-                Action = action,
-            });
+            return this.View(
+                "../AutoCrudAdmin/EntityForm",
+                new AutoCrudAdminEntityFormViewModel { FormControls = formControls, Action = action, });
         }
 
         protected virtual IActionResult PostEntityForm(TEntity entity, EntityAction action)
@@ -205,11 +205,23 @@
                 ? x => this.ShownColumnNames.Contains(x.Name)
                 : this.HiddenColumnNames.Any()
                     ? x => !this.HiddenColumnNames.Contains(x.Name)
-                    : _ => true;
+                    : x => !typeof(IEnumerable).IsAssignableFrom(x.PropertyType);
 
-            return EntityType
+            var primaryKeys = EntityType.GetPrimaryKeyPropertyInfos();
+
+            var properties = EntityType
                 .GetProperties()
                 .Where(filter)
+                .OrderBy(property => property != primaryKeys.FirstOrDefault());
+
+            properties = primaryKeys.Skip(1)
+                .Aggregate(
+                    properties,
+                    (current, pk)
+                        => current.ThenBy(property => property != pk))
+                .ThenBy(property => property.Name);
+
+            return properties
                 .Aggregate(
                     columns,
                     (currentColumns, prop) => (IGridColumnsOf<TEntity>)GenerateColumnExpressionMethod
@@ -229,10 +241,8 @@
                             action.Name,
                             action.Action,
                             this.RouteData.Values["controller"].ToString(),
-                            new
-                            {
-                                id = EntityType.GetPrimaryKeyValue(model),
-                            },
+                            RouteValueDictionary.FromArray(
+                                EntityType.GetPrimaryKeyValue(model).ToArray()),
                             new { }))
                         .Titled("Action");
                 });

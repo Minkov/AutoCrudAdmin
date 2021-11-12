@@ -1,36 +1,51 @@
 namespace AutoCrudAdmin.Helpers
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
     using AutoCrudAdmin.Extensions;
+    using static AutoCrudAdmin.Constants.Entity;
 
     public class ExpressionsBuilder
     {
-        public static Expression<Func<TEntity, bool>> ForByEntityId<TEntity>(object entityId)
+        public static Expression<Func<TEntity, bool>> ForByEntityPrimaryKey<TEntity>(
+            IDictionary<string, string> primaryKeys)
+            where TEntity : class
         {
             var entityType = typeof(TEntity);
-            var primaryKeyProperty = entityType.GetPrimaryKeyPropertyInfo();
             var parameter = Expression.Parameter(typeof(object), "model");
             var convertedParameter = Expression.Convert(
                 parameter,
                 entityType);
 
-            var memberAccess = Expression.MakeMemberAccess(
-                convertedParameter,
-                primaryKeyProperty);
-
-            var cast = Expression.Convert(
-                memberAccess,
-                typeof(object));
-
-            var id = Expression.Convert(
-                Expression.Constant(entityId),
-                typeof(object));
-
             var equals = Expression.Equal(
-                cast,
-                id);
+                Expression.Constant(true),
+                Expression.Constant(true));
+
+            primaryKeys
+                .Select(pair =>
+                {
+                    var key = pair.Key == SinglePrimaryKeyName
+                        ? entityType.GetPrimaryKeyPropertyInfos()
+                            .Select(x => x.Name)
+                            .FirstOrDefault()
+                        : pair.Key;
+
+                    return new KeyValuePair<string, string>(key, pair.Value);
+                })
+                .Select(pair =>
+                    ForPrimaryKeySubExpression(
+                        pair.Key,
+                        pair.Value,
+                        convertedParameter,
+                        entityType))
+                .ToList()
+                .ForEach(expression =>
+                    equals = Expression.And(
+                        equals,
+                        expression));
 
             return Expression.Lambda<Func<TEntity, bool>>(
                 equals,
@@ -66,6 +81,26 @@ namespace AutoCrudAdmin.Helpers
                         property.GetGetMethod()),
                     typeof(object)),
                 instanceParam).Compile();
+        }
+
+        private static Expression ForPrimaryKeySubExpression(
+            string name,
+            string value,
+            Expression parameter,
+            Type entityType)
+        {
+            var memberAccess = Expression.MakeMemberAccess(
+                parameter,
+                entityType.GetProperty(name));
+
+            var cast = Expression.Convert(
+                memberAccess,
+                typeof(object));
+            var id = Expression.Convert(
+                Expression.Constant(value),
+                typeof(object));
+
+            return Expression.Equal(cast, id);
         }
     }
 }

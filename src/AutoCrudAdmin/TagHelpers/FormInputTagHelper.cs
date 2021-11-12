@@ -22,6 +22,9 @@ namespace AutoCrudAdmin.TagHelpers
         [HtmlAttributeName("with-value")]
         public object Value { get; set; }
 
+        [HtmlAttributeName("with-options")]
+        public IEnumerable<object> Options { get; set; }
+
         public override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             output.Attributes.SetAttribute("name", this.Name);
@@ -49,6 +52,14 @@ namespace AutoCrudAdmin.TagHelpers
             else if (this.Type == typeof(bool))
             {
                 output.Attributes.SetAttribute("type", "checkbox");
+                output.Attributes.SetAttribute("value", "true");
+
+                if (this.Value is not true)
+                {
+                    return Task.CompletedTask;
+                }
+
+                output.Attributes.SetAttribute("checked", "checked");
             }
             else
             {
@@ -63,28 +74,25 @@ namespace AutoCrudAdmin.TagHelpers
             output.TagName = "select";
 
             output.Attributes.SetAttribute("name", this.Name + "Id");
-            var valuesList = (this.Value as IEnumerable<object>)
+            var valuesList = this.Options
                 !.ToList();
             var values = valuesList
-                .Select(x => x.GetType().GetPrimaryKeyValue(x))
+                .Select(x => x.GetType().GetPrimaryKeyValue(x).FirstOrDefault())
+                .Select(x => x.Value)
                 .ToList();
             var names = valuesList
                 .Select(x => x.ToString())
                 .ToList();
 
-            var options =
-                values
-                    .Cast<object>()
-                    .Select((t, i) => new
-                    {
-                        Text = names[i],
-                        Value = values[i],
-                    })
-                    .Select(x =>
-                        x.Value.ToString() == this.Value.ToString()
-                            ? $"<option value='{x.Value}' selected>{x.Text}</option>"
-                            : $"<option value='{x.Value}'>{x.Text}</option>")
-                    .ToList();
+            var value = this.Value?.ToString();
+
+            var options = values
+                .Select((t, i) => new { Text = names[i], Value = values[i], })
+                .Select(x =>
+                    x.Value.ToString() == value
+                        ? $"<option value='{x.Value}' selected>{x.Text}</option>"
+                        : $"<option value='{x.Value}'>{x.Text}</option>")
+                .ToList();
             output.Content.SetHtmlContent(
                 string.Join(string.Empty, options));
         }
@@ -98,11 +106,7 @@ namespace AutoCrudAdmin.TagHelpers
             var options =
                 values
                     .Cast<object>()
-                    .Select((t, i) => new
-                    {
-                        Text = names[i],
-                        Value = values.GetValue(i)?.ToString(),
-                    })
+                    .Select((t, i) => new { Text = names[i], Value = values.GetValue(i)?.ToString(), })
                     .Select(x =>
                         x.Value == this.Value.ToString()
                             ? $"<option value='{x.Value}' selected>{x.Text}</option>"

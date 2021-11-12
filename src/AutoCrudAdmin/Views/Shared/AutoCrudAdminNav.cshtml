@@ -1,6 +1,12 @@
 @using AutoCrudAdmin.Helpers
 
-<nav>
+<style>
+    .list-group {
+    height: 100vh;
+    overflow: auto;
+    }
+</style>
+<nav class="nav">
     <ul class="list-group">
         @foreach (var item in NavHelper.GetNavItems())
         {
