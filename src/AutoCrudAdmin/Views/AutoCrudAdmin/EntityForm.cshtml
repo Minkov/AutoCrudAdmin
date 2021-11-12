@@ -3,9 +3,14 @@
 @{
     Layout = ViewBag.LayoutName;
 }
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet"/>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+
 
 <form asp-action="@ViewContext.RouteData.Values["action"]" style="display: flex; flex-direction: column">
-    <div style="display:flex; flex-direction: column; gap: 10px;">
+    <div id="entity-form" style="display:flex; flex-direction: column; gap: 10px;">
         @foreach (var formControl in Model.FormControls)
         {
             var className = formControl.Value is bool
@@ -25,3 +30,9 @@
         <button class="btn btn-dark">@Model.Action</button>
     </div>
 </form>
+
+<script >
+$(document).ready(function(){
+  $("#entity-form select").select2();
+});
+</script>

@@ -99,7 +99,8 @@ namespace AutoCrudAdmin.Helpers.Implementations
         {
             var entityType = typeof(TEntity);
 
-            var primaryKeyProperty = entityType.GetPrimaryKeyPropertyInfos();
+            var primaryKeyProperty = entityType.GetPrimaryKeyPropertyInfos()
+                .ToHashSet();
             var result = entityType.GetProperties()
                 .Where(property => IsDbContextEntity(property, entity))
                 .Select(property => new FormControlViewModel()
@@ -108,7 +109,7 @@ namespace AutoCrudAdmin.Helpers.Implementations
                     Type = property.PropertyType,
                     Value = this.dbContext.Set(property.PropertyType),
                     IsComplex = true,
-                    IsReadOnly = property == primaryKeyProperty,
+                    IsReadOnly = primaryKeyProperty.Contains(property),
                 })
                 .ToList();
 
