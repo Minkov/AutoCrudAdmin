@@ -202,7 +202,7 @@
             return EntityType
                 .GetProperties()
                 .Where(filter)
-                .OrderBy(property => EntityType.GetPrimaryKeyPropertyInfo() != property)
+                .OrderBy(property => EntityType.GetPrimaryKeyPropertyInfos() != property)
                 .Aggregate(
                     columns,
                     (currentColumns, prop) => (IGridColumnsOf<TEntity>)GenerateColumnExpressionMethod

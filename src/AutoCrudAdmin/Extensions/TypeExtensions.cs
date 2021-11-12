@@ -2,33 +2,46 @@ namespace AutoCrudAdmin.Extensions
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
     using System.Linq;
     using System.Reflection;
-    using AutoCrudAdmin.Attributes;
+    using AutoCrudAdmin.Helpers;
+    using Microsoft.EntityFrameworkCore;
+    using static AutoCrudAdmin.Constants.Entity;
 
     public static class TypeExtensions
     {
-        public static PropertyInfo GetPrimaryKeyPropertyInfo(this Type type)
-            => type
-                .GetProperties()
-                .FirstOrDefault(pi =>
-                    Attribute.IsDefined(pi, typeof(KeyAttribute))
-                    || Attribute.IsDefined(pi, typeof(ComplexKeyAttribute)));
+        public static IEnumerable<PropertyInfo> GetPrimaryKeyPropertyInfos(this Type type)
+        {
+            var dbContextType = ReflectionHelper.DbContexts
+                .FirstOrDefault();
+
+            var primaryKeyNames = (Activator.CreateInstance(dbContextType) as DbContext)
+                .Model.FindEntityType(type)
+                .FindPrimaryKey()
+                .Properties
+                .Select(x => x.Name)
+                .ToHashSet();
+
+            return type.GetProperties()
+                .Where(property => primaryKeyNames.Contains(property.Name));
+        }
 
         public static IEnumerable<KeyValuePair<string, object>> GetPrimaryKeyValue(this Type type, object value)
         {
-            var primaryKeyInfo = type.GetPrimaryKeyPropertyInfo();
+            var primaryKeyInfos = type.GetPrimaryKeyPropertyInfos()
+                .ToList();
 
-            var primaryKey = primaryKeyInfo.GetValue(value);
-
-            if (primaryKey is IEnumerable<string> complexKey)
+            if (primaryKeyInfos.Count == 1)
             {
-                return complexKey.Select(name => type.GetProperty(name))
-                    .Select(p => new KeyValuePair<string, object>(p.Name, p.GetValue(value)));
+                var primaryKeyValue = primaryKeyInfos
+                    .Select(property => property.GetValue(value))
+                    .FirstOrDefault();
+
+                return new[] { new KeyValuePair<string, object>(SinglePrimaryKeyName, primaryKeyValue) };
             }
 
-            return new[] { new KeyValuePair<string, object>("pk", primaryKey) };
+            return primaryKeyInfos
+                .Select(property => new KeyValuePair<string, object>(property.Name, property.GetValue(value)));
         }
 
         public static bool IsSubclassOfRawGeneric(this Type type, Type genericParent)

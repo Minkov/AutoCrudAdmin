@@ -8,14 +8,14 @@
         <Company>Minkov</Company>
         <IsPackable>true</IsPackable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
+<!--        <PackageReadmeFile>README.md</PackageReadmeFile>-->
         <RepositoryUrl>https://github.com/Minkov/AutoCrudAdmin</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.11" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0" />
         <PackageReference Include="NonFactors.Grid.Core.Mvc6" Version="6.2.4" />
         <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
           <PrivateAssets>all</PrivateAssets>

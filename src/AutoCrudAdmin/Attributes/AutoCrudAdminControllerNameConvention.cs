@@ -5,6 +5,7 @@ namespace AutoCrudAdmin.Attributes
     using System.Linq;
     using AutoCrudAdmin.Controllers;
     using AutoCrudAdmin.Extensions;
+    using AutoCrudAdmin.Helpers;
     using Microsoft.AspNetCore.Mvc.ApplicationModels;
     using Microsoft.EntityFrameworkCore;
 

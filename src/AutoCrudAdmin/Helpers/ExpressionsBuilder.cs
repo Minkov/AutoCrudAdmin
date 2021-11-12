@@ -1,53 +1,19 @@
 namespace AutoCrudAdmin.Helpers
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
     using AutoCrudAdmin.Extensions;
-    using System.Collections.Generic;
-    using System.Linq;
+    using static AutoCrudAdmin.Constants.Entity;
 
     public class ExpressionsBuilder
     {
-        public static Expression<Func<TEntity, bool>> ForByEntityId<TEntity>(object entityId)
-        {
-            var entityType = typeof(TEntity);
-            var primaryKeyProperty = entityType.GetPrimaryKeyPropertyInfo();
-            var parameter = Expression.Parameter(typeof(object), "model");
-            var convertedParameter = Expression.Convert(
-                parameter,
-                entityType);
-
-            var memberAccess = Expression.MakeMemberAccess(
-                convertedParameter,
-                primaryKeyProperty);
-
-            var cast = Expression.Convert(
-                memberAccess,
-                typeof(object));
-
-            var id = Expression.Convert(
-                Expression.Constant(entityId),
-                typeof(object));
-
-            var equals = Expression.Equal(
-                cast,
-                id);
-
-            return Expression.Lambda<Func<TEntity, bool>>(
-                equals,
-                parameter);
-        }
-
         public static Expression<Func<TEntity, bool>> ForByEntityPrimaryKey<TEntity>(
             IDictionary<string, string> keyPairs)
             where TEntity : class
         {
-            if (keyPairs.Count == 1)
-            {
-                return ForByEntityId<TEntity>(keyPairs.FirstOrDefault().Value);
-            }
-
             var entityType = typeof(TEntity);
             var parameter = Expression.Parameter(typeof(object), "model");
             var convertedParameter = Expression.Convert(
@@ -59,6 +25,16 @@ namespace AutoCrudAdmin.Helpers
                 Expression.Constant(true));
 
             keyPairs
+                .Select(pair =>
+                {
+                    var key = pair.Key == SinglePrimaryKeyName
+                        ? entityType.GetPrimaryKeyPropertyInfos()
+                            .Select(x => x.Name)
+                            .FirstOrDefault()
+                        : pair.Key;
+
+                    return new KeyValuePair<string, string>(key, pair.Value);
+                })
                 .ToList()
                 .ForEach(pair =>
                 {
