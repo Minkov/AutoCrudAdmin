@@ -5,6 +5,6 @@ namespace AutoCrudAdmin.Helpers
 
     public interface IFormControlsHelper
     {
-        IEnumerable<FormControlViewModel> GenerateFormControls<TEntity>(TEntity entity);
+        IEnumerable<FormControlViewModel> GenerateFormControls<TEntity>(TEntity entity, EntityAction entityAction);
     }
 }

@@ -34,14 +34,43 @@ namespace AutoCrudAdmin.Helpers.Implementations
 
         private static ISet<Type> Types { get; set; }
 
-        public IEnumerable<FormControlViewModel> GenerateFormControls<TEntity>(TEntity entity)
-            => GeneratePrimaryKeyFormControls(entity)
+        public IEnumerable<FormControlViewModel> GenerateFormControls<TEntity>(
+            TEntity entity,
+            EntityAction entityAction)
+            => this.GeneratePrimaryKeyFormControls(entity, entityAction)
                 .Concat(GeneratePrimitiveFormControls(entity))
                 .Concat(this.GenerateComplexFormControls(entity));
 
-        private static IEnumerable<FormControlViewModel> GeneratePrimaryKeyFormControls<TEntity>(TEntity entity)
-            => typeof(TEntity)
-                .GetPrimaryKeyValue(entity)
+        private IEnumerable<FormControlViewModel> GeneratePrimaryKeyFormControls<TEntity>(
+            TEntity entity,
+            EntityAction entityAction)
+        {
+            var entityType = typeof(TEntity);
+
+            var primaryKeyValues = entityType.GetPrimaryKeyValue(entity)
+                .ToList();
+
+            if (entityAction == EntityAction.Create && primaryKeyValues.Count > 1)
+            {
+                return primaryKeyValues
+                    .Select(pair =>
+                    {
+                        var name = pair.Key[..^2];
+                        var property = entityType.GetProperty(name);
+
+                        return new FormControlViewModel
+                        {
+                            Name = name,
+                            Type = property.PropertyType,
+                            Value = null,
+                            Options = this.dbContext.Set(property.PropertyType) as IEnumerable<object>,
+                            IsComplex = true,
+                            IsReadOnly = false,
+                        };
+                    });
+            }
+
+            return primaryKeyValues
                 .Select(pair => new FormControlViewModel
                 {
                     Name = pair.Key == SinglePrimaryKeyName
@@ -60,6 +89,7 @@ namespace AutoCrudAdmin.Helpers.Implementations
                     IsComplex = false,
                     IsReadOnly = true,
                 });
+        }
 
         private static IEnumerable<FormControlViewModel> GeneratePrimitiveFormControls<TEntity>(TEntity entity)
         {

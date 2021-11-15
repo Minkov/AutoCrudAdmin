@@ -129,7 +129,7 @@
             EntityAction action,
             IDictionary<string, string> complexId = null)
         {
-            var formControls = this.FormControlsHelper.GenerateFormControls(entity)
+            var formControls = this.FormControlsHelper.GenerateFormControls(entity, action)
                 .ToList();
 
             if (action == EntityAction.Delete)

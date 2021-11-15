@@ -3,12 +3,12 @@
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <PackageId>AutoCrudAdmin</PackageId>
-        <Version>1.1.7</Version>
+        <Version>1.1.8</Version>
         <Authors>Doncho Minkov</Authors>
         <Company>Minkov</Company>
         <IsPackable>true</IsPackable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-<!--        <PackageReadmeFile>README.md</PackageReadmeFile>-->
+       <PackageReadmeFile>README.md</PackageReadmeFile>
         <RepositoryUrl>https://github.com/Minkov/AutoCrudAdmin</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <TargetFramework>net6.0</TargetFramework>
