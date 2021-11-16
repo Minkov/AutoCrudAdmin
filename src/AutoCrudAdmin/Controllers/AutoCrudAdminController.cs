@@ -28,7 +28,7 @@
         private DbContext db;
         private IFormControlsHelper formControlsHelper;
 
-        protected virtual IQueryable<TEntity> Set
+        private IQueryable<TEntity> Set
             => this.set ??= this.DbContext
                 ?.Set<TEntity>();
 
@@ -76,6 +76,8 @@
             => this.formControlsHelper ??= this.HttpContext
                 .RequestServices
                 .GetService<IFormControlsHelper>();
+
+        protected virtual IQueryable<TEntity> ApplyIncludes(IQueryable<TEntity> set) => set;
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
@@ -174,6 +176,8 @@
 
             var setForGrid = names
                 !.Aggregate(this.Set, (current, name) => current.Include(name));
+
+            setForGrid = this.ApplyIncludes(setForGrid);
 
             return htmlHelper
                 .Grid(setForGrid)
