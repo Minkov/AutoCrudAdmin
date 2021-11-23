@@ -7,7 +7,6 @@ namespace AutoCrudAdmin.Attributes
     using AutoCrudAdmin.Extensions;
     using AutoCrudAdmin.Helpers;
     using Microsoft.AspNetCore.Mvc.ApplicationModels;
-    using Microsoft.EntityFrameworkCore;
 
     [AttributeUsage(AttributeTargets.Class)]
     public class AutoCrudAdminControllerNameConvention : Attribute, IControllerModelConvention
@@ -19,7 +18,12 @@ namespace AutoCrudAdmin.Attributes
                 .Where(p => p.IsSubclassOfRawGeneric(typeof(AutoCrudAdminController<>)))
                 .ToList();
 
-            EntityTypeToNameMap = ReflectionHelper.DbSetProperties
+            EntityTypeToNameMap = GetEntityTypeToNameMap();
+        }
+
+        private static Dictionary<Type, string> GetEntityTypeToNameMap()
+        {
+            return ReflectionHelper.DbSetProperties
                 .DistinctBy(x => x.PropertyType.GetGenericArguments().FirstOrDefault())
                 .ToDictionary(
                     set => set.PropertyType.GetGenericArguments().FirstOrDefault(),

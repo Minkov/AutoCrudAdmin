@@ -5,22 +5,39 @@ namespace AutoCrudAdmin.Extensions
     using System.Linq;
     using System.Reflection;
     using AutoCrudAdmin.Helpers;
+    using Microsoft.CodeAnalysis.CSharp.Syntax;
     using Microsoft.EntityFrameworkCore;
     using static AutoCrudAdmin.Constants.Entity;
 
     public static class TypeExtensions
     {
+        private static DbContext CreateDbContext(Type type)
+        {
+            try
+            {
+                return Activator.CreateInstance(type) as DbContext;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         public static IEnumerable<PropertyInfo> GetPrimaryKeyPropertyInfos(this Type type)
         {
-            var dbContextType = ReflectionHelper.DbContexts
-                .FirstOrDefault();
+            var dbContextTypes = ReflectionHelper.DbContexts
+                .ToList();
 
-            var primaryKeyNames = (Activator.CreateInstance(dbContextType) as DbContext)
-                .Model.FindEntityType(type)
-                .FindPrimaryKey()
-                .Properties
-                .Select(x => x.Name)
-                .ToHashSet();
+            var primaryKeyNames = dbContextTypes
+                .Select(t => CreateDbContext(t))
+                .Where(dbContext => dbContext != null)
+                .Select(dbContext => dbContext.Model.FindEntityType(type))
+                .Where(x => x != null)
+                .Select(entity => entity.FindPrimaryKey()
+                    .Properties
+                    .Select(x => x.Name)
+                    .ToHashSet())
+                .FirstOrDefault();
 
             return type.GetProperties()
                 .Where(property => primaryKeyNames.Contains(property.Name));
@@ -46,6 +63,11 @@ namespace AutoCrudAdmin.Extensions
 
         public static bool IsSubclassOfRawGeneric(this Type type, Type genericParent)
         {
+            if (type == genericParent)
+            {
+                return false;
+            }
+
             while (type != null && type != typeof(object))
             {
                 var cur = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
@@ -59,5 +81,8 @@ namespace AutoCrudAdmin.Extensions
 
             return false;
         }
+
+        public static bool IsSubclassOfAnyType(this Type type, Type parent)
+            => type.IsSubclassOf(parent) || type.IsSubclassOfRawGeneric(parent);
     }
 }
