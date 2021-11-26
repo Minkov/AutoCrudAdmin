@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
+#nullable disable
+
 namespace AutoCrudAdmin.Demo.PostgreSQL.Migrations
 {
     [DbContext(typeof(TaskSystemDbContext))]
@@ -15,16 +17,18 @@ namespace AutoCrudAdmin.Demo.PostgreSQL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.12")
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                .HasAnnotation("ProductVersion", "6.0.0")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Employee", b =>
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.Employee", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Email")
                         .HasMaxLength(30)
@@ -44,43 +48,37 @@ namespace AutoCrudAdmin.Demo.PostgreSQL.Migrations
                     b.ToTable("Employees");
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.EmployeeTasks", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.EmployeeTasks", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
                     b.Property<int>("EmployeeId")
                         .HasColumnType("integer");
 
                     b.Property<int>("TaskId")
                         .HasColumnType("integer");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId");
+                    b.HasKey("EmployeeId", "TaskId");
 
                     b.HasIndex("TaskId");
 
                     b.ToTable("EmployeeTasks");
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Project", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.Project", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DueDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
                     b.Property<DateTime>("OpenDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -92,33 +90,34 @@ namespace AutoCrudAdmin.Demo.PostgreSQL.Migrations
                             Id = 1,
                             DueDate = new DateTime(2022, 1, 1, 12, 3, 25, 0, DateTimeKind.Unspecified),
                             Name = "Setup migration to PostgreSQL",
-                            OpenDate = new DateTime(2021, 11, 10, 10, 58, 16, 187, DateTimeKind.Local).AddTicks(740)
+                            OpenDate = new DateTime(2021, 11, 15, 14, 55, 32, 471, DateTimeKind.Local).AddTicks(9930)
                         },
                         new
                         {
                             Id = 2,
                             DueDate = new DateTime(2021, 10, 4, 12, 3, 25, 0, DateTimeKind.Unspecified),
                             Name = "Update packages",
-                            OpenDate = new DateTime(2021, 11, 10, 10, 58, 16, 193, DateTimeKind.Local).AddTicks(30)
+                            OpenDate = new DateTime(2021, 11, 15, 14, 55, 32, 472, DateTimeKind.Local).AddTicks(10)
                         },
                         new
                         {
                             Id = 3,
                             DueDate = new DateTime(2021, 11, 8, 12, 3, 25, 0, DateTimeKind.Unspecified),
                             Name = "Integrate AutoCrudAdmin",
-                            OpenDate = new DateTime(2021, 11, 10, 10, 58, 16, 193, DateTimeKind.Local).AddTicks(90)
+                            OpenDate = new DateTime(2021, 11, 15, 14, 55, 32, 472, DateTimeKind.Local).AddTicks(20)
                         });
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Task", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.Task", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DueDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("ExecutionType")
                         .HasColumnType("integer");
@@ -132,7 +131,7 @@ namespace AutoCrudAdmin.Demo.PostgreSQL.Migrations
                         .HasColumnType("character varying(30)");
 
                     b.Property<DateTime>("OpenDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("ProjectId")
                         .HasColumnType("integer");
@@ -156,7 +155,7 @@ namespace AutoCrudAdmin.Demo.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = 12,
+                            Id = 2,
                             DueDate = new DateTime(2021, 12, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             ExecutionType = 3,
                             LabelType = 0,
@@ -206,15 +205,15 @@ namespace AutoCrudAdmin.Demo.PostgreSQL.Migrations
                         });
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.EmployeeTasks", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.EmployeeTasks", b =>
                 {
-                    b.HasOne("AutoCrudAdmin.Demo.Models.Employee", "Employee")
+                    b.HasOne("AutoCrudAdmin.Demo.Models.Models.Employee", "Employee")
                         .WithMany()
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AutoCrudAdmin.Demo.Models.Task", "Task")
+                    b.HasOne("AutoCrudAdmin.Demo.Models.Models.Task", "Task")
                         .WithMany("EmployeeTasks")
                         .HasForeignKey("TaskId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -225,9 +224,9 @@ namespace AutoCrudAdmin.Demo.PostgreSQL.Migrations
                     b.Navigation("Task");
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Task", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.Task", b =>
                 {
-                    b.HasOne("AutoCrudAdmin.Demo.Models.Project", "Project")
+                    b.HasOne("AutoCrudAdmin.Demo.Models.Models.Project", "Project")
                         .WithMany("Tasks")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -236,12 +235,12 @@ namespace AutoCrudAdmin.Demo.PostgreSQL.Migrations
                     b.Navigation("Project");
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Project", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.Project", b =>
                 {
                     b.Navigation("Tasks");
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Task", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.Task", b =>
                 {
                     b.Navigation("EmployeeTasks");
                 });

@@ -3,7 +3,7 @@
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <PackageId>AutoCrudAdmin</PackageId>
-        <Version>1.1.10</Version>
+        <Version>1.1.12</Version>
         <Authors>Doncho Minkov</Authors>
         <Company>Minkov</Company>
         <IsPackable>true</IsPackable>
@@ -28,7 +28,6 @@
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
         <CodeAnalysisRuleSet>AutoCrudAdmin.ruleset</CodeAnalysisRuleSet>
     </PropertyGroup>
-
 
     <ItemGroup>
         <_ContentIncludedByDefault Remove="Pages\Admin\Index.cshtml" />

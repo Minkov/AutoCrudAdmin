@@ -15,6 +15,10 @@ namespace AutoCrudAdmin.Helpers
             DbSetProperties = GetDbSetProperties();
         }
 
+        public static IEnumerable<Type> DbContexts { get; set; }
+
+        public static IEnumerable<PropertyInfo> DbSetProperties { get; }
+
         private static IEnumerable<PropertyInfo> GetDbSetProperties()
         {
             var dbSetTypes = DbContexts
@@ -56,9 +60,5 @@ namespace AutoCrudAdmin.Helpers
 
             return dbContexts;
         }
-
-        public static IEnumerable<Type> DbContexts { get; set; }
-
-        public static IEnumerable<PropertyInfo> DbSetProperties { get; }
     }
 }

@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
+#nullable disable
+
 namespace AutoCrudAdmin.Demo.Sqlite.Migrations
 {
     [DbContext(typeof(TaskSystemDbContext))]
@@ -13,10 +15,9 @@ namespace AutoCrudAdmin.Demo.Sqlite.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.12");
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.0");
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Employee", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.Employee", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -40,28 +41,22 @@ namespace AutoCrudAdmin.Demo.Sqlite.Migrations
                     b.ToTable("Employees");
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.EmployeeTasks", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.EmployeeTasks", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("EmployeeId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("TaskId")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId");
+                    b.HasKey("EmployeeId", "TaskId");
 
                     b.HasIndex("TaskId");
 
                     b.ToTable("EmployeeTasks");
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Project", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.Project", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -86,25 +81,25 @@ namespace AutoCrudAdmin.Demo.Sqlite.Migrations
                             Id = 1,
                             DueDate = new DateTime(2022, 1, 1, 12, 3, 25, 0, DateTimeKind.Unspecified),
                             Name = "Setup migration to PostgreSQL",
-                            OpenDate = new DateTime(2021, 11, 10, 11, 3, 25, 645, DateTimeKind.Local).AddTicks(5010)
+                            OpenDate = new DateTime(2021, 11, 15, 15, 7, 38, 910, DateTimeKind.Local).AddTicks(3080)
                         },
                         new
                         {
                             Id = 2,
                             DueDate = new DateTime(2021, 10, 4, 12, 3, 25, 0, DateTimeKind.Unspecified),
                             Name = "Update packages",
-                            OpenDate = new DateTime(2021, 11, 10, 11, 3, 25, 651, DateTimeKind.Local).AddTicks(5370)
+                            OpenDate = new DateTime(2021, 11, 15, 15, 7, 38, 910, DateTimeKind.Local).AddTicks(3170)
                         },
                         new
                         {
                             Id = 3,
                             DueDate = new DateTime(2021, 11, 8, 12, 3, 25, 0, DateTimeKind.Unspecified),
                             Name = "Integrate AutoCrudAdmin",
-                            OpenDate = new DateTime(2021, 11, 10, 11, 3, 25, 651, DateTimeKind.Local).AddTicks(5430)
+                            OpenDate = new DateTime(2021, 11, 15, 15, 7, 38, 910, DateTimeKind.Local).AddTicks(3170)
                         });
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Task", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.Task", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -149,7 +144,7 @@ namespace AutoCrudAdmin.Demo.Sqlite.Migrations
                         },
                         new
                         {
-                            Id = 12,
+                            Id = 2,
                             DueDate = new DateTime(2021, 12, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             ExecutionType = 3,
                             LabelType = 0,
@@ -199,15 +194,15 @@ namespace AutoCrudAdmin.Demo.Sqlite.Migrations
                         });
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.EmployeeTasks", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.EmployeeTasks", b =>
                 {
-                    b.HasOne("AutoCrudAdmin.Demo.Models.Employee", "Employee")
-                        .WithMany()
+                    b.HasOne("AutoCrudAdmin.Demo.Models.Models.Employee", "Employee")
+                        .WithMany("EmployeeTasks")
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AutoCrudAdmin.Demo.Models.Task", "Task")
+                    b.HasOne("AutoCrudAdmin.Demo.Models.Models.Task", "Task")
                         .WithMany("EmployeeTasks")
                         .HasForeignKey("TaskId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -218,9 +213,9 @@ namespace AutoCrudAdmin.Demo.Sqlite.Migrations
                     b.Navigation("Task");
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Task", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.Task", b =>
                 {
-                    b.HasOne("AutoCrudAdmin.Demo.Models.Project", "Project")
+                    b.HasOne("AutoCrudAdmin.Demo.Models.Models.Project", "Project")
                         .WithMany("Tasks")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -229,12 +224,17 @@ namespace AutoCrudAdmin.Demo.Sqlite.Migrations
                     b.Navigation("Project");
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Project", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.Employee", b =>
+                {
+                    b.Navigation("EmployeeTasks");
+                });
+
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.Project", b =>
                 {
                     b.Navigation("Tasks");
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Task", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.Task", b =>
                 {
                     b.Navigation("EmployeeTasks");
                 });

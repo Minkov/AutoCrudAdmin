@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
+#nullable disable
+
 namespace AutoCrudAdmin.Demo.SqlServer.Migrations
 {
     [DbContext(typeof(TaskSystemDbContext))]
@@ -15,16 +17,18 @@ namespace AutoCrudAdmin.Demo.SqlServer.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.12")
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("ProductVersion", "6.0.0")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Employee", b =>
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.Employee", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Email")
                         .HasMaxLength(30)
@@ -44,34 +48,28 @@ namespace AutoCrudAdmin.Demo.SqlServer.Migrations
                     b.ToTable("Employees");
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.EmployeeTasks", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.EmployeeTasks", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
                     b.Property<int>("TaskId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId");
+                    b.HasKey("EmployeeId", "TaskId");
 
                     b.HasIndex("TaskId");
 
                     b.ToTable("EmployeeTasks");
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Project", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.Project", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime2");
@@ -92,30 +90,31 @@ namespace AutoCrudAdmin.Demo.SqlServer.Migrations
                             Id = 1,
                             DueDate = new DateTime(2022, 1, 1, 12, 3, 25, 0, DateTimeKind.Unspecified),
                             Name = "Setup migration to PostgreSQL",
-                            OpenDate = new DateTime(2021, 11, 10, 10, 46, 11, 44, DateTimeKind.Local).AddTicks(2230)
+                            OpenDate = new DateTime(2021, 11, 15, 14, 38, 25, 695, DateTimeKind.Local).AddTicks(6920)
                         },
                         new
                         {
                             Id = 2,
                             DueDate = new DateTime(2021, 10, 4, 12, 3, 25, 0, DateTimeKind.Unspecified),
                             Name = "Update packages",
-                            OpenDate = new DateTime(2021, 11, 10, 10, 46, 11, 51, DateTimeKind.Local).AddTicks(3770)
+                            OpenDate = new DateTime(2021, 11, 15, 14, 38, 25, 695, DateTimeKind.Local).AddTicks(7000)
                         },
                         new
                         {
                             Id = 3,
                             DueDate = new DateTime(2021, 11, 8, 12, 3, 25, 0, DateTimeKind.Unspecified),
                             Name = "Integrate AutoCrudAdmin",
-                            OpenDate = new DateTime(2021, 11, 10, 10, 46, 11, 51, DateTimeKind.Local).AddTicks(3940)
+                            OpenDate = new DateTime(2021, 11, 15, 14, 38, 25, 695, DateTimeKind.Local).AddTicks(7010)
                         });
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Task", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.Task", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime2");
@@ -156,7 +155,7 @@ namespace AutoCrudAdmin.Demo.SqlServer.Migrations
                         },
                         new
                         {
-                            Id = 12,
+                            Id = 2,
                             DueDate = new DateTime(2021, 12, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             ExecutionType = 3,
                             LabelType = 0,
@@ -206,15 +205,15 @@ namespace AutoCrudAdmin.Demo.SqlServer.Migrations
                         });
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.EmployeeTasks", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.EmployeeTasks", b =>
                 {
-                    b.HasOne("AutoCrudAdmin.Demo.Models.Employee", "Employee")
+                    b.HasOne("AutoCrudAdmin.Demo.Models.Models.Employee", "Employee")
                         .WithMany()
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AutoCrudAdmin.Demo.Models.Task", "Task")
+                    b.HasOne("AutoCrudAdmin.Demo.Models.Models.Task", "Task")
                         .WithMany("EmployeeTasks")
                         .HasForeignKey("TaskId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -225,9 +224,9 @@ namespace AutoCrudAdmin.Demo.SqlServer.Migrations
                     b.Navigation("Task");
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Task", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.Task", b =>
                 {
-                    b.HasOne("AutoCrudAdmin.Demo.Models.Project", "Project")
+                    b.HasOne("AutoCrudAdmin.Demo.Models.Models.Project", "Project")
                         .WithMany("Tasks")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -236,12 +235,12 @@ namespace AutoCrudAdmin.Demo.SqlServer.Migrations
                     b.Navigation("Project");
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Project", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.Project", b =>
                 {
                     b.Navigation("Tasks");
                 });
 
-            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Task", b =>
+            modelBuilder.Entity("AutoCrudAdmin.Demo.Models.Models.Task", b =>
                 {
                     b.Navigation("EmployeeTasks");
                 });

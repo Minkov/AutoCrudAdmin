@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using System.Threading.Tasks;
     using AutoCrudAdmin.Attributes;
     using AutoCrudAdmin.Extensions;
     using AutoCrudAdmin.Helpers;
@@ -40,6 +41,9 @@
 
         protected virtual IEnumerable<Func<TEntity, ValidatorResult>> EntityValidators
             => Array.Empty<Func<TEntity, ValidatorResult>>();
+
+        protected virtual IEnumerable<Func<TEntity, Task<ValidatorResult>>> AsyncEntityValidators
+            => Array.Empty<Func<TEntity, Task<ValidatorResult>>>();
 
         protected virtual IEnumerable<GridAction> CustomActions
             => Enumerable.Empty<GridAction>();
@@ -88,13 +92,9 @@
 
         [HttpGet]
         public virtual IActionResult Index()
-        {
-            this.PrepareErrorMessageViewData();
-
-            return this.View(
+            => this.View(
                 "../AutoCrudAdmin/Index",
                 new AutoCrudAdminIndexViewModel { GenerateGrid = this.GenerateGrid, });
-        }
 
         [HttpGet]
         public virtual IActionResult Create()
@@ -119,15 +119,15 @@
                 complexId);
 
         [HttpPost]
-        public virtual IActionResult PostCreate(IDictionary<string, string> entityDict)
+        public virtual Task<IActionResult> PostCreate(IDictionary<string, string> entityDict)
             => this.PostEntityForm(entityDict, EntityAction.Create);
 
         [HttpPost]
-        public virtual IActionResult PostEdit(IDictionary<string, string> entityDict)
+        public virtual Task<IActionResult> PostEdit(IDictionary<string, string> entityDict)
             => this.PostEntityForm(entityDict, EntityAction.Edit);
 
         [HttpPost]
-        public virtual IActionResult PostDelete(IDictionary<string, string> entityDict)
+        public virtual Task<IActionResult> PostDelete(IDictionary<string, string> entityDict)
             => this.PostEntityForm(entityDict, EntityAction.Delete);
 
         protected virtual IActionResult GetEntityForm(
@@ -150,11 +150,14 @@
         protected virtual IEnumerable<FormControlViewModel> GenerateFormControls(TEntity entity, EntityAction action)
             => this.FormControlsHelper.GenerateFormControls(entity, action);
 
-        protected virtual IActionResult PostEntityForm(IDictionary<string, string> entityDict, EntityAction action)
+        protected virtual async Task<IActionResult> PostEntityForm(
+            IDictionary<string, string> entityDict,
+            EntityAction action)
         {
-            var entity = this.CreateEntityFromFormData(entityDict);
-            this.ValidateBeforeSave(entity);
-            this.BeforeEntitySave(entity, entityDict);
+            var entity = DictToEntity(entityDict);
+            await this.ValidateBeforeSave(entity);
+
+            await this.BeforeEntitySaveAsync(entity, entityDict);
             this.DbContext.Entry(entity).State = action switch
             {
                 EntityAction.Create => EntityState.Added,
@@ -162,19 +165,17 @@
                 var _ => EntityState.Deleted
             };
 
-            this.DbContext.SaveChanges();
-            this.AfterEntitySave(entity, entityDict);
+            await this.DbContext.SaveChangesAsync();
+            await this.AfterEntitySaveAsync(entity, entityDict);
 
             return this.RedirectToAction("Index");
         }
 
-        protected virtual void AfterEntitySave(TEntity entity, IDictionary<string, string> entityDict)
-        {
-        }
+        protected virtual Task BeforeEntitySaveAsync(TEntity entity, IDictionary<string, string> entityDict)
+            => Task.CompletedTask;
 
-        protected virtual void BeforeEntitySave(TEntity entity, IDictionary<string, string> entityDict)
-        {
-        }
+        protected virtual Task AfterEntitySaveAsync(TEntity entity, IDictionary<string, string> entityDict)
+            => Task.CompletedTask;
 
         protected virtual IHtmlGrid<TEntity> GenerateGrid(IHtmlHelper<AutoCrudAdminIndexViewModel> htmlHelper)
         {
@@ -285,21 +286,7 @@
             return columns;
         }
 
-        private void ValidateBeforeSave(TEntity entity)
-        {
-            var errors = this.EntityValidators
-                .Select(v => v(entity))
-                .Where(x => !x.IsValid)
-                .Select(x => x.Message)
-                .ToList();
-
-            if (errors.Any())
-            {
-                throw new Exception(string.Join(", ", errors));
-            }
-        }
-
-        private TEntity CreateEntityFromFormData(IDictionary<string, string> entityDict)
+        private static TEntity DictToEntity(IDictionary<string, string> entityDict)
         {
             var entity = Activator.CreateInstance<TEntity>();
             EntityType.GetProperties()
@@ -312,24 +299,48 @@
                         return;
                     }
 
-                    Type propType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+                    var propType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
 
                     var strValue = entityDict[prop.Name];
-                    object safeValue;
-
-                    if (propType.IsEnum)
-                    {
-                        safeValue = Enum.Parse(propType, strValue);
-                    }
-                    else
-                    {
-                        safeValue = (strValue == null) ? null : Convert.ChangeType(strValue, propType);
-                    }
+                    var safeValue = propType.IsEnum
+                        ? Enum.Parse(propType, strValue)
+                        : strValue == null
+                            ? null
+                            : Convert.ChangeType(strValue, propType);
 
                     prop.SetValue(entity, safeValue);
                 });
 
             return entity;
+        }
+
+        private async Task ValidateBeforeSave(TEntity entity)
+        {
+            var errors = this.GetValidatorResults(entity)
+                .Concat(await this.GetAsyncValidatorResults(entity))
+                .Where(x => !x.IsValid)
+                .Select(x => x.Message)
+                .ToList();
+
+            if (errors.Any())
+            {
+                throw new Exception(string.Join(", ", errors));
+            }
+        }
+
+        private IEnumerable<ValidatorResult> GetValidatorResults(TEntity entity)
+            => this.EntityValidators
+                .Select(v => v(entity));
+
+        private async Task<IEnumerable<ValidatorResult>> GetAsyncValidatorResults(TEntity entity)
+        {
+            var resultTasks = this.AsyncEntityValidators
+                .Select(v => v(entity))
+                .ToList();
+
+            await Task.WhenAll(resultTasks);
+
+            return resultTasks.Select(r => r.Result);
         }
     }
 }

@@ -14,11 +14,6 @@
     public class ProjectsController
         : AutoCrudAdminController<Project>
     {
-        protected override IQueryable<Project> Set
-            => base.Set.Include(x => x.Tasks)
-                .ThenInclude(t => t.EmployeeTasks)
-                .ThenInclude(et => et.Employee);
-
         protected override IEnumerable<Func<Project, ValidatorResult>> EntityValidators
             => new Func<Project, ValidatorResult>[]
             {
@@ -61,6 +56,11 @@
 
             return columns;
         }
+
+        protected override IQueryable<Project> ApplyIncludes(IQueryable<Project> set)
+            => set.Include(x => x.Tasks)
+                .ThenInclude(t => t.EmployeeTasks)
+                .ThenInclude(et => et.Employee);
 
         public IActionResult This()
             => this.Ok("It works!");

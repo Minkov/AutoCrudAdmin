@@ -1,5 +1,6 @@
 ﻿namespace AutoCrudAdmin.Demo.Models.Models
 {
+    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
 
     public class Employee
@@ -21,5 +22,7 @@
 
         public override string ToString()
             => $"{this.Id}, {this.Username}";
+        
+        public ICollection<EmployeeTasks> EmployeeTasks { get; set; }
     }
 }

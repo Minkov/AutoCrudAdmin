@@ -18,12 +18,7 @@ namespace AutoCrudAdmin.Attributes
                 .Where(p => p.IsSubclassOfRawGeneric(typeof(AutoCrudAdminController<>)))
                 .ToList();
 
-            EntityTypeToNameMap = GetEntityTypeToNameMap();
-        }
-
-        private static Dictionary<Type, string> GetEntityTypeToNameMap()
-        {
-            return ReflectionHelper.DbSetProperties
+            EntityTypeToNameMap = ReflectionHelper.DbSetProperties
                 .DistinctBy(x => x.PropertyType.GetGenericArguments().FirstOrDefault())
                 .ToDictionary(
                     set => set.PropertyType.GetGenericArguments().FirstOrDefault(),

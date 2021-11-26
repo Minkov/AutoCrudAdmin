@@ -11,18 +11,6 @@ namespace AutoCrudAdmin.Extensions
 
     public static class TypeExtensions
     {
-        private static DbContext CreateDbContext(Type type)
-        {
-            try
-            {
-                return Activator.CreateInstance(type) as DbContext;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
         public static IEnumerable<PropertyInfo> GetPrimaryKeyPropertyInfos(this Type type)
         {
             var dbContextTypes = ReflectionHelper.DbContexts
@@ -84,5 +72,17 @@ namespace AutoCrudAdmin.Extensions
 
         public static bool IsSubclassOfAnyType(this Type type, Type parent)
             => type.IsSubclassOf(parent) || type.IsSubclassOfRawGeneric(parent);
+
+        private static DbContext CreateDbContext(Type type)
+        {
+            try
+            {
+                return Activator.CreateInstance(type) as DbContext;
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }

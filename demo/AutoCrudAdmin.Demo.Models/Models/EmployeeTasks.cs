@@ -4,9 +4,6 @@
 
     public class EmployeeTasks
     {
-        [Key]
-        public int Id { get; set; }
-        
         public int EmployeeId { get; set; }
         
         public Employee Employee { get; set; }

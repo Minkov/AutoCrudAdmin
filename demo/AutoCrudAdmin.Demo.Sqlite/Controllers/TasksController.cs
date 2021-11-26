@@ -20,9 +20,6 @@ namespace AutoCrudAdmin.Demo.Sqlite.Controllers
                 new Tuple<int, string>(0, "All"),
             };
 
-        protected override IQueryable<Task> Set
-            => base.Set.Include(x => x.Project);
-
         protected override IEnumerable<string> HiddenColumnNames
             => new[] { nameof(Task.EmployeeTasks), nameof(Task.LabelType) };
     }

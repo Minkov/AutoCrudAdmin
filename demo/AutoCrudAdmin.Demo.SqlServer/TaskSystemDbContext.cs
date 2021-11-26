@@ -13,9 +13,16 @@
         {
         }
 
+        public TaskSystemDbContext()
+            : base()
+        {
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<EmployeeTasks>()
+                .HasKey(et => new { et.EmployeeId, et.TaskId });
             modelBuilder.Seed();
         }
 

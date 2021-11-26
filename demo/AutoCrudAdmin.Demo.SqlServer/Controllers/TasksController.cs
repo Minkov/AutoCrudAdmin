@@ -20,8 +20,9 @@ namespace AutoCrudAdmin.Demo.SqlServer.Controllers
                 new Tuple<int, string>(0, "All"),
             };
 
-        protected override IQueryable<Task> Set
-            => base.Set.Include(x => x.Project);
+
+        protected override IQueryable<Task> ApplyIncludes(IQueryable<Task> set)
+            => set.Include(x => x.Project);
 
         protected override IEnumerable<string> HiddenColumnNames
             => new[] { nameof(Task.EmployeeTasks), nameof(Task.LabelType) };
