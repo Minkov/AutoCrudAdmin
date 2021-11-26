@@ -10,6 +10,17 @@ namespace AutoCrudAdmin.TagHelpers
     [HtmlTargetElement("formInput", TagStructure = TagStructure.NormalOrSelfClosing)]
     public class FormInputTagHelper : TagHelper
     {
+        private static ISet<Type> NumberTypes => new HashSet<Type>
+        {
+            typeof(long),
+            typeof(int),
+            typeof(short),
+
+            typeof(decimal),
+            typeof(double),
+            typeof(float),
+        };
+
         [HtmlAttributeName("for-name")]
         public string Name { get; set; }
 
@@ -45,7 +56,7 @@ namespace AutoCrudAdmin.TagHelpers
             {
                 output.Attributes.SetAttribute("type", "datetime");
             }
-            else if (this.Type == typeof(int))
+            else if (NumberTypes.Contains(this.Type))
             {
                 output.Attributes.SetAttribute("type", "number");
             }

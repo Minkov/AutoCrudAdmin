@@ -88,9 +88,13 @@
 
         [HttpGet]
         public virtual IActionResult Index()
-            => this.View(
+        {
+            this.PrepareErrorMessageViewData();
+
+            return this.View(
                 "../AutoCrudAdmin/Index",
                 new AutoCrudAdminIndexViewModel { GenerateGrid = this.GenerateGrid, });
+        }
 
         [HttpGet]
         public virtual IActionResult Create()
@@ -115,24 +119,23 @@
                 complexId);
 
         [HttpPost]
-        public virtual IActionResult Create(TEntity entity)
-            => this.PostEntityForm(entity, EntityAction.Create);
+        public virtual IActionResult PostCreate(IDictionary<string, string> entityDict)
+            => this.PostEntityForm(entityDict, EntityAction.Create);
 
         [HttpPost]
-        public virtual IActionResult Edit(TEntity entity)
-            => this.PostEntityForm(entity, EntityAction.Edit);
+        public virtual IActionResult PostEdit(IDictionary<string, string> entityDict)
+            => this.PostEntityForm(entityDict, EntityAction.Edit);
 
         [HttpPost]
-        public virtual IActionResult Delete(TEntity entity)
-            => this.PostEntityForm(entity, EntityAction.Delete);
+        public virtual IActionResult PostDelete(IDictionary<string, string> entityDict)
+            => this.PostEntityForm(entityDict, EntityAction.Delete);
 
         protected virtual IActionResult GetEntityForm(
             TEntity entity,
             EntityAction action,
             IDictionary<string, string> complexId = null)
         {
-            var formControls = this.FormControlsHelper.GenerateFormControls(entity, action)
-                .ToList();
+            var formControls = this.GenerateFormControls(entity, action).ToList();
 
             if (action == EntityAction.Delete)
             {
@@ -144,9 +147,14 @@
                 new AutoCrudAdminEntityFormViewModel { FormControls = formControls, Action = action, });
         }
 
-        protected virtual IActionResult PostEntityForm(TEntity entity, EntityAction action)
+        protected virtual IEnumerable<FormControlViewModel> GenerateFormControls(TEntity entity, EntityAction action)
+            => this.FormControlsHelper.GenerateFormControls(entity, action);
+
+        protected virtual IActionResult PostEntityForm(IDictionary<string, string> entityDict, EntityAction action)
         {
+            var entity = this.CreateEntityFromFormData(entityDict);
             this.ValidateBeforeSave(entity);
+            this.BeforeEntitySave(entity, entityDict);
             this.DbContext.Entry(entity).State = action switch
             {
                 EntityAction.Create => EntityState.Added,
@@ -155,8 +163,17 @@
             };
 
             this.DbContext.SaveChanges();
+            this.AfterEntitySave(entity, entityDict);
 
             return this.RedirectToAction("Index");
+        }
+
+        protected virtual void AfterEntitySave(TEntity entity, IDictionary<string, string> entityDict)
+        {
+        }
+
+        protected virtual void BeforeEntitySave(TEntity entity, IDictionary<string, string> entityDict)
+        {
         }
 
         protected virtual IHtmlGrid<TEntity> GenerateGrid(IHtmlHelper<AutoCrudAdminIndexViewModel> htmlHelper)
@@ -280,6 +297,39 @@
             {
                 throw new Exception(string.Join(", ", errors));
             }
+        }
+
+        private TEntity CreateEntityFromFormData(IDictionary<string, string> entityDict)
+        {
+            var entity = Activator.CreateInstance<TEntity>();
+            EntityType.GetProperties()
+                .Where(prop => prop.CanWrite)
+                .ToList()
+                .ForEach(prop =>
+                {
+                    if (!entityDict.ContainsKey(prop.Name))
+                    {
+                        return;
+                    }
+
+                    Type propType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+
+                    var strValue = entityDict[prop.Name];
+                    object safeValue;
+
+                    if (propType.IsEnum)
+                    {
+                        safeValue = Enum.Parse(propType, strValue);
+                    }
+                    else
+                    {
+                        safeValue = (strValue == null) ? null : Convert.ChangeType(strValue, propType);
+                    }
+
+                    prop.SetValue(entity, safeValue);
+                });
+
+            return entity;
         }
     }
 }
