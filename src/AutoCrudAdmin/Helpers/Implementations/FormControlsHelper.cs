@@ -2,6 +2,7 @@ namespace AutoCrudAdmin.Helpers.Implementations
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
     using System.Reflection;
     using AutoCrudAdmin.Extensions;
@@ -99,6 +100,7 @@ namespace AutoCrudAdmin.Helpers.Implementations
             var entityType = typeof(TEntity);
 
             return entityType.GetProperties()
+                .Where(p => !p.GetCustomAttributes<NotMappedAttribute>().Any())
                 .Where(property => IsPrimitiveProperty(property, entityType)
                                    && !IsComplexPrimaryKey(property, entityType))
                 .Select(property => new FormControlViewModel
