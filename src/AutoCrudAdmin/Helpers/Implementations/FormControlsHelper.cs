@@ -16,7 +16,10 @@ namespace AutoCrudAdmin.Helpers.Implementations
         {
             typeof(string),
             typeof(int),
-            typeof(int),
+            typeof(short),
+            typeof(long),
+            typeof(double),
+            typeof(decimal),
             typeof(bool),
             typeof(DateTime),
         };
