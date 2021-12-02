@@ -40,11 +40,11 @@
         protected virtual IEnumerable<string> HiddenColumnNames
             => Enumerable.Empty<string>();
 
-        protected virtual IEnumerable<Func<TEntity, ValidatorResult>> EntityValidators
-            => Array.Empty<Func<TEntity, ValidatorResult>>();
+        protected virtual IEnumerable<Func<TEntity, EntityAction, ValidatorResult>> EntityValidators
+            => Array.Empty<Func<TEntity, EntityAction, ValidatorResult>>();
 
-        protected virtual IEnumerable<Func<TEntity, Task<ValidatorResult>>> AsyncEntityValidators
-            => Array.Empty<Func<TEntity, Task<ValidatorResult>>>();
+        protected virtual IEnumerable<Func<TEntity, EntityAction, Task<ValidatorResult>>> AsyncEntityValidators
+            => Array.Empty<Func<TEntity, EntityAction, Task<ValidatorResult>>>();
 
         protected virtual IEnumerable<GridAction> CustomActions
             => Enumerable.Empty<GridAction>();
@@ -53,7 +53,9 @@
             => new string[]
             {
                 "dd/MM/yyyy hh:mm",
-                "d/M/yyyy hh:mm:ss tt",
+                "M/dd/yyyy hh:mm:ss tt",
+                "M/dd/yyyy h:mm:ss tt",
+                "M/d/yyyy h:mm:ss tt",
             };
 
         protected virtual int RowsPerPage
@@ -163,7 +165,7 @@
             EntityAction action)
         {
             var entity = DictToEntity(entityDict);
-            await this.ValidateBeforeSave(entity);
+            await this.ValidateBeforeSave(entity, action);
 
             await this.BeforeEntitySaveAsync(entity, entityDict);
             this.DbContext.Entry(entity).State = action switch
@@ -358,10 +360,10 @@
             return entity;
         }
 
-        private async Task ValidateBeforeSave(TEntity entity)
+        private async Task ValidateBeforeSave(TEntity entity, EntityAction action)
         {
-            var errors = this.GetValidatorResults(entity)
-                .Concat(await this.GetAsyncValidatorResults(entity))
+            var errors = this.GetValidatorResults(entity, action)
+                .Concat(await this.GetAsyncValidatorResults(entity, action))
                 .Where(x => !x.IsValid)
                 .Select(x => x.Message)
                 .ToList();
@@ -372,14 +374,14 @@
             }
         }
 
-        private IEnumerable<ValidatorResult> GetValidatorResults(TEntity entity)
+        private IEnumerable<ValidatorResult> GetValidatorResults(TEntity entity, EntityAction action)
             => this.EntityValidators
-                .Select(v => v(entity));
+                .Select(v => v(entity, action));
 
-        private async Task<IEnumerable<ValidatorResult>> GetAsyncValidatorResults(TEntity entity)
+        private async Task<IEnumerable<ValidatorResult>> GetAsyncValidatorResults(TEntity entity, EntityAction action)
         {
             var resultTasks = this.AsyncEntityValidators
-                .Select(v => v(entity))
+                .Select(v => v(entity, action))
                 .ToList();
 
             await Task.WhenAll(resultTasks);
