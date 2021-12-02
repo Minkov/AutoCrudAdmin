@@ -17,12 +17,21 @@ namespace AutoCrudAdmin.Helpers.Implementations
         {
             typeof(string),
             typeof(int),
+            typeof(int?),
             typeof(short),
+            typeof(short?),
             typeof(long),
+            typeof(long?),
             typeof(double),
+            typeof(double?),
             typeof(decimal),
+            typeof(decimal?),
             typeof(bool),
+            typeof(bool?),
             typeof(DateTime),
+            typeof(DateTime?),
+            typeof(TimeSpan),
+            typeof(TimeSpan?),
         };
 
         private readonly DbContext dbContext;
@@ -103,14 +112,14 @@ namespace AutoCrudAdmin.Helpers.Implementations
                 .Where(p => !p.GetCustomAttributes<NotMappedAttribute>().Any())
                 .Where(property => IsPrimitiveProperty(property, entityType)
                                    && !IsComplexPrimaryKey(property, entityType))
+                .OrderBy(p => p.MetadataToken)
                 .Select(property => new FormControlViewModel
                 {
                     Name = property.Name,
                     Type = property.PropertyType,
                     Value = ExpressionsBuilder.ForGetPropertyValue<TEntity>(property)(entity),
                     IsComplex = false,
-                })
-                .OrderBy(x => x.Name);
+                });
         }
 
         private static bool IsDbContextEntity<TEntity>(PropertyInfo property, TEntity entity)

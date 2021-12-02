@@ -52,9 +52,13 @@ namespace AutoCrudAdmin.TagHelpers
             {
                 output.Attributes.SetAttribute("type", "text");
             }
-            else if (this.Type == typeof(DateTime))
+            else if (this.Type == typeof(DateTime) || this.Type == typeof(DateTime?))
             {
                 output.Attributes.SetAttribute("type", "datetime");
+            }
+            else if (this.Type == typeof(TimeSpan) || this.Type == typeof(TimeSpan?))
+            {
+                output.Attributes.SetAttribute("type", "timespan");
             }
             else if (NumberTypes.Contains(this.Type))
             {
