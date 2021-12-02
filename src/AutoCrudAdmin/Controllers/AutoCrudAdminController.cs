@@ -3,6 +3,7 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
@@ -47,6 +48,13 @@
 
         protected virtual IEnumerable<GridAction> CustomActions
             => Enumerable.Empty<GridAction>();
+
+        protected virtual IEnumerable<string> DateTimeFormats
+            => new string[]
+            {
+                "dd/MM/yyyy hh:mm",
+                "d/M/yyyy hh:mm:ss tt",
+            };
 
         protected virtual int RowsPerPage
             => this.PageSizes.Any()
@@ -272,6 +280,25 @@
             return columns;
         }
 
+        protected virtual DateTime ParseDateTime(string dateTimeStr)
+        {
+            foreach (var dateTimeFormat in this.DateTimeFormats)
+            {
+                if (DateTime.TryParseExact(
+                    dateTimeStr,
+                    dateTimeFormat,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out var dateTime))
+                {
+                    return dateTime;
+                }
+            }
+
+            throw new ArgumentException(
+                $"Cannot parse string date \"{dateTimeStr}\" to DateTime. Try adding another format template.");
+        }
+
         private static IGridColumnsOf<TEntity> GenerateColumnConfiguration<TProperty>(
             IGridColumnsOf<TEntity> columns,
             MemberInfo property)
@@ -286,7 +313,7 @@
             return columns;
         }
 
-        private static TEntity DictToEntity(IDictionary<string, string> entityDict)
+        private TEntity DictToEntity(IDictionary<string, string> entityDict)
         {
             var entity = Activator.CreateInstance<TEntity>();
             EntityType.GetProperties()
@@ -302,11 +329,28 @@
                     var propType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
 
                     var strValue = entityDict[prop.Name];
-                    var safeValue = propType.IsEnum
-                        ? Enum.Parse(propType, strValue)
-                        : strValue == null
-                            ? null
-                            : Convert.ChangeType(strValue, propType);
+                    object safeValue;
+
+                    if (strValue == null)
+                    {
+                        safeValue = null;
+                    }
+                    else if (propType.IsEnum)
+                    {
+                        safeValue = Enum.Parse(propType, strValue);
+                    }
+                    else if (propType == typeof(DateTime))
+                    {
+                        safeValue = this.ParseDateTime(strValue);
+                    }
+                    else if (propType == typeof(TimeSpan))
+                    {
+                        safeValue = TimeSpan.Parse(strValue, CultureInfo.InvariantCulture);
+                    }
+                    else
+                    {
+                        safeValue = Convert.ChangeType(strValue, propType);
+                    }
 
                     prop.SetValue(entity, safeValue);
                 });
