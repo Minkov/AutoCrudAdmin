@@ -164,10 +164,22 @@
             IDictionary<string, string> entityDict,
             EntityAction action)
         {
-            var entity = DictToEntity(entityDict);
+            var entity = this.DictToEntity(entityDict);
             await this.ValidateBeforeSave(entity, action);
 
-            await this.BeforeEntitySaveAsync(entity, entityDict);
+            switch (action)
+            {
+                case EntityAction.Edit:
+                    await this.BeforeEntitySaveOnEditAsync(entity, entityDict);
+                    break;
+                case EntityAction.Create:
+                    await this.BeforeEntitySaveOnCreateAsync(entity, entityDict);
+                    break;
+                case EntityAction.Delete:
+                    await this.BeforeEntitySaveOnDeleteAsync(entity, entityDict);
+                    break;
+            }
+
             this.DbContext.Entry(entity).State = action switch
             {
                 EntityAction.Create => EntityState.Added,
@@ -176,15 +188,38 @@
             };
 
             await this.DbContext.SaveChangesAsync();
-            await this.AfterEntitySaveAsync(entity, entityDict);
+            switch (action)
+            {
+                case EntityAction.Edit:
+                    await this.AfterEntitySaveOnEditAsync(entity, entityDict);
+                    break;
+                case EntityAction.Create:
+                    await this.AfterEntitySaveOnCreateAsync(entity, entityDict);
+                    break;
+                case EntityAction.Delete:
+                    await this.AfterEntitySaveOnDeleteAsync(entity, entityDict);
+                    break;
+            }
 
             return this.RedirectToAction("Index");
         }
 
-        protected virtual Task BeforeEntitySaveAsync(TEntity entity, IDictionary<string, string> entityDict)
+        protected virtual Task BeforeEntitySaveOnCreateAsync(TEntity entity, IDictionary<string, string> entityDict)
             => Task.CompletedTask;
 
-        protected virtual Task AfterEntitySaveAsync(TEntity entity, IDictionary<string, string> entityDict)
+        protected virtual Task BeforeEntitySaveOnDeleteAsync(TEntity entity, IDictionary<string, string> entityDict)
+            => Task.CompletedTask;
+
+        protected virtual Task BeforeEntitySaveOnEditAsync(TEntity entity, IDictionary<string, string> entityDict)
+            => Task.CompletedTask;
+
+        protected virtual Task AfterEntitySaveOnCreateAsync(TEntity entity, IDictionary<string, string> entityDict)
+            => Task.CompletedTask;
+
+        protected virtual Task AfterEntitySaveOnEditAsync(TEntity entity, IDictionary<string, string> entityDict)
+            => Task.CompletedTask;
+
+        protected virtual Task AfterEntitySaveOnDeleteAsync(TEntity entity, IDictionary<string, string> entityDict)
             => Task.CompletedTask;
 
         protected virtual IHtmlGrid<TEntity> GenerateGrid(IHtmlHelper<AutoCrudAdminIndexViewModel> htmlHelper)
