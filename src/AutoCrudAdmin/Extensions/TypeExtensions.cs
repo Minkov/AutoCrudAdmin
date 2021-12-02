@@ -5,7 +5,6 @@ namespace AutoCrudAdmin.Extensions
     using System.Linq;
     using System.Reflection;
     using AutoCrudAdmin.Helpers;
-    using Microsoft.CodeAnalysis.CSharp.Syntax;
     using Microsoft.EntityFrameworkCore;
     using static AutoCrudAdmin.Constants.Entity;
 
@@ -17,18 +16,18 @@ namespace AutoCrudAdmin.Extensions
                 .ToList();
 
             var primaryKeyNames = dbContextTypes
-                .Select(t => CreateDbContext(t))
+                .Select(CreateDbContext)
                 .Where(dbContext => dbContext != null)
                 .Select(dbContext => dbContext.Model.FindEntityType(type))
                 .Where(x => x != null)
                 .Select(entity => entity.FindPrimaryKey()
-                    .Properties
+                    ?.Properties
                     .Select(x => x.Name)
                     .ToHashSet())
                 .FirstOrDefault();
 
             return type.GetProperties()
-                .Where(property => primaryKeyNames.Contains(property.Name));
+                .Where(property => primaryKeyNames != null && primaryKeyNames.Contains(property.Name));
         }
 
         public static IEnumerable<KeyValuePair<string, object>> GetPrimaryKeyValue(this Type type, object value)
@@ -72,6 +71,11 @@ namespace AutoCrudAdmin.Extensions
 
         public static bool IsSubclassOfAnyType(this Type type, Type parent)
             => type.IsSubclassOf(parent) || type.IsSubclassOfRawGeneric(parent);
+
+        public static Type UnProxy(this Type entityType)
+            => entityType.Namespace == "Castle.Proxies"
+                ? entityType.BaseType
+                : entityType;
 
         private static DbContext CreateDbContext(Type type)
         {

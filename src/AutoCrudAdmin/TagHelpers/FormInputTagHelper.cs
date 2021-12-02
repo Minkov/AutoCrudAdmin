@@ -92,7 +92,7 @@ namespace AutoCrudAdmin.TagHelpers
             var valuesList = this.Options
                 !.ToList();
             var values = valuesList
-                .Select(x => x.GetType().GetPrimaryKeyValue(x).FirstOrDefault())
+                .Select(x => x.GetType().UnProxy().GetPrimaryKeyValue(x).FirstOrDefault())
                 .Select(x => x.Value)
                 .ToList();
             var names = valuesList
