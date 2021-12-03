@@ -169,44 +169,22 @@
 
             switch (action)
             {
-                case EntityAction.Edit:
-                    await this.BeforeEntitySaveOnEditAsync(entity, entityDict);
-                    break;
                 case EntityAction.Create:
                     await this.BeforeEntitySaveOnCreateAsync(entity, entityDict);
+                    await this.DbContext.AddAsync(entity);
+                    await this.DbContext.SaveChangesAsync();
+                    await this.AfterEntitySaveOnCreateAsync(entity, entityDict);
+                    break;
+                case EntityAction.Edit:
+                    await this.BeforeEntitySaveOnEditAsync(entity, entityDict);
+                    this.DbContext.Update(entity);
+                    await this.DbContext.SaveChangesAsync();
+                    await this.AfterEntitySaveOnEditAsync(entity, entityDict);
                     break;
                 case EntityAction.Delete:
                     await this.BeforeEntitySaveOnDeleteAsync(entity, entityDict);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(action), action, null);
-            }
-
-            switch (action)
-            {
-                case EntityAction.Create:
-                    await this.DbContext.AddAsync(entity);
-                    break;
-                case EntityAction.Edit:
-                    this.DbContext.Update(entity);
-                    break;
-                case EntityAction.Delete:
                     this.DbContext.Remove(entity);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(action), action, null);
-            }
-
-            await this.DbContext.SaveChangesAsync();
-            switch (action)
-            {
-                case EntityAction.Edit:
-                    await this.AfterEntitySaveOnEditAsync(entity, entityDict);
-                    break;
-                case EntityAction.Create:
-                    await this.AfterEntitySaveOnCreateAsync(entity, entityDict);
-                    break;
-                case EntityAction.Delete:
+                    await this.DbContext.SaveChangesAsync();
                     await this.AfterEntitySaveOnDeleteAsync(entity, entityDict);
                     break;
                 default:
