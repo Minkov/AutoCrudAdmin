@@ -178,14 +178,24 @@
                 case EntityAction.Delete:
                     await this.BeforeEntitySaveOnDeleteAsync(entity, entityDict);
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(action), action, null);
             }
 
-            this.DbContext.Entry(entity).State = action switch
+            switch (action)
             {
-                EntityAction.Create => EntityState.Added,
-                EntityAction.Edit => EntityState.Modified,
-                var _ => EntityState.Deleted
-            };
+                case EntityAction.Create:
+                    await this.DbContext.AddAsync(entity);
+                    break;
+                case EntityAction.Edit:
+                    this.DbContext.Update(entity);
+                    break;
+                case EntityAction.Delete:
+                    this.DbContext.Remove(entity);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(action), action, null);
+            }
 
             await this.DbContext.SaveChangesAsync();
             switch (action)
@@ -199,6 +209,8 @@
                 case EntityAction.Delete:
                     await this.AfterEntitySaveOnDeleteAsync(entity, entityDict);
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(action), action, null);
             }
 
             return this.RedirectToAction("Index");
