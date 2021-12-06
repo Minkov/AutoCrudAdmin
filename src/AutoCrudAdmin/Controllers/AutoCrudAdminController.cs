@@ -40,11 +40,11 @@
         protected virtual IEnumerable<string> HiddenColumnNames
             => Enumerable.Empty<string>();
 
-        protected virtual IEnumerable<Func<TEntity, EntityAction, ValidatorResult>> EntityValidators
-            => Array.Empty<Func<TEntity, EntityAction, ValidatorResult>>();
+        protected virtual IEnumerable<Func<TEntity, TEntity, EntityAction, ValidatorResult>> EntityValidators
+            => Array.Empty<Func<TEntity, TEntity, EntityAction, ValidatorResult>>();
 
-        protected virtual IEnumerable<Func<TEntity, EntityAction, Task<ValidatorResult>>> AsyncEntityValidators
-            => Array.Empty<Func<TEntity, EntityAction, Task<ValidatorResult>>>();
+        protected virtual IEnumerable<Func<TEntity, TEntity, EntityAction, Task<ValidatorResult>>> AsyncEntityValidators
+            => Array.Empty<Func<TEntity, TEntity, EntityAction, Task<ValidatorResult>>>();
 
         protected virtual IEnumerable<GridAction> CustomActions
             => Enumerable.Empty<GridAction>();
@@ -164,28 +164,34 @@
             IDictionary<string, string> entityDict,
             EntityAction action)
         {
-            var entity = this.DictToEntity(entityDict);
-            await this.ValidateBeforeSave(entity, action);
+            var newEntity = this.DictToEntity(entityDict);
+            var existingEntity = this.GetExistingEntityForAction(action, newEntity);
+            if (existingEntity != null)
+            {
+                this.DbContext.Entry(existingEntity).State = EntityState.Detached;
+            }
+
+            await this.ValidateBeforeSave(existingEntity, newEntity, action);
 
             switch (action)
             {
                 case EntityAction.Create:
-                    await this.BeforeEntitySaveOnCreateAsync(entity, entityDict);
-                    await this.DbContext.AddAsync(entity);
+                    await this.BeforeEntitySaveOnCreateAsync(newEntity, entityDict);
+                    await this.DbContext.AddAsync(newEntity);
                     await this.DbContext.SaveChangesAsync();
-                    await this.AfterEntitySaveOnCreateAsync(entity, entityDict);
+                    await this.AfterEntitySaveOnCreateAsync(newEntity, entityDict);
                     break;
                 case EntityAction.Edit:
-                    await this.BeforeEntitySaveOnEditAsync(entity, entityDict);
-                    this.DbContext.Update(entity);
+                    await this.BeforeEntitySaveOnEditAsync(existingEntity, newEntity, entityDict);
+                    this.DbContext.Update(newEntity);
                     await this.DbContext.SaveChangesAsync();
-                    await this.AfterEntitySaveOnEditAsync(entity, entityDict);
+                    await this.AfterEntitySaveOnEditAsync(existingEntity, newEntity, entityDict);
                     break;
                 case EntityAction.Delete:
-                    await this.BeforeEntitySaveOnDeleteAsync(entity, entityDict);
-                    this.DbContext.Remove(entity);
+                    await this.BeforeEntitySaveOnDeleteAsync(newEntity, entityDict);
+                    this.DbContext.Remove(newEntity);
                     await this.DbContext.SaveChangesAsync();
-                    await this.AfterEntitySaveOnDeleteAsync(entity, entityDict);
+                    await this.AfterEntitySaveOnDeleteAsync(newEntity, entityDict);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(action), action, null);
@@ -200,13 +206,13 @@
         protected virtual Task BeforeEntitySaveOnDeleteAsync(TEntity entity, IDictionary<string, string> entityDict)
             => Task.CompletedTask;
 
-        protected virtual Task BeforeEntitySaveOnEditAsync(TEntity entity, IDictionary<string, string> entityDict)
+        protected virtual Task BeforeEntitySaveOnEditAsync(TEntity existingEntity, TEntity newEntity, IDictionary<string, string> entityDict)
             => Task.CompletedTask;
 
         protected virtual Task AfterEntitySaveOnCreateAsync(TEntity entity, IDictionary<string, string> entityDict)
             => Task.CompletedTask;
 
-        protected virtual Task AfterEntitySaveOnEditAsync(TEntity entity, IDictionary<string, string> entityDict)
+        protected virtual Task AfterEntitySaveOnEditAsync(TEntity oldEntity, TEntity entity, IDictionary<string, string> entityDict)
             => Task.CompletedTask;
 
         protected virtual Task AfterEntitySaveOnDeleteAsync(TEntity entity, IDictionary<string, string> entityDict)
@@ -385,10 +391,10 @@
             return entity;
         }
 
-        private async Task ValidateBeforeSave(TEntity entity, EntityAction action)
+        private async Task ValidateBeforeSave(TEntity existingEntity, TEntity newEntity, EntityAction action)
         {
-            var errors = this.GetValidatorResults(entity, action)
-                .Concat(await this.GetAsyncValidatorResults(entity, action))
+            var errors = this.GetValidatorResults(existingEntity, newEntity, action)
+                .Concat(await this.GetAsyncValidatorResults(existingEntity, newEntity, action))
                 .Where(x => !x.IsValid)
                 .Select(x => x.Message)
                 .ToList();
@@ -399,19 +405,41 @@
             }
         }
 
-        private IEnumerable<ValidatorResult> GetValidatorResults(TEntity entity, EntityAction action)
+        private IEnumerable<ValidatorResult> GetValidatorResults(
+            TEntity existingEntity,
+            TEntity newEntity,
+            EntityAction action)
             => this.EntityValidators
-                .Select(v => v(entity, action));
+                .Select(v => v(existingEntity, newEntity, action));
 
-        private async Task<IEnumerable<ValidatorResult>> GetAsyncValidatorResults(TEntity entity, EntityAction action)
+        private async Task<IEnumerable<ValidatorResult>> GetAsyncValidatorResults(
+            TEntity existingEntity,
+            TEntity newEntity,
+            EntityAction action)
         {
             var resultTasks = this.AsyncEntityValidators
-                .Select(v => v(entity, action))
+                .Select(v => v(existingEntity, newEntity, action))
                 .ToList();
 
             await Task.WhenAll(resultTasks);
 
             return resultTasks.Select(r => r.Result);
+        }
+
+        private TEntity GetExistingEntityForAction(EntityAction action, TEntity entity)
+        {
+            var entityType = typeof(TEntity);
+            var keyValues = entityType.GetPrimaryKeyValue(entity).Select(x => x.Value).ToArray();
+            var existingEntity = (TEntity)this.DbContext.Find(entityType, keyValues);
+
+            if ((action is EntityAction.Edit or EntityAction.Delete) && existingEntity == null)
+            {
+                throw new ArgumentException(
+                    $"Action {action} cannot be performed, because the entity was not found in the db.",
+                    nameof(entity));
+            }
+
+            return existingEntity;
         }
     }
 }
