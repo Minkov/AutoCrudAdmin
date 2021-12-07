@@ -346,8 +346,8 @@
             foreach (PropertyInfo property in typeof(TEntity)
                 .GetProperties()
                 .Where(p => p.CanWrite &&
-                    !p.PropertyType.IsClass &&
-                    !typeof(ICollection<>).IsAssignableFrom(p.PropertyType)))
+                    ((!p.PropertyType.IsClass && !typeof(ICollection<>).IsAssignableFrom(p.PropertyType)) ||
+                        p.PropertyType == typeof(string))))
             {
                 property.SetValue(existingEntity, property.GetValue(newEntity, null), null);
             }
@@ -449,8 +449,7 @@
 
             if (action is EntityAction.Delete)
             {
-                // No need for new entity here, as we delete the original one.
-                return (originalEntity, null);
+                return (originalEntity, newEntity);
             }
 
             // Detach original entity, so ChangeTracker does not track two instances of the same object.
