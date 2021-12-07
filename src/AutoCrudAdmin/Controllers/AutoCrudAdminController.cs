@@ -166,10 +166,6 @@
         {
             var newEntity = this.DictToEntity(entityDict);
             var existingEntity = this.GetExistingEntityForAction(action, newEntity);
-            if (existingEntity != null)
-            {
-                this.DbContext.Entry(existingEntity).State = EntityState.Detached;
-            }
 
             await this.ValidateBeforeSave(existingEntity, newEntity, action);
 
@@ -428,16 +424,23 @@
 
         private TEntity GetExistingEntityForAction(EntityAction action, TEntity entity)
         {
+            if (action == EntityAction.Create)
+            {
+                return null;
+            }
+
             var entityType = typeof(TEntity);
             var keyValues = entityType.GetPrimaryKeyValue(entity).Select(x => x.Value).ToArray();
             var existingEntity = (TEntity)this.DbContext.Find(entityType, keyValues);
 
-            if ((action is EntityAction.Edit or EntityAction.Delete) && existingEntity == null)
+            if (existingEntity == null)
             {
                 throw new ArgumentException(
                     $"Action {action} cannot be performed, because the entity was not found in the db.",
                     nameof(entity));
             }
+
+            this.DbContext.Entry(existingEntity).State = EntityState.Detached;
 
             return existingEntity;
         }
