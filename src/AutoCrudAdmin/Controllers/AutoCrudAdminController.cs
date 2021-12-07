@@ -164,10 +164,9 @@
             IDictionary<string, string> entityDict,
             EntityAction action)
         {
-            var newEntity = this.DictToEntity(entityDict);
-            var existingEntity = this.GetExistingEntityForAction(action, newEntity);
+            var (originalEntity, newEntity) = this.GetEntitiesForAction(action, entityDict);
 
-            await this.ValidateBeforeSave(existingEntity, newEntity, action);
+            await this.ValidateBeforeSave(originalEntity, newEntity, action);
 
             switch (action)
             {
@@ -178,16 +177,16 @@
                     await this.AfterEntitySaveOnCreateAsync(newEntity, entityDict);
                     break;
                 case EntityAction.Edit:
-                    await this.BeforeEntitySaveOnEditAsync(existingEntity, newEntity, entityDict);
+                    await this.BeforeEntitySaveOnEditAsync(originalEntity, newEntity, entityDict);
                     this.DbContext.Update(newEntity);
                     await this.DbContext.SaveChangesAsync();
-                    await this.AfterEntitySaveOnEditAsync(existingEntity, newEntity, entityDict);
+                    await this.AfterEntitySaveOnEditAsync(originalEntity, newEntity, entityDict);
                     break;
                 case EntityAction.Delete:
-                    await this.BeforeEntitySaveOnDeleteAsync(newEntity, entityDict);
-                    this.DbContext.Remove(newEntity);
+                    await this.BeforeEntitySaveOnDeleteAsync(originalEntity, entityDict);
+                    this.DbContext.Remove(originalEntity);
                     await this.DbContext.SaveChangesAsync();
-                    await this.AfterEntitySaveOnDeleteAsync(newEntity, entityDict);
+                    await this.AfterEntitySaveOnDeleteAsync(originalEntity, entityDict);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(action), action, null);
@@ -342,6 +341,18 @@
             return columns;
         }
 
+        private static void CopyFormPropertiesToExistingEntityFromNewEntity(TEntity existingEntity, TEntity newEntity)
+        {
+            foreach (PropertyInfo property in typeof(TEntity)
+                .GetProperties()
+                .Where(p => p.CanWrite &&
+                    !p.PropertyType.IsClass &&
+                    !typeof(ICollection<>).IsAssignableFrom(p.PropertyType)))
+            {
+                property.SetValue(existingEntity, property.GetValue(newEntity, null), null);
+            }
+        }
+
         private TEntity DictToEntity(IDictionary<string, string> entityDict)
         {
             var entity = Activator.CreateInstance<TEntity>();
@@ -422,25 +433,52 @@
             return resultTasks.Select(r => r.Result);
         }
 
-        private TEntity GetExistingEntityForAction(EntityAction action, TEntity entity)
+        private (TEntity originalEntity, TEntity newEntity) GetEntitiesForAction(
+            EntityAction action,
+            IDictionary<string, string> entityDict)
         {
-            if (action == EntityAction.Create)
+            var newEntity = this.DictToEntity(entityDict);
+
+            if (action is EntityAction.Create)
             {
-                return null;
+                // No original entity here.
+                return (null, newEntity);
             }
 
+            var originalEntity = this.GetExistingEntity(newEntity);
+
+            if (action is EntityAction.Delete)
+            {
+                // No need for new entity here, as we delete the original one.
+                return (originalEntity, null);
+            }
+
+            // Detach original entity, so ChangeTracker does not track two instances of the same object.
+            this.DbContext.Entry(originalEntity).State = EntityState.Detached;
+
+            // Get the existing entity again, to which the new properties will be copied.
+            // We want to preserve the original entity as it is.
+            var existingEntity = this.GetExistingEntity(originalEntity);
+
+            // Copy properties from new entity to the existing entity.
+            CopyFormPropertiesToExistingEntityFromNewEntity(existingEntity, newEntity);
+
+            // Return original entity and modified existing entity.
+            // This approach allows for lazy loading to work on the new entity.
+            return (originalEntity, existingEntity);
+        }
+
+        private TEntity GetExistingEntity(TEntity newEntity)
+        {
             var entityType = typeof(TEntity);
-            var keyValues = entityType.GetPrimaryKeyValue(entity).Select(x => x.Value).ToArray();
+            var keyValues = entityType.GetPrimaryKeyValue(newEntity).Select(x => x.Value).ToArray();
             var existingEntity = (TEntity)this.DbContext.Find(entityType, keyValues);
 
             if (existingEntity == null)
             {
-                throw new ArgumentException(
-                    $"Action {action} cannot be performed, because the entity was not found in the db.",
-                    nameof(entity));
+                throw new Exception(
+                    "The Action cannot be performed, because the original entity was not found in the db.");
             }
-
-            this.DbContext.Entry(existingEntity).State = EntityState.Detached;
 
             return existingEntity;
         }
