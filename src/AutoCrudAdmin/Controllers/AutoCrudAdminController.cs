@@ -1,8 +1,8 @@
 ﻿namespace AutoCrudAdmin.Controllers
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations.Schema;
     using System.Globalization;
     using System.Linq;
     using System.Reflection;
@@ -261,9 +261,9 @@
 
             Func<PropertyInfo, bool> filter = this.ShownColumnNames.Any()
                 ? x => this.ShownColumnNames.Contains(x.Name)
-                : this.HiddenColumnNames.Any()
-                    ? x => !this.HiddenColumnNames.Contains(x.Name)
-                    : x => !typeof(IEnumerable).IsAssignableFrom(x.PropertyType);
+                : x => !this.HiddenColumnNames.Contains(x.Name) &&
+                    x.PropertyType.IsNotEnumerable() &&
+                    !x.GetCustomAttributes<NotMappedAttribute>().Any();
 
             var primaryKeys = EntityType.GetPrimaryKeyPropertyInfos();
 
@@ -346,8 +346,8 @@
             foreach (PropertyInfo property in typeof(TEntity)
                 .GetProperties()
                 .Where(p => p.CanWrite &&
-                    ((!p.PropertyType.IsClass && !typeof(ICollection<>).IsAssignableFrom(p.PropertyType)) ||
-                        p.PropertyType == typeof(string))))
+                    !p.PropertyType.IsClass &&
+                    p.PropertyType.IsNotEnumerable()))
             {
                 property.SetValue(existingEntity, property.GetValue(newEntity, null), null);
             }

@@ -1,6 +1,7 @@
 namespace AutoCrudAdmin.Extensions
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
@@ -76,6 +77,9 @@ namespace AutoCrudAdmin.Extensions
             => entityType.Namespace == "Castle.Proxies"
                 ? entityType.BaseType
                 : entityType;
+
+        public static bool IsNotEnumerable(this Type type)
+            => !typeof(IEnumerable).IsAssignableFrom(type) || type == typeof(string);
 
         private static DbContext CreateDbContext(Type type)
         {
