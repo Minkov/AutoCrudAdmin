@@ -78,8 +78,12 @@ namespace AutoCrudAdmin.Extensions
                 ? entityType.BaseType
                 : entityType;
 
-        public static bool IsNotEnumerable(this Type type)
-            => !typeof(IEnumerable).IsAssignableFrom(type) || type == typeof(string);
+        public static bool IsNavigationProperty(this Type type)
+            => (type.IsClass || typeof(IEnumerable).IsAssignableFrom(type)) &&
+               type != typeof(string);
+
+        public static bool IsEnumerableExceptString(this Type type)
+            => typeof(IEnumerable).IsAssignableFrom(type) && type != typeof(string);
 
         private static DbContext CreateDbContext(Type type)
         {

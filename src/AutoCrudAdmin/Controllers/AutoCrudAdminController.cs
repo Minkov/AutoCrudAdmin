@@ -259,11 +259,18 @@
                 throw new Exception("Both shown and hidden column names are declared. Leave only one of them");
             }
 
-            Func<PropertyInfo, bool> filter = this.ShownColumnNames.Any()
-                ? x => this.ShownColumnNames.Contains(x.Name)
-                : x => !this.HiddenColumnNames.Contains(x.Name) &&
-                    x.PropertyType.IsNotEnumerable() &&
+            Func<PropertyInfo, bool> filter;
+
+            if (this.ShownColumnNames.Any())
+            {
+                filter = x => this.ShownColumnNames.Contains(x.Name);
+            }
+            else
+            {
+                filter = x => !this.HiddenColumnNames.Contains(x.Name) &&
+                    !x.PropertyType.IsEnumerableExceptString() &&
                     !x.GetCustomAttributes<NotMappedAttribute>().Any();
+            }
 
             var primaryKeys = EntityType.GetPrimaryKeyPropertyInfos();
 
@@ -345,9 +352,7 @@
         {
             foreach (PropertyInfo property in typeof(TEntity)
                 .GetProperties()
-                .Where(p => p.CanWrite &&
-                    !p.PropertyType.IsClass &&
-                    p.PropertyType.IsNotEnumerable()))
+                .Where(p => p.CanWrite && !p.PropertyType.IsNavigationProperty()))
             {
                 property.SetValue(existingEntity, property.GetValue(newEntity, null), null);
             }
