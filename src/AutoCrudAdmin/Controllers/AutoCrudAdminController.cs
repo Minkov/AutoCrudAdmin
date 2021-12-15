@@ -46,6 +46,13 @@
         protected virtual IEnumerable<Func<TEntity, TEntity, EntityAction, Task<ValidatorResult>>> AsyncEntityValidators
             => Array.Empty<Func<TEntity, TEntity, EntityAction, Task<ValidatorResult>>>();
 
+        protected virtual IEnumerable<GridAction> DefaultActions
+            => new[]
+            {
+                new GridAction { Action = nameof(Edit) },
+                new GridAction { Action = nameof(Delete) },
+            };
+
         protected virtual IEnumerable<GridAction> CustomActions
             => Enumerable.Empty<GridAction>();
 
@@ -75,11 +82,8 @@
                     nameof(GenerateColumnConfiguration),
                     BindingFlags.NonPublic | BindingFlags.Static);
 
-        private static IEnumerable<GridAction> DefaultActions
-            => new[] { new GridAction { Action = nameof(Edit) }, new GridAction { Action = nameof(Delete) }, };
-
         private IEnumerable<GridAction> Actions
-            => DefaultActions.Concat(this.CustomActions);
+            => this.DefaultActions.Concat(this.CustomActions);
 
         private DbContext DbContext
             => this.db ??= this.HttpContext
