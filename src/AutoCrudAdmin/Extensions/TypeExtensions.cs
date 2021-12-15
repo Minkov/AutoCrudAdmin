@@ -11,6 +11,9 @@ namespace AutoCrudAdmin.Extensions
 
     public static class TypeExtensions
     {
+        private static IDictionary<Type, IList<PropertyInfo>> primaryKeyPropertyInfosCache =
+            new Dictionary<Type, IList<PropertyInfo>>();
+
         public static IEnumerable<PropertyInfo> GetPrimaryKeyPropertyInfos(this Type type)
         {
             var dbContextTypes = ReflectionHelper.DbContexts
@@ -33,8 +36,12 @@ namespace AutoCrudAdmin.Extensions
 
         public static IEnumerable<KeyValuePair<string, object>> GetPrimaryKeyValue(this Type type, object value)
         {
-            var primaryKeyInfos = type.GetPrimaryKeyPropertyInfos()
-                .ToList();
+            if (!primaryKeyPropertyInfosCache.ContainsKey(type))
+            {
+                primaryKeyPropertyInfosCache.Add(type, type.GetPrimaryKeyPropertyInfos().ToList());
+            }
+
+            var primaryKeyInfos = primaryKeyPropertyInfosCache[type];
 
             if (primaryKeyInfos.Count == 1)
             {
