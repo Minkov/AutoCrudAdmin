@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Reflection;
     using System.Threading.Tasks;
     using AutoCrudAdmin.Attributes;
@@ -115,18 +116,14 @@
         [HttpGet]
         public virtual IActionResult Edit([FromQuery] IDictionary<string, string> complexId)
             => this.GetEntityForm(
-                this.Set
-                    .FirstOrDefault(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(complexId)),
-                EntityAction.Edit,
-                complexId);
+                this.Set.FirstOrDefault(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(complexId)),
+                EntityAction.Edit);
 
         [HttpGet]
         public virtual IActionResult Delete([FromQuery] IDictionary<string, string> complexId)
             => this.GetEntityForm(
-                this.Set
-                    .FirstOrDefault(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(complexId)),
-                EntityAction.Delete,
-                complexId);
+                this.Set.FirstOrDefault(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(complexId)),
+                EntityAction.Delete);
 
         [HttpPost]
         public virtual Task<IActionResult> PostCreate(IDictionary<string, string> entityDict)
@@ -142,10 +139,13 @@
 
         protected virtual IActionResult GetEntityForm(
             TEntity entity,
-            EntityAction action,
-            IDictionary<string, string> complexId = null)
+            EntityAction action)
         {
-            var formControls = this.GenerateFormControls(entity, action).ToList();
+            var formControls = this.GenerateFormControls(
+                    entity,
+                    action,
+                    new Dictionary<string, Expression<Func<object, bool>>>())
+                .ToList();
 
             if (action == EntityAction.Delete)
             {
@@ -157,8 +157,11 @@
                 new AutoCrudAdminEntityFormViewModel { FormControls = formControls, Action = action, });
         }
 
-        protected virtual IEnumerable<FormControlViewModel> GenerateFormControls(TEntity entity, EntityAction action)
-            => this.FormControlsHelper.GenerateFormControls(entity, action);
+        protected virtual IEnumerable<FormControlViewModel> GenerateFormControls(
+            TEntity entity,
+            EntityAction action,
+            IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters)
+            => this.FormControlsHelper.GenerateFormControls(entity, action, complexOptionFilters);
 
         protected virtual async Task<IActionResult> PostEntityForm(
             IDictionary<string, string> entityDict,
