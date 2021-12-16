@@ -1,8 +1,8 @@
 ﻿namespace AutoCrudAdmin.Controllers
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations.Schema;
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
@@ -47,6 +47,13 @@
         protected virtual IEnumerable<Func<TEntity, TEntity, EntityAction, Task<ValidatorResult>>> AsyncEntityValidators
             => Array.Empty<Func<TEntity, TEntity, EntityAction, Task<ValidatorResult>>>();
 
+        protected virtual IEnumerable<GridAction> DefaultActions
+            => new[]
+            {
+                new GridAction { Action = nameof(Edit) },
+                new GridAction { Action = nameof(Delete) },
+            };
+
         protected virtual IEnumerable<GridAction> CustomActions
             => Enumerable.Empty<GridAction>();
 
@@ -76,11 +83,8 @@
                     nameof(GenerateColumnConfiguration),
                     BindingFlags.NonPublic | BindingFlags.Static);
 
-        private static IEnumerable<GridAction> DefaultActions
-            => new[] { new GridAction { Action = nameof(Edit) }, new GridAction { Action = nameof(Delete) }, };
-
         private IEnumerable<GridAction> Actions
-            => DefaultActions.Concat(this.CustomActions);
+            => this.DefaultActions.Concat(this.CustomActions);
 
         private DbContext DbContext
             => this.db ??= this.HttpContext
@@ -262,11 +266,18 @@
                 throw new Exception("Both shown and hidden column names are declared. Leave only one of them");
             }
 
-            Func<PropertyInfo, bool> filter = this.ShownColumnNames.Any()
-                ? x => this.ShownColumnNames.Contains(x.Name)
-                : this.HiddenColumnNames.Any()
-                    ? x => !this.HiddenColumnNames.Contains(x.Name)
-                    : x => !typeof(IEnumerable).IsAssignableFrom(x.PropertyType);
+            Func<PropertyInfo, bool> filter;
+
+            if (this.ShownColumnNames.Any())
+            {
+                filter = x => this.ShownColumnNames.Contains(x.Name);
+            }
+            else
+            {
+                filter = x => !this.HiddenColumnNames.Contains(x.Name) &&
+                    !x.PropertyType.IsEnumerableExceptString() &&
+                    !x.GetCustomAttributes<NotMappedAttribute>().Any();
+            }
 
             var primaryKeys = EntityType.GetPrimaryKeyPropertyInfos();
 
@@ -348,9 +359,7 @@
         {
             foreach (PropertyInfo property in typeof(TEntity)
                 .GetProperties()
-                .Where(p => p.CanWrite &&
-                    ((!p.PropertyType.IsClass && !typeof(ICollection<>).IsAssignableFrom(p.PropertyType)) ||
-                        p.PropertyType == typeof(string))))
+                .Where(p => p.CanWrite && !p.PropertyType.IsNavigationProperty()))
             {
                 property.SetValue(existingEntity, property.GetValue(newEntity, null), null);
             }
