@@ -11,5 +11,7 @@ namespace AutoCrudAdmin.Helpers
             TEntity entity,
             EntityAction entityAction,
             IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters = null);
+
+        string GetComplexFormControlNameForEntityName(string entityName);
     }
 }

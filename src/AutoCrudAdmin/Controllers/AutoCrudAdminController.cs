@@ -41,11 +41,11 @@
         protected virtual IEnumerable<string> HiddenColumnNames
             => Enumerable.Empty<string>();
 
-        protected virtual IEnumerable<Func<TEntity, TEntity, EntityAction, ValidatorResult>> EntityValidators
-            => Array.Empty<Func<TEntity, TEntity, EntityAction, ValidatorResult>>();
+        protected virtual IEnumerable<Func<TEntity, TEntity, EntityAction, IDictionary<string, string>, ValidatorResult>> EntityValidators
+            => Array.Empty<Func<TEntity, TEntity, EntityAction, IDictionary<string, string>, ValidatorResult>>();
 
-        protected virtual IEnumerable<Func<TEntity, TEntity, EntityAction, Task<ValidatorResult>>> AsyncEntityValidators
-            => Array.Empty<Func<TEntity, TEntity, EntityAction, Task<ValidatorResult>>>();
+        protected virtual IEnumerable<Func<TEntity, TEntity, EntityAction, IDictionary<string, string>, Task<ValidatorResult>>> AsyncEntityValidators
+            => Array.Empty<Func<TEntity, TEntity, EntityAction, IDictionary<string, string>, Task<ValidatorResult>>>();
 
         protected virtual IEnumerable<GridAction> DefaultActions
             => new[]
@@ -173,7 +173,7 @@
         {
             var (originalEntity, newEntity) = this.GetEntitiesForAction(action, entityDict);
 
-            await this.ValidateBeforeSave(originalEntity, newEntity, action);
+            await this.ValidateBeforeSave(originalEntity, newEntity, action, entityDict);
 
             switch (action)
             {
@@ -341,6 +341,9 @@
                 $"Cannot parse string date \"{dateTimeStr}\" to DateTime. Try adding another format template.");
         }
 
+        protected string GetComplexFormControlNameFor<T>()
+            => this.FormControlsHelper.GetComplexFormControlNameForEntityName(typeof(T).Name);
+
         private static IGridColumnsOf<TEntity> GenerateColumnConfiguration<TProperty>(
             IGridColumnsOf<TEntity> columns,
             MemberInfo property)
@@ -410,10 +413,14 @@
             return entity;
         }
 
-        private async Task ValidateBeforeSave(TEntity existingEntity, TEntity newEntity, EntityAction action)
+        private async Task ValidateBeforeSave(
+            TEntity existingEntity,
+            TEntity newEntity,
+            EntityAction action,
+            IDictionary<string, string> entityDict)
         {
-            var errors = this.GetValidatorResults(existingEntity, newEntity, action)
-                .Concat(await this.GetAsyncValidatorResults(existingEntity, newEntity, action))
+            var errors = this.GetValidatorResults(existingEntity, newEntity, action, entityDict)
+                .Concat(await this.GetAsyncValidatorResults(existingEntity, newEntity, action, entityDict))
                 .Where(x => !x.IsValid)
                 .Select(x => x.Message)
                 .ToList();
@@ -427,17 +434,19 @@
         private IEnumerable<ValidatorResult> GetValidatorResults(
             TEntity existingEntity,
             TEntity newEntity,
-            EntityAction action)
+            EntityAction action,
+            IDictionary<string, string> entityDict)
             => this.EntityValidators
-                .Select(v => v(existingEntity, newEntity, action));
+                .Select(v => v(existingEntity, newEntity, action, entityDict));
 
         private async Task<IEnumerable<ValidatorResult>> GetAsyncValidatorResults(
             TEntity existingEntity,
             TEntity newEntity,
-            EntityAction action)
+            EntityAction action,
+            IDictionary<string, string> entityDict)
         {
             var resultTasks = this.AsyncEntityValidators
-                .Select(v => v(existingEntity, newEntity, action))
+                .Select(v => v(existingEntity, newEntity, action, entityDict))
                 .ToList();
 
             await Task.WhenAll(resultTasks);

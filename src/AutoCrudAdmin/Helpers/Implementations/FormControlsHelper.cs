@@ -4,11 +4,11 @@ namespace AutoCrudAdmin.Helpers.Implementations
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Reflection;
     using AutoCrudAdmin.Extensions;
     using AutoCrudAdmin.ViewModels;
     using Microsoft.EntityFrameworkCore;
-    using System.Linq.Expressions;
     using static AutoCrudAdmin.Constants.Entity;
 
     public class FormControlsHelper
@@ -56,6 +56,9 @@ namespace AutoCrudAdmin.Helpers.Implementations
                 .Concat(GeneratePrimitiveFormControls(entity))
                 .Concat(this.GenerateComplexFormControls(entity, complexOptionFilters));
 
+        public string GetComplexFormControlNameForEntityName(string entityName)
+            => entityName + "Id";
+
         private IEnumerable<FormControlViewModel> GeneratePrimaryKeyFormControls<TEntity>(
             TEntity entity,
             EntityAction entityAction)
@@ -78,7 +81,7 @@ namespace AutoCrudAdmin.Helpers.Implementations
                             Name = name,
                             Type = property.PropertyType,
                             Value = null,
-                            Options = this.dbContext.Set(property.PropertyType) as IEnumerable<object>,
+                            Options = this.dbContext.Set(property.PropertyType),
                             IsComplex = true,
                             IsReadOnly = false,
                         };
@@ -124,7 +127,7 @@ namespace AutoCrudAdmin.Helpers.Implementations
                 });
         }
 
-        private static bool IsDbContextEntity<TEntity>(PropertyInfo property, TEntity entity)
+        private static bool IsDbContextEntity(PropertyInfo property)
             => Types.Contains(property.PropertyType);
 
         private static bool IsPrimitiveProperty(PropertyInfo property, Type entityType)
@@ -139,9 +142,9 @@ namespace AutoCrudAdmin.Helpers.Implementations
                 .GetPrimaryKeyPropertyInfos()
                 .Any(p => p == property);
 
-        private static bool IsPartOfPrimaryKey(PropertyInfo property, Type entityType)
+        private bool IsPartOfPrimaryKey(PropertyInfo property, Type entityType)
             => entityType.GetPrimaryKeyPropertyInfos()
-                .Any(pk => pk.Name == property.Name + "Id");
+                .Any(pk => pk.Name == this.GetComplexFormControlNameForEntityName(property.Name));
 
         private IEnumerable<FormControlViewModel> GenerateComplexFormControls<TEntity>(
             TEntity entity,
@@ -150,7 +153,7 @@ namespace AutoCrudAdmin.Helpers.Implementations
             var entityType = entity.GetType();
 
             return entityType.GetProperties()
-                .Where(property => IsDbContextEntity(property, entity) && !IsPartOfPrimaryKey(property, entityType))
+                .Where(property => IsDbContextEntity(property) && !this.IsPartOfPrimaryKey(property, entityType))
                 .Select(property =>
                 {
                     var filter = optionFilters?.ContainsKey(property.Name) ?? false
@@ -173,13 +176,14 @@ namespace AutoCrudAdmin.Helpers.Implementations
                 ? this.dbContext.Set(property.PropertyType).Where(optionsFilter)
                 : this.dbContext.Set(property.PropertyType);
 
+            var valueFunc = ExpressionsBuilder.ForGetPropertyValue<TEntity>(
+                entityType.GetProperty(this.GetComplexFormControlNameForEntityName(property.Name)));
+
             return new FormControlViewModel
             {
                 Name = property.Name,
                 Type = property.PropertyType,
-                Value =
-                    ExpressionsBuilder.ForGetPropertyValue<TEntity>(entityType.GetProperty(property.Name + "Id"))(
-                        entity),
+                Value = valueFunc(entity),
                 Options = options,
                 IsComplex = true,
                 IsReadOnly = false,
