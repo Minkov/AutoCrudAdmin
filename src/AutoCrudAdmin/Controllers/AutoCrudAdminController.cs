@@ -175,6 +175,8 @@
 
             await this.ValidateBeforeSave(originalEntity, newEntity, action, entityDict);
 
+            await this.BeforeEntitySaveAsync(newEntity, action, entityDict);
+
             switch (action)
             {
                 case EntityAction.Create:
@@ -201,6 +203,9 @@
 
             return this.RedirectToAction("Index");
         }
+
+        protected virtual Task BeforeEntitySaveAsync(TEntity entity, EntityAction action, IDictionary<string, string> entityDict)
+            => Task.CompletedTask;
 
         protected virtual Task BeforeEntitySaveOnCreateAsync(TEntity entity, IDictionary<string, string> entityDict)
             => Task.CompletedTask;
