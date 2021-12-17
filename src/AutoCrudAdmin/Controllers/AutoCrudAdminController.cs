@@ -112,22 +112,25 @@
                 new AutoCrudAdminIndexViewModel { GenerateGrid = this.GenerateGrid, });
 
         [HttpGet]
-        public virtual IActionResult Create()
-            => this.GetEntityForm(
+        public virtual async Task<IActionResult> Create([FromQuery] IDictionary<string, string> complexId)
+            => await this.GetEntityForm(
                 ExpressionsBuilder.ForCreateInstance<TEntity>()(),
-                EntityAction.Create);
+                EntityAction.Create,
+                complexId);
 
         [HttpGet]
-        public virtual IActionResult Edit([FromQuery] IDictionary<string, string> complexId)
-            => this.GetEntityForm(
+        public virtual async Task<IActionResult> Edit([FromQuery] IDictionary<string, string> complexId)
+            => await this.GetEntityForm(
                 this.Set.FirstOrDefault(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(complexId)),
-                EntityAction.Edit);
+                EntityAction.Edit,
+                complexId);
 
         [HttpGet]
-        public virtual IActionResult Delete([FromQuery] IDictionary<string, string> complexId)
-            => this.GetEntityForm(
+        public virtual async Task<IActionResult> Delete([FromQuery] IDictionary<string, string> complexId)
+            => await this.GetEntityForm(
                 this.Set.FirstOrDefault(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(complexId)),
-                EntityAction.Delete);
+                EntityAction.Delete,
+                complexId);
 
         [HttpPost]
         public virtual Task<IActionResult> PostCreate(IDictionary<string, string> entityDict)
@@ -141,14 +144,16 @@
         public virtual Task<IActionResult> PostDelete(IDictionary<string, string> entityDict)
             => this.PostEntityForm(entityDict, EntityAction.Delete);
 
-        protected virtual IActionResult GetEntityForm(
+        protected virtual async Task<IActionResult> GetEntityForm(
             TEntity entity,
-            EntityAction action)
+            EntityAction action,
+            IDictionary<string, string> entityDict)
         {
-            var formControls = this.GenerateFormControls(
+            var formControls = (await this.GenerateFormControlsAsync(
                     entity,
                     action,
-                    new Dictionary<string, Expression<Func<object, bool>>>())
+                    entityDict,
+                    new Dictionary<string, Expression<Func<object, bool>>>()))
                 .ToList();
 
             if (action == EntityAction.Delete)
@@ -164,8 +169,16 @@
         protected virtual IEnumerable<FormControlViewModel> GenerateFormControls(
             TEntity entity,
             EntityAction action,
+            IDictionary<string, string> entityDict,
             IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters)
             => this.FormControlsHelper.GenerateFormControls(entity, action, complexOptionFilters);
+
+        protected virtual Task<IEnumerable<FormControlViewModel>> GenerateFormControlsAsync(
+            TEntity entity,
+            EntityAction action,
+            IDictionary<string, string> entityDict,
+            IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters)
+            => Task.FromResult(this.GenerateFormControls(entity, action, entityDict, complexOptionFilters));
 
         protected virtual async Task<IActionResult> PostEntityForm(
             IDictionary<string, string> entityDict,
