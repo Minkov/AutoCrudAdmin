@@ -11,6 +11,7 @@
     using AutoCrudAdmin.Attributes;
     using AutoCrudAdmin.Extensions;
     using AutoCrudAdmin.Helpers;
+    using AutoCrudAdmin.Models;
     using AutoCrudAdmin.ViewModels;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Filters;
@@ -41,11 +42,11 @@
         protected virtual IEnumerable<string> HiddenColumnNames
             => Enumerable.Empty<string>();
 
-        protected virtual IEnumerable<Func<TEntity, TEntity, EntityAction, IDictionary<string, string>, ValidatorResult>> EntityValidators
-            => Array.Empty<Func<TEntity, TEntity, EntityAction, IDictionary<string, string>, ValidatorResult>>();
+        protected virtual IEnumerable<Func<TEntity, TEntity, AdminActionContext, ValidatorResult>> EntityValidators
+            => Array.Empty<Func<TEntity, TEntity, AdminActionContext, ValidatorResult>>();
 
-        protected virtual IEnumerable<Func<TEntity, TEntity, EntityAction, IDictionary<string, string>, Task<ValidatorResult>>> AsyncEntityValidators
-            => Array.Empty<Func<TEntity, TEntity, EntityAction, IDictionary<string, string>, Task<ValidatorResult>>>();
+        protected virtual IEnumerable<Func<TEntity, TEntity, AdminActionContext, Task<ValidatorResult>>> AsyncEntityValidators
+            => Array.Empty<Func<TEntity, TEntity, AdminActionContext, Task<ValidatorResult>>>();
 
         protected virtual IEnumerable<GridAction> DefaultActions
             => new[]
@@ -202,29 +203,36 @@
         {
             var (originalEntity, newEntity) = this.GetEntitiesForAction(action, entityDict);
 
-            await this.ValidateBeforeSave(originalEntity, newEntity, action, entityDict, files);
+            var actionContext = new AdminActionContext
+            {
+                Action = action,
+                EntityDict = entityDict,
+                Files = files,
+            };
 
-            await this.BeforeEntitySaveAsync(newEntity, action, entityDict);
+            await this.ValidateBeforeSave(originalEntity, newEntity, actionContext);
+
+            await this.BeforeEntitySaveAsync(newEntity, actionContext);
 
             switch (action)
             {
                 case EntityAction.Create:
-                    await this.BeforeEntitySaveOnCreateAsync(newEntity, entityDict);
+                    await this.BeforeEntitySaveOnCreateAsync(newEntity, actionContext);
                     await this.DbContext.AddAsync(newEntity);
                     await this.DbContext.SaveChangesAsync();
-                    await this.AfterEntitySaveOnCreateAsync(newEntity, entityDict);
+                    await this.AfterEntitySaveOnCreateAsync(newEntity, actionContext);
                     break;
                 case EntityAction.Edit:
-                    await this.BeforeEntitySaveOnEditAsync(originalEntity, newEntity, entityDict);
+                    await this.BeforeEntitySaveOnEditAsync(originalEntity, newEntity, actionContext);
                     this.DbContext.Update(newEntity);
                     await this.DbContext.SaveChangesAsync();
-                    await this.AfterEntitySaveOnEditAsync(originalEntity, newEntity, entityDict);
+                    await this.AfterEntitySaveOnEditAsync(originalEntity, newEntity, actionContext);
                     break;
                 case EntityAction.Delete:
-                    await this.BeforeEntitySaveOnDeleteAsync(originalEntity, entityDict);
+                    await this.BeforeEntitySaveOnDeleteAsync(originalEntity, actionContext);
                     this.DbContext.Remove(originalEntity);
                     await this.DbContext.SaveChangesAsync();
-                    await this.AfterEntitySaveOnDeleteAsync(originalEntity, entityDict);
+                    await this.AfterEntitySaveOnDeleteAsync(originalEntity, actionContext);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(action), action, null);
@@ -233,25 +241,25 @@
             return this.RedirectToAction("Index");
         }
 
-        protected virtual Task BeforeEntitySaveAsync(TEntity entity, EntityAction action, IDictionary<string, string> entityDict)
+        protected virtual Task BeforeEntitySaveAsync(TEntity entity, AdminActionContext actionContext)
             => Task.CompletedTask;
 
-        protected virtual Task BeforeEntitySaveOnCreateAsync(TEntity entity, IDictionary<string, string> entityDict)
+        protected virtual Task BeforeEntitySaveOnCreateAsync(TEntity entity, AdminActionContext actionContext)
             => Task.CompletedTask;
 
-        protected virtual Task BeforeEntitySaveOnDeleteAsync(TEntity entity, IDictionary<string, string> entityDict)
+        protected virtual Task BeforeEntitySaveOnDeleteAsync(TEntity entity, AdminActionContext actionContext)
             => Task.CompletedTask;
 
-        protected virtual Task BeforeEntitySaveOnEditAsync(TEntity existingEntity, TEntity newEntity, IDictionary<string, string> entityDict)
+        protected virtual Task BeforeEntitySaveOnEditAsync(TEntity existingEntity, TEntity newEntity, AdminActionContext actionContext)
             => Task.CompletedTask;
 
-        protected virtual Task AfterEntitySaveOnCreateAsync(TEntity entity, IDictionary<string, string> entityDict)
+        protected virtual Task AfterEntitySaveOnCreateAsync(TEntity entity, AdminActionContext actionContext)
             => Task.CompletedTask;
 
-        protected virtual Task AfterEntitySaveOnEditAsync(TEntity oldEntity, TEntity entity, IDictionary<string, string> entityDict)
+        protected virtual Task AfterEntitySaveOnEditAsync(TEntity oldEntity, TEntity entity, AdminActionContext actionContext)
             => Task.CompletedTask;
 
-        protected virtual Task AfterEntitySaveOnDeleteAsync(TEntity entity, IDictionary<string, string> entityDict)
+        protected virtual Task AfterEntitySaveOnDeleteAsync(TEntity entity, AdminActionContext actionContext)
             => Task.CompletedTask;
 
         protected virtual IHtmlGrid<TEntity> GenerateGrid(IHtmlHelper<AutoCrudAdminIndexViewModel> htmlHelper)
@@ -450,12 +458,10 @@
         private async Task ValidateBeforeSave(
             TEntity existingEntity,
             TEntity newEntity,
-            EntityAction action,
-            IDictionary<string, string> entityDict,
-            FormFilesContainer files)
+            AdminActionContext actionContext)
         {
-            var errors = this.GetValidatorResults(existingEntity, newEntity, action, entityDict)
-                .Concat(await this.GetAsyncValidatorResults(existingEntity, newEntity, action, entityDict))
+            var errors = this.GetValidatorResults(existingEntity, newEntity, actionContext)
+                .Concat(await this.GetAsyncValidatorResults(existingEntity, newEntity, actionContext))
                 .Where(x => !x.IsValid)
                 .Select(x => x.Message)
                 .ToList();
@@ -469,19 +475,17 @@
         private IEnumerable<ValidatorResult> GetValidatorResults(
             TEntity existingEntity,
             TEntity newEntity,
-            EntityAction action,
-            IDictionary<string, string> entityDict)
+            AdminActionContext actionContext)
             => this.EntityValidators
-                .Select(v => v(existingEntity, newEntity, action, entityDict));
+                .Select(v => v(existingEntity, newEntity, actionContext));
 
         private async Task<IEnumerable<ValidatorResult>> GetAsyncValidatorResults(
             TEntity existingEntity,
             TEntity newEntity,
-            EntityAction action,
-            IDictionary<string, string> entityDict)
+            AdminActionContext actionContext)
         {
             var resultTasks = this.AsyncEntityValidators
-                .Select(v => v(existingEntity, newEntity, action, entityDict))
+                .Select(v => v(existingEntity, newEntity, actionContext))
                 .ToList();
 
             await Task.WhenAll(resultTasks);
