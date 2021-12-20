@@ -2,7 +2,7 @@
 
 @{
     Layout = ViewBag.LayoutName;
-    var aspAction = $"Post{ViewContext.RouteData.Values["action"]}";
+    var aspAction = Model?.CustomActionName ?? $"Post{ViewContext.RouteData.Values["action"]}";
 }
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet"/>
 
@@ -10,7 +10,7 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 
 
-<form asp-action="@aspAction" style="display: flex; flex-direction: column">
+<form enctype="multipart/form-data" asp-action="@aspAction" style="display: flex; flex-direction: column">
     <div id="entity-form" style="display:flex; flex-direction: column; gap: 10px;">
         @foreach (var formControl in Model.FormControls)
         {

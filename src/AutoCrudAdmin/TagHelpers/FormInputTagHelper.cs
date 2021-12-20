@@ -5,6 +5,7 @@ namespace AutoCrudAdmin.TagHelpers
     using System.Linq;
     using System.Threading.Tasks;
     using AutoCrudAdmin.Extensions;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Razor.TagHelpers;
 
     [HtmlTargetElement("formInput", TagStructure = TagStructure.NormalOrSelfClosing)]
@@ -75,6 +76,15 @@ namespace AutoCrudAdmin.TagHelpers
                 }
 
                 output.Attributes.SetAttribute("checked", "checked");
+            }
+            else if (this.Type == typeof(IFormFile) || this.Type == typeof(IFormFileCollection))
+            {
+                output.Attributes.SetAttribute("type", "file");
+
+                if (this.Type == typeof(IFormFileCollection))
+                {
+                    output.Attributes.SetAttribute("multiple", "multiple");
+                }
             }
             else
             {

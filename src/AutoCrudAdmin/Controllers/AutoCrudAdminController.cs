@@ -112,42 +112,52 @@
                 new AutoCrudAdminIndexViewModel { GenerateGrid = this.GenerateGrid, });
 
         [HttpGet]
-        public virtual async Task<IActionResult> Create([FromQuery] IDictionary<string, string> complexId)
+        public virtual async Task<IActionResult> Create(
+            [FromQuery] IDictionary<string, string> complexId,
+            string postEndpointName)
             => await this.GetEntityForm(
                 ExpressionsBuilder.ForCreateInstance<TEntity>()(),
                 EntityAction.Create,
-                complexId);
+                complexId,
+                postEndpointName);
 
         [HttpGet]
-        public virtual async Task<IActionResult> Edit([FromQuery] IDictionary<string, string> complexId)
+        public virtual async Task<IActionResult> Edit(
+            [FromQuery] IDictionary<string, string> complexId,
+            string postEndpointName)
             => await this.GetEntityForm(
                 this.Set.FirstOrDefault(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(complexId)),
                 EntityAction.Edit,
-                complexId);
+                complexId,
+                postEndpointName);
 
         [HttpGet]
-        public virtual async Task<IActionResult> Delete([FromQuery] IDictionary<string, string> complexId)
+        public virtual async Task<IActionResult> Delete(
+            [FromQuery] IDictionary<string, string> complexId,
+            string postEndpointName)
             => await this.GetEntityForm(
                 this.Set.FirstOrDefault(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(complexId)),
                 EntityAction.Delete,
-                complexId);
+                complexId,
+                postEndpointName);
 
         [HttpPost]
-        public virtual Task<IActionResult> PostCreate(IDictionary<string, string> entityDict)
-            => this.PostEntityForm(entityDict, EntityAction.Create);
+        public virtual Task<IActionResult> PostCreate(IDictionary<string, string> entityDict, FormFilesContainer files)
+            => this.PostEntityForm(entityDict, EntityAction.Create, files);
 
         [HttpPost]
-        public virtual Task<IActionResult> PostEdit(IDictionary<string, string> entityDict)
-            => this.PostEntityForm(entityDict, EntityAction.Edit);
+        public virtual Task<IActionResult> PostEdit(IDictionary<string, string> entityDict, FormFilesContainer files)
+            => this.PostEntityForm(entityDict, EntityAction.Edit, files);
 
         [HttpPost]
-        public virtual Task<IActionResult> PostDelete(IDictionary<string, string> entityDict)
-            => this.PostEntityForm(entityDict, EntityAction.Delete);
+        public virtual Task<IActionResult> PostDelete(IDictionary<string, string> entityDict, FormFilesContainer files)
+            => this.PostEntityForm(entityDict, EntityAction.Delete, files);
 
         protected virtual async Task<IActionResult> GetEntityForm(
             TEntity entity,
             EntityAction action,
-            IDictionary<string, string> entityDict)
+            IDictionary<string, string> entityDict,
+            string postEndpointName = null)
         {
             var formControls = (await this.GenerateFormControlsAsync(
                     entity,
@@ -163,7 +173,12 @@
 
             return this.View(
                 "../AutoCrudAdmin/EntityForm",
-                new AutoCrudAdminEntityFormViewModel { FormControls = formControls, Action = action, });
+                new AutoCrudAdminEntityFormViewModel
+                {
+                    FormControls = formControls,
+                    Action = action,
+                    CustomActionName = postEndpointName,
+                });
         }
 
         protected virtual IEnumerable<FormControlViewModel> GenerateFormControls(
@@ -182,11 +197,12 @@
 
         protected virtual async Task<IActionResult> PostEntityForm(
             IDictionary<string, string> entityDict,
-            EntityAction action)
+            EntityAction action,
+            FormFilesContainer files)
         {
             var (originalEntity, newEntity) = this.GetEntitiesForAction(action, entityDict);
 
-            await this.ValidateBeforeSave(originalEntity, newEntity, action, entityDict);
+            await this.ValidateBeforeSave(originalEntity, newEntity, action, entityDict, files);
 
             await this.BeforeEntitySaveAsync(newEntity, action, entityDict);
 
@@ -435,7 +451,8 @@
             TEntity existingEntity,
             TEntity newEntity,
             EntityAction action,
-            IDictionary<string, string> entityDict)
+            IDictionary<string, string> entityDict,
+            FormFilesContainer files)
         {
             var errors = this.GetValidatorResults(existingEntity, newEntity, action, entityDict)
                 .Concat(await this.GetAsyncValidatorResults(existingEntity, newEntity, action, entityDict))
