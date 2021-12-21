@@ -18,7 +18,7 @@ namespace AutoCrudAdmin.ViewModels
 
         public bool IsReadOnly { get; set; }
 
-        public object Value { get; set; }
+        public object? Value { get; set; }
 
         public IEnumerable<object> Options { get; set; }
 
