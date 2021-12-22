@@ -10,11 +10,11 @@ public class FormFilesContainer
     {
     }
 
-    public FormFilesContainer(params IFormFile[] formFiles)
-        => this.SingleFiles = formFiles;
+    public FormFilesContainer(params IFormFile?[] formFiles)
+        => this.SingleFiles = formFiles.Where(f => f != null) !;
 
-    public FormFilesContainer(params IFormFileCollection[] formFileCollections)
-        => this.MultipleFiles = formFileCollections;
+    public FormFilesContainer(params IFormFileCollection?[] formFileCollections)
+        => this.MultipleFiles = formFileCollections.Where(fc => fc != null) !;
 
     public FormFilesContainer(IEnumerable<IFormFile> formFiles, IEnumerable<IFormFileCollection> formFileCollections)
     {
