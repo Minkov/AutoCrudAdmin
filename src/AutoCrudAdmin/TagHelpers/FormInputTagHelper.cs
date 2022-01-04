@@ -28,6 +28,9 @@ namespace AutoCrudAdmin.TagHelpers
         [HtmlAttributeName("for-type")]
         public Type Type { get; set; }
 
+        [HtmlAttributeName("is-hidden")]
+        public bool IsHidden { get; set; }
+
         [HtmlAttributeName("with-label")]
         public string LabelText { get; set; }
 
@@ -40,6 +43,7 @@ namespace AutoCrudAdmin.TagHelpers
         public override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             output.Attributes.SetAttribute("name", this.Name);
+
             if (this.Type.IsEnum)
             {
                 this.PrepareEnum(output);
@@ -70,12 +74,10 @@ namespace AutoCrudAdmin.TagHelpers
                 output.Attributes.SetAttribute("type", "checkbox");
                 output.Attributes.SetAttribute("value", "true");
 
-                if (this.Value is not true)
+                if (this.Value is true)
                 {
-                    return Task.CompletedTask;
+                    output.Attributes.SetAttribute("checked", "checked");
                 }
-
-                output.Attributes.SetAttribute("checked", "checked");
             }
             else if (this.Type == typeof(IFormFile) || this.Type == typeof(IFormFileCollection))
             {
@@ -89,6 +91,11 @@ namespace AutoCrudAdmin.TagHelpers
             else
             {
                 this.PrepareComplex(output);
+            }
+
+            if (this.IsHidden)
+            {
+                output.Attributes.SetAttribute("type", "hidden");
             }
 
             return Task.CompletedTask;

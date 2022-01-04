@@ -42,6 +42,24 @@
         protected virtual IEnumerable<string> HiddenColumnNames
             => Enumerable.Empty<string>();
 
+        protected virtual IEnumerable<string> ShownFormControlNames
+            => Enumerable.Empty<string>();
+
+        protected virtual IEnumerable<string> ShownFormControlNamesOnCreate
+            => Enumerable.Empty<string>();
+
+        protected virtual IEnumerable<string> ShownFormControlNamesOnEdit
+            => Enumerable.Empty<string>();
+
+        protected virtual IEnumerable<string> HiddenFormControlNames
+            => Enumerable.Empty<string>();
+
+        protected virtual IEnumerable<string> HiddenFormControlNamesOnCreate
+            => Enumerable.Empty<string>();
+
+        protected virtual IEnumerable<string> HiddenFormControlNamesOnEdit
+            => Enumerable.Empty<string>();
+
         protected virtual IEnumerable<Func<TEntity, TEntity, AdminActionContext, ValidatorResult>> EntityValidators
             => Array.Empty<Func<TEntity, TEntity, AdminActionContext, ValidatorResult>>();
 
@@ -167,9 +185,36 @@
                     new Dictionary<string, Expression<Func<object, bool>>>()))
                 .ToList();
 
-            if (action == EntityAction.Delete)
+            switch (action)
             {
-                formControls.ForEach(fc => fc.IsReadOnly = true);
+                case EntityAction.Create:
+                {
+                    var shownFormControls = this.ShownFormControlNames.Concat(this.ShownFormControlNamesOnCreate);
+                    var hiddenFormControls = this.HiddenFormControlNames.Concat(this.HiddenFormControlNamesOnCreate);
+                    formControls = SetFormControlsVisibility(formControls, shownFormControls, hiddenFormControls)
+                        .ToList();
+                    break;
+                }
+
+                case EntityAction.Edit:
+                {
+                    var shownFormControls = this.ShownFormControlNames.Concat(this.ShownFormControlNamesOnEdit);
+                    var hiddenFormControls = this.HiddenFormControlNames.Concat(this.HiddenFormControlNamesOnEdit);
+                    formControls = SetFormControlsVisibility(formControls, shownFormControls, hiddenFormControls)
+                        .ToList();
+                    break;
+                }
+
+                case EntityAction.Delete:
+                {
+                    formControls.ForEach(fc => fc.IsReadOnly = true);
+                    break;
+                }
+
+                default:
+                {
+                    throw new ArgumentOutOfRangeException(nameof(action), action, null);
+                }
             }
 
             return this.View(
@@ -385,6 +430,28 @@
 
         protected string GetComplexFormControlNameFor<T>()
             => this.FormControlsHelper.GetComplexFormControlNameForEntityName(typeof(T).Name);
+
+        private static IEnumerable<FormControlViewModel> SetFormControlsVisibility(
+            List<FormControlViewModel> formControls,
+            IEnumerable<string> shownFormControlNames,
+            IEnumerable<string> hiddenFormControlNames)
+        {
+            var shownFormControlNamesList = shownFormControlNames.ToList();
+            var isAnyShownExplicitly = shownFormControlNamesList.Any();
+
+            formControls.ForEach(fc =>
+            {
+                if (isAnyShownExplicitly && shownFormControlNamesList.Contains(fc.Name))
+                {
+                    fc.IsHidden = false;
+                    return;
+                }
+
+                fc.IsHidden = isAnyShownExplicitly || hiddenFormControlNames.Contains(fc.Name);
+            });
+
+            return formControls;
+        }
 
         private static IGridColumnsOf<TEntity> GenerateColumnConfiguration<TProperty>(
             IGridColumnsOf<TEntity> columns,

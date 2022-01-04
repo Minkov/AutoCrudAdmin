@@ -17,13 +17,15 @@
             var className = formControl.Value is bool
                 ? "form-check-input"
                 : "form-control";
-            <label>
+            var hiddenAttribute = formControl.IsHidden ? "hidden" : string.Empty;
+            <label @hiddenAttribute>
                 @formControl.Name
                 <formInput
                     for-type="@formControl.Type"
                     for-name="@formControl.Name"
                     with-value="@formControl.Value"
                     with-options="@formControl.Options"
+                    is-hidden="@formControl.IsHidden"
                     readonly="@formControl.IsReadOnly"
                     class="@className">
                 </formInput>
