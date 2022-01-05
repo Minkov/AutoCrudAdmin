@@ -37,6 +37,14 @@
 
 <script >
 $(document).ready(function(){
-  $("#entity-form select").select2();
+    $(":checkbox").on('click', function(event) {
+        if (event.target.value === "True") {
+            event.target.value = "False"
+        } else {
+            event.target.value = "True"
+        }
+    });
+
+    $("#entity-form select").select2();
 });
 </script>
