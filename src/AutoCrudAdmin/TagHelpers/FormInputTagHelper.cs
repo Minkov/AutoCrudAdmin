@@ -19,6 +19,7 @@ namespace AutoCrudAdmin.TagHelpers
         {
             typeof(long),
             typeof(int),
+            typeof(int?),
             typeof(short),
 
             typeof(decimal),
