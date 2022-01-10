@@ -161,22 +161,16 @@ namespace AutoCrudAdmin.TagHelpers
         {
             output.TagName = "fieldset";
 
-            var checkboxValues = ((IEnumerable<CheckboxFormControlViewModel>)this.Options).ToList();
+            var checkboxValues = (IEnumerable<CheckboxFormControlViewModel>)this.Options;
 
-            var result = new StringBuilder();
-            for (var i = 0; i < checkboxValues.Count; i++)
+            var checkboxes = checkboxValues.Select(x =>
             {
-                var x = checkboxValues[i];
-                var name = $"{this.Name}[{i}]";
-                var id = $"{this.Name}_{i}_";
                 var selected = x.IsSelected ? "checked='checked'" : string.Empty;
 
-                result.AppendLine(
-                    $"<input type='checkbox' value='{x.Value}' name='{name}' id='{id}' {selected}>{x.Name}</input>");
-                result.AppendLine("<br/>");
-            }
+                return $"<input type='checkbox' data-name='{x.Name}' data-value='{x.Value}' {selected}>{x.Name}</input>";
+            });
 
-            output.Content.SetHtmlContent(result.ToString());
+            output.Content.SetHtmlContent(string.Join("<br/>", checkboxes));
         }
     }
 }
