@@ -165,9 +165,9 @@ namespace AutoCrudAdmin.TagHelpers
 
             var checkboxes = checkboxValues.Select(x =>
             {
-                var selected = x.IsSelected ? "checked='checked'" : string.Empty;
+                var isChecked = x.IsChecked ? "checked='checked'" : string.Empty;
 
-                return $"<input type='checkbox' data-name='{x.Name}' data-value='{x.Value}' {selected}>{x.Name}</input>";
+                return $"<input type='checkbox' data-name='{x.Name}' data-value='{x.Value}' {isChecked}>{x.Name}</input>";
             });
 
             output.Content.SetHtmlContent(string.Join("<br/>", checkboxes));

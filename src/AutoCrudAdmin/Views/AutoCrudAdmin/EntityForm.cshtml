@@ -56,7 +56,7 @@ $(document).ready(function(){
             const result = selectedCheckboxes.map(x => ({
                 name: $(x).data("name"),
                 value: $(x).data("value"),
-                isSelected: $(x).is(":checked")}));
+                isChecked: $(x).is(":checked")}));
             const input = $(`<input name="${fs.name}">`)
                 .attr('type','hidden')
                 .val(JSON.stringify(result));
