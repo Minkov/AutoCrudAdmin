@@ -1,15 +1,16 @@
 namespace AutoCrudAdmin.TagHelpers
 {
-    using AutoCrudAdmin.Enumerations;
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
     using System.Threading.Tasks;
+    using AutoCrudAdmin.Enumerations;
     using AutoCrudAdmin.Extensions;
     using AutoCrudAdmin.ViewModels;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Razor.TagHelpers;
-    using System.Text;
+    using static Constants.CssClassNames;
 
     [HtmlTargetElement("formInput", TagStructure = TagStructure.NormalOrSelfClosing)]
     public class FormInputTagHelper : TagHelper
@@ -167,10 +168,12 @@ namespace AutoCrudAdmin.TagHelpers
             {
                 var isChecked = x.IsChecked ? "checked='checked'" : string.Empty;
 
-                return $"<input type='checkbox' data-name='{x.Name}' data-value='{x.Value}' {isChecked}>{x.Name}</input>";
+                return $"<label class='d-block'>{x.Name}" +
+                       $"<input type='checkbox' class='{FormCheckboxInput}' data-name='{x.Name}' data-value='{x.Value}' {isChecked}/>" +
+                       "</label>";
             });
 
-            output.Content.SetHtmlContent(string.Join("<br/>", checkboxes));
+            output.Content.SetHtmlContent(string.Join(string.Empty, checkboxes));
         }
     }
 }

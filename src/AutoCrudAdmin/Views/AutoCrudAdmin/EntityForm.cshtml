@@ -1,4 +1,5 @@
 @model AutoCrudAdmin.ViewModels.AutoCrudAdminEntityFormViewModel
+@using static AutoCrudAdmin.Constants.CssClassNames;
 
 @{
     Layout = ViewBag.LayoutName;
@@ -15,8 +16,8 @@
         @foreach (var formControl in Model.FormControls)
         {
             var className = formControl.Value is bool
-                ? "form-check-input"
-                : "form-control";
+                ? FormCheckboxInput
+                : FormControl;
             var hiddenAttribute = formControl.IsHidden ? "hidden" : string.Empty;
             <label @hiddenAttribute>
                 @formControl.Name
@@ -52,7 +53,7 @@ $(document).ready(function(){
 
     form.submit(function(event) {
         $('fieldset').each(function (ev, fs) {
-            const selectedCheckboxes = $(fs).children('input[type=checkbox]').toArray();
+            const selectedCheckboxes = $(fs).find('input[type=checkbox]').toArray();
             const result = selectedCheckboxes.map(x => ({
                 name: $(x).data("name"),
                 value: $(x).data("value"),
