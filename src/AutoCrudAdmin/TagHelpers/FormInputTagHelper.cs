@@ -1,12 +1,15 @@
 namespace AutoCrudAdmin.TagHelpers
 {
+    using AutoCrudAdmin.Enumerations;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using AutoCrudAdmin.Extensions;
+    using AutoCrudAdmin.ViewModels;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Razor.TagHelpers;
+    using System.Text;
 
     [HtmlTargetElement("formInput", TagStructure = TagStructure.NormalOrSelfClosing)]
     public class FormInputTagHelper : TagHelper
@@ -27,6 +30,9 @@ namespace AutoCrudAdmin.TagHelpers
 
         [HtmlAttributeName("for-type")]
         public Type Type { get; set; }
+
+        [HtmlAttributeName("for-form-control-type")]
+        public FormControlType FormControlType { get; set; }
 
         [HtmlAttributeName("is-hidden")]
         public bool IsHidden { get; set; }
@@ -87,6 +93,10 @@ namespace AutoCrudAdmin.TagHelpers
                     output.Attributes.SetAttribute("multiple", "multiple");
                 }
             }
+            else if (this.FormControlType == FormControlType.MultiChoiceCheckbox)
+            {
+                this.PrepareMultiChoiceCheckbox(output);
+            }
             else
             {
                 this.PrepareComplex(output);
@@ -145,6 +155,28 @@ namespace AutoCrudAdmin.TagHelpers
                     .ToList();
             output.Content.SetHtmlContent(
                 string.Join(string.Empty, options));
+        }
+
+        private void PrepareMultiChoiceCheckbox(TagHelperOutput output)
+        {
+            output.TagName = "fieldset";
+
+            var checkboxValues = ((IEnumerable<CheckboxFormControlViewModel>)this.Options).ToList();
+
+            var result = new StringBuilder();
+            for (var i = 0; i < checkboxValues.Count; i++)
+            {
+                var x = checkboxValues[i];
+                var name = $"{this.Name}[{i}]";
+                var id = $"{this.Name}_{i}_";
+                var selected = x.IsSelected ? "checked='checked'" : string.Empty;
+
+                result.AppendLine(
+                    $"<input type='checkbox' value='{x.Value}' name='{name}' id='{id}' {selected}>{x.Name}</input>");
+                result.AppendLine("<br/>");
+            }
+
+            output.Content.SetHtmlContent(result.ToString());
         }
     }
 }

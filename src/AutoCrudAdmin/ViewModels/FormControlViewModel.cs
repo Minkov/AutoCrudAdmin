@@ -3,6 +3,7 @@ namespace AutoCrudAdmin.ViewModels
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using AutoCrudAdmin.Enumerations;
 
     public class FormControlViewModel
     {
@@ -14,7 +15,7 @@ namespace AutoCrudAdmin.ViewModels
 
         public string Name { get; set; }
 
-        public Type Type { get; set; }
+        public virtual Type Type { get; set; }
 
         public bool IsReadOnly { get; set; }
 
@@ -25,5 +26,7 @@ namespace AutoCrudAdmin.ViewModels
         public IEnumerable<object> Options { get; set; }
 
         public bool IsComplex { get; set; }
+
+        public FormControlType FormControlType { get; set; }
     }
 }
