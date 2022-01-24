@@ -308,27 +308,8 @@
             => Task.CompletedTask;
 
         protected virtual IHtmlGrid<TEntity> GenerateGrid(IHtmlHelper<AutoCrudAdminIndexViewModel> htmlHelper)
-        {
-            var types = ReflectionHelper.DbSetProperties
-                .Select(p => p.PropertyType)
-                .Select(t => t.GetGenericArguments())
-                .Select(a => a.FirstOrDefault())
-                .ToHashSet();
-
-            var names = this.Set.GetType()
-                .GetGenericArguments()
-                .FirstOrDefault()
-                ?.GetProperties()
-                .Where(prop => types.Contains(prop.PropertyType))
-                .Select(prop => prop.Name);
-
-            var setForGrid = names
-                !.Aggregate(this.Set, (current, name) => current.Include(name));
-
-            setForGrid = this.ApplyIncludes(setForGrid);
-
-            return htmlHelper
-                .Grid(setForGrid)
+            => htmlHelper
+                .Grid(this.GetQueryWithIncludes())
                 .Build(columns =>
                 {
                     this.BuildGridColumns(columns);
@@ -344,7 +325,6 @@
                     pager.ShowPageSizes = this.ShowPageSizes;
                     pager.RowsPerPage = this.RowsPerPage;
                 });
-        }
 
         protected virtual IGridColumnsOf<TEntity> BuildGridColumns(IGridColumnsOf<TEntity> columns)
         {
@@ -597,16 +577,34 @@
         private TEntity GetExistingEntity(TEntity newEntity)
         {
             var entityType = typeof(TEntity);
-            var keyValues = entityType.GetPrimaryKeyValue(newEntity).Select(x => x.Value).ToArray();
-            var existingEntity = (TEntity)this.DbContext.Find(entityType, keyValues);
+            var keyValues = entityType.GetPrimaryKeyValue(newEntity).ToDictionary(x => x.Key, x => x.Value.ToString());
+            var existingEntity = this.GetQueryWithIncludes()
+                .Where(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(keyValues!))
+                .FirstOrDefault();
 
-            if (existingEntity == null)
-            {
-                throw new Exception(
-                    "The Action cannot be performed, because the original entity was not found in the db.");
-            }
+            return existingEntity ?? throw new Exception(
+                "The Action cannot be performed, because the original entity was not found in the db.");
+        }
 
-            return existingEntity;
+        private IQueryable<TEntity> GetQueryWithIncludes()
+        {
+            var types = ReflectionHelper.DbSetProperties
+                .Select(p => p.PropertyType)
+                .Select(t => t.GetGenericArguments())
+                .Select(a => a.FirstOrDefault())
+                .ToHashSet();
+
+            var names = this.Set.GetType()
+                .GetGenericArguments()
+                .FirstOrDefault()
+                ?.GetProperties()
+                .Where(prop => types.Contains(prop.PropertyType))
+                .Select(prop => prop.Name);
+
+            var setForGrid = names
+                !.Aggregate(this.Set, (current, name) => current.Include(name));
+
+            return this.ApplyIncludes(setForGrid);
         }
     }
 }
