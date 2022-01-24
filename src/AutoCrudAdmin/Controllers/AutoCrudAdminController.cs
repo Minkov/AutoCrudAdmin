@@ -419,7 +419,7 @@
             var shownFormControlNamesList = shownFormControlNames.ToList();
             var isAnyShownExplicitly = shownFormControlNamesList.Any();
 
-            formControls.ForEach(fc =>
+            formControls.Where(x => !x.IsHidden).ToList().ForEach(fc =>
             {
                 if (isAnyShownExplicitly && shownFormControlNamesList.Contains(fc.Name))
                 {
