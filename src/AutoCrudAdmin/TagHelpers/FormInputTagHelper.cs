@@ -108,7 +108,7 @@ namespace AutoCrudAdmin.TagHelpers
             }
             else
             {
-                this.PrepareGenericDropDown(output);
+                this.PrepareDropdown(output, this.Options.Cast<DropDownViewModel>().ToList());
             }
 
             if (this.IsHidden)
@@ -121,44 +121,33 @@ namespace AutoCrudAdmin.TagHelpers
 
         private void PrepareDropDownForDbSet(TagHelperOutput output)
         {
-            var valuesList = this.Options
-                !.ToList();
-            var values = valuesList
-                .Select(x => x.GetType().UnProxy().GetPrimaryKeyValue(x).FirstOrDefault())
-                .Select(x => x.Value)
-                .ToList();
-            var names = valuesList
-                .Select(x => x.ToString())
+            var values = this.Options
+                .Select(x => new DropDownViewModel
+                {
+                    Name = x.ToString(),
+                    Value = x.GetType().UnProxy().GetPrimaryKeyValue(x).First().Value,
+                })
                 .ToList();
 
-            this.PrepareDropdown(output, values, names, this.Name + "Id");
-        }
-
-        private void PrepareGenericDropDown(TagHelperOutput output)
-        {
-            var valuesList = this.Options
-                .Cast<DropDownViewModel>()
-                .ToList();
-            var values = valuesList
-                .Select(x => x.Value!)
-                .ToList();
-            var names = valuesList
-                .Select(x => x.Name)
-                .ToList();
-
-            this.PrepareDropdown(output, values, names);
+            this.PrepareDropdown(output, values, this.Name + "Id");
         }
 
         private void PrepareDropdown(
             TagHelperOutput output,
-            IList<object> values,
-            IList<string?> names,
+            IList<DropDownViewModel> options,
             string? name = null)
         {
             output.TagName = "select";
             output.Attributes.SetAttribute("name", name ?? this.Name);
 
-            var options = values
+            var values = options
+                .Select(x => x.Value!)
+                .ToList();
+            var names = options
+                .Select(x => x.Name)
+                .ToList();
+
+            var optionsResult = values
                 .Select((t, i) => new { Text = names[i], Value = values[i], })
                 .Select(x =>
                     x.Value.ToString() == this.Value?.ToString()
@@ -166,7 +155,7 @@ namespace AutoCrudAdmin.TagHelpers
                         : $"<option value='{x.Value}'>{x.Text}</option>")
                 .ToList();
 
-            output.Content.SetHtmlContent(string.Join(string.Empty, options));
+            output.Content.SetHtmlContent(string.Join(string.Empty, optionsResult));
         }
 
         private void PrepareEnum(TagHelperOutput output)
