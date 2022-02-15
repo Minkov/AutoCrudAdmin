@@ -67,6 +67,8 @@
         protected virtual IEnumerable<Func<TEntity, TEntity, AdminActionContext, Task<ValidatorResult>>> AsyncEntityValidators
             => Array.Empty<Func<TEntity, TEntity, AdminActionContext, Task<ValidatorResult>>>();
 
+        protected Expression<Func<TEntity, bool>>? MasterGridFilter { get; set; }
+
         protected virtual IEnumerable<GridAction> DefaultActions
             => new[]
             {
@@ -310,7 +312,7 @@
 
         protected virtual IHtmlGrid<TEntity> GenerateGrid(IHtmlHelper<AutoCrudAdminIndexViewModel> htmlHelper)
             => htmlHelper
-                .Grid(this.GetQueryWithIncludes())
+                .Grid(this.GetQueryWithIncludes(this.MasterGridFilter))
                 .Build(columns =>
                 {
                     this.BuildGridColumns(columns);
@@ -604,7 +606,7 @@
                 "The Action cannot be performed, because the original entity was not found in the db.");
         }
 
-        private IQueryable<TEntity> GetQueryWithIncludes()
+        private IQueryable<TEntity> GetQueryWithIncludes(Expression<Func<TEntity, bool>>? filter = null)
         {
             var types = ReflectionHelper.DbSetProperties
                 .Select(p => p.PropertyType)
@@ -621,6 +623,11 @@
 
             var setForGrid = names
                 !.Aggregate(this.Set, (current, name) => current.Include(name));
+
+            if (filter != null)
+            {
+                setForGrid = setForGrid.Where(filter);
+            }
 
             return this.ApplyIncludes(setForGrid);
         }
