@@ -25,7 +25,7 @@ namespace AutoCrudAdmin.ViewModels
 
         public IEnumerable<object> Options { get; set; }
 
-        public bool IsComplex { get; set; }
+        public bool IsDbSet { get; set; }
 
         public FormControlType FormControlType { get; set; }
     }

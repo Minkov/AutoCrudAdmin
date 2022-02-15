@@ -82,7 +82,7 @@ namespace AutoCrudAdmin.Helpers.Implementations
                             Type = property.PropertyType,
                             Value = null,
                             Options = this.dbContext.Set(property.PropertyType),
-                            IsComplex = true,
+                            IsDbSet = true,
                             IsReadOnly = false,
                         };
                     });
@@ -104,7 +104,6 @@ namespace AutoCrudAdmin.Helpers.Implementations
                             entity)
                         : ExpressionsBuilder.ForGetPropertyValue<TEntity>(
                             typeof(TEntity).GetProperty(pair.Key))(entity),
-                    IsComplex = false,
                     IsReadOnly = true,
                 });
         }
@@ -123,7 +122,6 @@ namespace AutoCrudAdmin.Helpers.Implementations
                     Name = property.Name,
                     Type = property.PropertyType,
                     Value = ExpressionsBuilder.ForGetPropertyValue<TEntity>(property)(entity),
-                    IsComplex = false,
                 });
         }
 
@@ -185,7 +183,7 @@ namespace AutoCrudAdmin.Helpers.Implementations
                 Type = property.PropertyType,
                 Value = valueFunc(entity),
                 Options = options,
-                IsComplex = true,
+                IsDbSet = true,
                 IsReadOnly = false,
             };
         }

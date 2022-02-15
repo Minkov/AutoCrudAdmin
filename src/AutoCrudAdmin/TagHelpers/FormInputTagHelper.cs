@@ -48,6 +48,9 @@ namespace AutoCrudAdmin.TagHelpers
         [HtmlAttributeName("with-options")]
         public IEnumerable<object> Options { get; set; }
 
+        [HtmlAttributeName("is-db-set")]
+        public bool IsDbSet { get; set; }
+
         public override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             output.Attributes.SetAttribute("name", this.Name);
@@ -99,9 +102,13 @@ namespace AutoCrudAdmin.TagHelpers
             {
                 this.PrepareMultiChoiceCheckbox(output);
             }
+            else if (this.IsDbSet)
+            {
+                this.PrepareDropDownForDbSet(output);
+            }
             else
             {
-                this.PrepareComplex(output);
+                this.PrepareGenericDropDown(output);
             }
 
             if (this.IsHidden)
@@ -112,11 +119,8 @@ namespace AutoCrudAdmin.TagHelpers
             return Task.CompletedTask;
         }
 
-        private void PrepareComplex(TagHelperOutput output)
+        private void PrepareDropDownForDbSet(TagHelperOutput output)
         {
-            output.TagName = "select";
-
-            output.Attributes.SetAttribute("name", this.Name + "Id");
             var valuesList = this.Options
                 !.ToList();
             var values = valuesList
@@ -127,17 +131,42 @@ namespace AutoCrudAdmin.TagHelpers
                 .Select(x => x.ToString())
                 .ToList();
 
-            var value = this.Value?.ToString();
+            this.PrepareDropdown(output, values, names, this.Name + "Id");
+        }
+
+        private void PrepareGenericDropDown(TagHelperOutput output)
+        {
+            var valuesList = this.Options
+                .Cast<DropDownViewModel>()
+                .ToList();
+            var values = valuesList
+                .Select(x => x.Value!)
+                .ToList();
+            var names = valuesList
+                .Select(x => x.Name)
+                .ToList();
+
+            this.PrepareDropdown(output, values, names);
+        }
+
+        private void PrepareDropdown(
+            TagHelperOutput output,
+            IList<object> values,
+            IList<string?> names,
+            string? name = null)
+        {
+            output.TagName = "select";
+            output.Attributes.SetAttribute("name", name ?? this.Name);
 
             var options = values
                 .Select((t, i) => new { Text = names[i], Value = values[i], })
                 .Select(x =>
-                    x.Value.ToString() == value
+                    x.Value.ToString() == this.Value?.ToString()
                         ? $"<option value='{x.Value}' selected>{x.Text}</option>"
                         : $"<option value='{x.Value}'>{x.Text}</option>")
                 .ToList();
-            output.Content.SetHtmlContent(
-                string.Join(string.Empty, options));
+
+            output.Content.SetHtmlContent(string.Join(string.Empty, options));
         }
 
         private void PrepareEnum(TagHelperOutput output)
