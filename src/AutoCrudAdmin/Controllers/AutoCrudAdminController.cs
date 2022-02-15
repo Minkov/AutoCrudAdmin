@@ -9,6 +9,7 @@
     using System.Reflection;
     using System.Threading.Tasks;
     using AutoCrudAdmin.Attributes;
+    using AutoCrudAdmin.Enumerations;
     using AutoCrudAdmin.Extensions;
     using AutoCrudAdmin.Helpers;
     using AutoCrudAdmin.Models;
@@ -410,6 +411,23 @@
 
         protected string GetComplexFormControlNameFor<T>()
             => this.FormControlsHelper.GetComplexFormControlNameForEntityName(typeof(T).Name);
+
+        protected IActionResult RedirectToActionWithNumberFilter(
+            string controllerName,
+            string columnName,
+            int number,
+            string actionName = "Index",
+            GridNumberFilterType numberFilterType = GridNumberFilterType.Equals)
+        {
+            var queryParamName = $"{columnName}-{numberFilterType.ToString().ToHyphenSeparatedWords()}";
+            var controller = controllerName.ToControllerBaseUri();
+            var routeValues = new Dictionary<string, string>
+            {
+                { queryParamName, number.ToString() },
+            };
+
+            return this.RedirectToAction(actionName, controller, routeValues);
+        }
 
         private static IEnumerable<FormControlViewModel> SetFormControlsVisibility(
             List<FormControlViewModel> formControls,
