@@ -15,7 +15,7 @@ namespace AutoCrudAdmin.ViewModels
 
         public string Name { get; set; }
 
-        public virtual Type Type { get; set; }
+        public virtual Type Type { get; set; } = typeof(object);
 
         public bool IsReadOnly { get; set; }
 
