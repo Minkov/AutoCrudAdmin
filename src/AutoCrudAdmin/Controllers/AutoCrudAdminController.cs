@@ -79,6 +79,9 @@
         protected virtual IEnumerable<GridAction> CustomActions
             => Enumerable.Empty<GridAction>();
 
+        protected virtual IEnumerable<CustomGridColumn<TEntity>> CustomColumns
+            => Enumerable.Empty<CustomGridColumn<TEntity>>();
+
         protected virtual IEnumerable<string> DateTimeFormats
             => new string[]
             {
@@ -363,12 +366,25 @@
                         => current.ThenBy(property => property != pk))
                 .ThenBy(property => property.Name);
 
-            return properties
+            var columnsResult = properties
                 .Aggregate(
                     columns,
                     (currentColumns, prop) => (IGridColumnsOf<TEntity>)GenerateColumnExpressionMethod
                         .MakeGenericMethod(prop.PropertyType)
                         .Invoke(null, new object[] { currentColumns, prop }));
+
+            foreach (var customGridColumn in this.CustomColumns)
+            {
+                var column = columnsResult
+                    .Add(customGridColumn.ValueFunc)
+                    .Titled(customGridColumn.Name)
+                    .Filterable(true)
+                    .Sortable(true);
+
+                customGridColumn.ConfigurationFunc?.Invoke(column);
+            }
+
+            return columnsResult;
         }
 
         protected virtual IGridColumnsOf<TEntity> BuildGridActions(
