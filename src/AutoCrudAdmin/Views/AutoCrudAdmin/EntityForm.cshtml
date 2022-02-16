@@ -29,6 +29,7 @@
                     with-options="@formControl.Options"
                     is-hidden="@formControl.IsHidden"
                     is-db-set="@formControl.IsDbSet"
+                    is-readonly="@formControl.IsReadOnly"
                     readonly="@formControl.IsReadOnly"
                     class="@className">
                 </formInput>
@@ -53,6 +54,8 @@ $(document).ready(function(){
     const form = $('#entity-form').parent();
 
     form.submit(function(event) {
+        $('select').prop('disabled', false);
+
         $('fieldset').each(function (ev, fs) {
             const selectedCheckboxes = $(fs).find('input[type=checkbox]').toArray();
             const result = selectedCheckboxes.map(x => ({

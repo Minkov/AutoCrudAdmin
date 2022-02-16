@@ -39,6 +39,9 @@ namespace AutoCrudAdmin.TagHelpers
         [HtmlAttributeName("is-hidden")]
         public bool IsHidden { get; set; }
 
+        [HtmlAttributeName("is-readonly")]
+        public bool IsReadonly { get; set; }
+
         [HtmlAttributeName("with-label")]
         public string LabelText { get; set; }
 
@@ -139,6 +142,11 @@ namespace AutoCrudAdmin.TagHelpers
         {
             output.TagName = "select";
             output.Attributes.SetAttribute("name", name ?? this.Name);
+
+            if (this.IsReadonly)
+            {
+                output.Attributes.SetAttribute("disabled", true);
+            }
 
             var values = options
                 .Select(x => x.Value!)
