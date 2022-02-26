@@ -444,7 +444,7 @@
             string actionName = "Index",
             GridNumberFilterType numberFilterType = GridNumberFilterType.Equals)
         {
-            var queryParamName = $"{columnName}-{numberFilterType.ToString().ToHyphenSeparatedWords()}";
+            var queryParamName = UrlsHelper.GetQueryParamForColumnFilter(columnName, numberFilterType);
             var controller = controllerName.ToControllerBaseUri();
             var routeValues = new Dictionary<string, string>
             {
