@@ -29,13 +29,9 @@
     {
         private static readonly Type EntityType = typeof(TEntity);
 
-        private IQueryable<TEntity> set;
-        private DbContext db;
-        private IFormControlsHelper formControlsHelper;
-
-        private IQueryable<TEntity> Set
-            => this.set ??= this.DbContext
-                ?.Set<TEntity>();
+        private IQueryable<TEntity>? set;
+        private DbContext? db;
+        private IFormControlsHelper? formControlsHelper;
 
         protected virtual IEnumerable<string> ShownColumnNames
             => Enumerable.Empty<string>();
@@ -72,18 +68,21 @@
         protected virtual IEnumerable<GridAction> DefaultActions
             => new[]
             {
-                new GridAction { Action = nameof(Edit) },
-                new GridAction { Action = nameof(Delete) },
+                new GridAction { Action = nameof(this.Edit) },
+                new GridAction { Action = nameof(this.Delete) },
             };
 
         protected virtual IEnumerable<GridAction> CustomActions
             => Enumerable.Empty<GridAction>();
 
+        protected IEnumerable<AutoCrudAdminGridToolbarActionViewModel> CustomToolbarActions { get; set; }
+            = Enumerable.Empty<AutoCrudAdminGridToolbarActionViewModel>();
+
         protected virtual IEnumerable<CustomGridColumn<TEntity>> CustomColumns
             => Enumerable.Empty<CustomGridColumn<TEntity>>();
 
         protected virtual IEnumerable<string> DateTimeFormats
-            => new string[]
+            => new[]
             {
                 "dd/MM/yyyy hh:mm",
                 "M/dd/yyyy hh:mm:ss tt",
@@ -106,7 +105,7 @@
             typeof(AutoCrudAdminController<TEntity>)
                 .GetMethod(
                     nameof(GenerateColumnConfiguration),
-                    BindingFlags.NonPublic | BindingFlags.Static);
+                    BindingFlags.NonPublic | BindingFlags.Static) !;
 
         private IEnumerable<GridAction> Actions
             => this.DefaultActions.Concat(this.CustomActions);
@@ -114,19 +113,21 @@
         private DbContext DbContext
             => this.db ??= this.HttpContext
                 .RequestServices
-                .GetService<DbContext>();
+                .GetRequiredService<DbContext>();
+
+        private IQueryable<TEntity> Set
+            => this.set ??= this.DbContext
+                .Set<TEntity>();
 
         private IFormControlsHelper FormControlsHelper
             => this.formControlsHelper ??= this.HttpContext
                 .RequestServices
-                .GetService<IFormControlsHelper>();
-
-        protected virtual IQueryable<TEntity> ApplyIncludes(IQueryable<TEntity> set) => set;
+                .GetRequiredService<IFormControlsHelper>();
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            this.ViewBag.LayoutName = context.HttpContext.Items["layout_name"];
-            this.ViewBag.ApplicationName = context.HttpContext.Items["application_name"];
+            this.ViewBag.LayoutName = context.HttpContext.Items["layout_name"] ?? string.Empty;
+            this.ViewBag.ApplicationName = context.HttpContext.Items["application_name"] ?? string.Empty;
             base.OnActionExecuting(context);
         }
 
@@ -134,7 +135,11 @@
         public virtual IActionResult Index()
             => this.View(
                 "../AutoCrudAdmin/Index",
-                new AutoCrudAdminIndexViewModel { GenerateGrid = this.GenerateGrid, });
+                new AutoCrudAdminIndexViewModel
+                {
+                    GenerateGrid = this.GenerateGrid,
+                    ToolbarActions = this.CustomToolbarActions,
+                });
 
         [HttpGet]
         public virtual async Task<IActionResult> Create(
@@ -151,7 +156,7 @@
             [FromQuery] IDictionary<string, string> complexId,
             string postEndpointName)
             => await this.GetEntityForm(
-                this.Set.FirstOrDefault(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(complexId)),
+                this.Set.First(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(complexId)),
                 EntityAction.Edit,
                 complexId,
                 postEndpointName);
@@ -161,7 +166,7 @@
             [FromQuery] IDictionary<string, string> complexId,
             string postEndpointName)
             => await this.GetEntityForm(
-                this.Set.FirstOrDefault(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(complexId)),
+                this.Set.First(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(complexId)),
                 EntityAction.Delete,
                 complexId,
                 postEndpointName);
@@ -178,11 +183,13 @@
         public virtual Task<IActionResult> PostDelete(IDictionary<string, string> entityDict, FormFilesContainer files)
             => this.PostEntityForm(entityDict, EntityAction.Delete, files);
 
+        protected virtual IQueryable<TEntity> ApplyIncludes(IQueryable<TEntity> queryable) => queryable;
+
         protected virtual async Task<IActionResult> GetEntityForm(
             TEntity entity,
             EntityAction action,
             IDictionary<string, string> entityDict,
-            string postEndpointName = null)
+            string? postEndpointName = null)
         {
             var formControls = (await this.GenerateFormControlsAsync(
                     entity,
@@ -509,13 +516,9 @@
                     var propType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
 
                     var strValue = entityDict[prop.Name];
-                    object safeValue;
+                    object? safeValue;
 
-                    if (strValue == null)
-                    {
-                        safeValue = null;
-                    }
-                    else if (propType.IsEnum)
+                    if (propType.IsEnum)
                     {
                         safeValue = Enum.Parse(propType, strValue);
                     }
@@ -585,7 +588,7 @@
             if (action is EntityAction.Create)
             {
                 // No original entity here.
-                return (null, newEntity);
+                return (null!, newEntity);
             }
 
             var originalEntity = this.GetExistingEntity(newEntity);

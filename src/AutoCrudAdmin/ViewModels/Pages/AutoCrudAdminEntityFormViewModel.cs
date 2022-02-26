@@ -8,6 +8,6 @@ namespace AutoCrudAdmin.ViewModels
 
         public EntityAction Action { get; set; }
 
-        public string CustomActionName { get; set; }
+        public string? CustomActionName { get; set; }
     }
 }
