@@ -515,10 +515,14 @@
 
                     var propType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
 
-                    var strValue = entityDict[prop.Name];
+                    entityDict.TryGetValue(prop.Name, out var strValue);
                     object? safeValue;
 
-                    if (propType.IsEnum)
+                    if (strValue == null)
+                    {
+                        safeValue = null;
+                    }
+                    else if (propType.IsEnum)
                     {
                         safeValue = Enum.Parse(propType, strValue);
                     }
