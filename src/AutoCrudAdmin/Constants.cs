@@ -16,7 +16,6 @@ namespace AutoCrudAdmin
         public static class TempDataKeys
         {
             public const string SuccessMessage = "SuccessMessage";
-            public const string InfoMessage = "InfoMessage";
             public const string DangerMessage = "DangerMessage";
         }
     }

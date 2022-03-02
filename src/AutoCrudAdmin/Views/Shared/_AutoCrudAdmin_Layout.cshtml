@@ -34,11 +34,11 @@
 
     @if (TempData.TryGetValue(DangerMessage, out var dangerMessage))
     {
-        <p class="alert alert-danger"><strong>@Html.Raw(dangerMessage)</strong></p>
+        <p class="alert alert-danger">@Html.Raw(dangerMessage)</p>
     }
     else if (TempData.TryGetValue(SuccessMessage, out var successMessage))
     {
-        <p class="alert alert-success"><strong>@Html.Raw(successMessage)</strong></p>
+        <p class="alert alert-success">@Html.Raw(successMessage)</p>
     }
 </header>
 <div class="root">
