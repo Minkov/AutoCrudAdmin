@@ -1,16 +1,23 @@
 namespace AutoCrudAdmin
 {
-    public class Constants
+    public static class Constants
     {
-        public class Entity
+        public static class Entity
         {
             public const string SinglePrimaryKeyName = "PK";
         }
 
-        public class CssClassNames
+        public static class CssClassNames
         {
             public const string FormControl = "form-control";
             public const string FormCheckboxInput = "form-check-input";
+        }
+
+        public static class TempDataKeys
+        {
+            public const string SuccessMessage = "SuccessMessage";
+            public const string InfoMessage = "InfoMessage";
+            public const string DangerMessage = "DangerMessage";
         }
     }
 }
