@@ -1,13 +1,19 @@
 @using AutoCrudAdmin.Extensions
 @model AutoCrudAdmin.ViewModels.AutoCrudAdminIndexViewModel
+@using static AutoCrudAdmin.Constants.CssClassNames
 
 @{
     Layout = ViewBag.LayoutName;
 }
 
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet"/>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
 <head>
     <title>title</title>
     <link href="/css/mvc-grid.css" rel="stylesheet">
@@ -19,19 +25,57 @@
             <section class="btn-toolbar mb-2">
             @foreach (var action in Model.ToolbarActions)
             {
-                @Html.ActionLink(
-                    action.Name,
-                    action.Action,
-                    ViewContext.GetControllerName(),
-                    action.RouteValues,
-                    new { @class = "btn btn-outline-primary mx-2" })
+                if (action.FormControls.Any())
+                {
+                    <a class="btn btn-outline-primary mx-2" href="#form-for-@action.Action.ToLower()">@action.Name</a>
+                }
+                else {
+                    @Html.ActionLink(
+                        action.Name,
+                        action.Action,
+                        ViewContext.GetControllerName(),
+                        action.RouteValues,
+                        new { @class = "btn btn-outline-primary mx-2" })
+                }
             }
             </section>
         }
 
         @Model.GenerateGrid(Html)
+
+        @foreach (var action in Model.ToolbarActions.Where(x => x.FormControls.Any()))
+        {
+            <form enctype="multipart/form-data" asp-action="@action.Action" style="display: flex; flex-direction: row; gap: 20px">
+                <div id="form-for-@action.Action.ToLower()" style="display:flex; flex-direction: column; gap: 10px;">
+                    @foreach (var formControl in Model.ToolbarActions.SelectMany(x => x.FormControls))
+                    {
+                        var className = formControl.Value is bool
+                            ? FormCheckboxInput
+                            : FormControl;
+                        var hiddenAttribute = formControl.IsHidden ? "hidden" : string.Empty;
+                        <label @hiddenAttribute>
+                            @formControl.Name
+                            <formInput
+                                for-type="@formControl.Type"
+                                for-form-control-type="@formControl.FormControlType"
+                                for-name="@formControl.Name"
+                                with-value="@formControl.Value"
+                                with-options="@formControl.Options"
+                                is-hidden="@formControl.IsHidden"
+                                is-db-set="@formControl.IsDbSet"
+                                is-readonly="@formControl.IsReadOnly"
+                                readonly="@formControl.IsReadOnly"
+                                class="@className">
+                            </formInput>
+                        </label>
+                    }
+                    <button class="btn btn-outline-primary">@action.Name</button>
+                </div>
+            </form>
+        }
     </div>
 <script src="/js/mvc-grid.js"></script>
+<script type="module" src="/js/mvc-grid-form.js"></script>
 <script>
    document.querySelectorAll(".mvc-grid").forEach(element => new MvcGrid(element));
 </script>
