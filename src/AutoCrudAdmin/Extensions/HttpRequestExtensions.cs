@@ -12,8 +12,14 @@ public static class HttpRequestExtensions
         out string value,
         GridNumberFilterType numberFilterType = GridNumberFilterType.Equals)
     {
+        if (request.Query.TryGetValue(columnName, out var result))
+        {
+            value = result;
+            return true;
+        }
+
         if (request.Query.TryGetValue(
-            UrlsHelper.GetQueryParamForColumnFilter(columnName, numberFilterType), out var result))
+            UrlsHelper.GetQueryParamForColumnFilter(columnName, numberFilterType), out result))
         {
             value = result;
             return true;
