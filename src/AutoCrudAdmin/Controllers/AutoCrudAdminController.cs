@@ -257,7 +257,8 @@
         protected virtual async Task<IActionResult> PostEntityForm(
             IDictionary<string, string> entityDict,
             EntityAction action,
-            FormFilesContainer files)
+            FormFilesContainer files,
+            object? routeValuesForRedirect = null)
         {
             var (originalEntity, newEntity) = this.GetEntitiesForAction(action, entityDict);
 
@@ -296,7 +297,11 @@
                     throw new ArgumentOutOfRangeException(nameof(action), action, null);
             }
 
-            return this.RedirectToAction("Index");
+            await this.AfterEntitySaveAsync(newEntity, actionContext);
+
+            routeValuesForRedirect ??= this.GetDefaultRouteValuesForPostEntityFormRedirect(newEntity);
+
+            return this.RedirectToAction("Index", routeValuesForRedirect);
         }
 
         protected virtual Task BeforeEntitySaveAsync(TEntity entity, AdminActionContext actionContext)
@@ -309,6 +314,9 @@
             => Task.CompletedTask;
 
         protected virtual Task BeforeEntitySaveOnEditAsync(TEntity existingEntity, TEntity newEntity, AdminActionContext actionContext)
+            => Task.CompletedTask;
+
+        protected virtual Task AfterEntitySaveAsync(TEntity entity, AdminActionContext actionContext)
             => Task.CompletedTask;
 
         protected virtual Task AfterEntitySaveOnCreateAsync(TEntity entity, AdminActionContext actionContext)
@@ -433,6 +441,9 @@
             throw new ArgumentException(
                 $"Cannot parse string date \"{dateTimeStr}\" to DateTime. Try adding another format template.");
         }
+
+        protected virtual object? GetDefaultRouteValuesForPostEntityFormRedirect(TEntity newEntity)
+            => null;
 
         protected string GetComplexFormControlNameFor<T>()
             => this.FormControlsHelper.GetComplexFormControlNameForEntityName(typeof(T).Name);
