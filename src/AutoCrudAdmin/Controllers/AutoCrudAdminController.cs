@@ -192,6 +192,8 @@
             IDictionary<string, string> entityDict,
             string? postEndpointName = null)
         {
+            await this.BeforeGeneratingForm(entity, action, entityDict);
+
             var formControls = (await this.GenerateFormControlsAsync(
                     entity,
                     action,
@@ -327,6 +329,12 @@
             => Task.CompletedTask;
 
         protected virtual Task AfterEntitySaveOnDeleteAsync(TEntity entity, AdminActionContext actionContext)
+            => Task.CompletedTask;
+
+        protected virtual Task BeforeGeneratingForm(
+            TEntity entity,
+            EntityAction action,
+            IDictionary<string, string> entityDict)
             => Task.CompletedTask;
 
         protected virtual IHtmlGrid<TEntity> GenerateGrid(IHtmlHelper<AutoCrudAdminIndexViewModel> htmlHelper)
