@@ -63,7 +63,8 @@
         protected virtual IEnumerable<Func<TEntity, TEntity, AdminActionContext, Task<ValidatorResult>>> AsyncEntityValidators
             => Array.Empty<Func<TEntity, TEntity, AdminActionContext, Task<ValidatorResult>>>();
 
-        protected Expression<Func<TEntity, bool>>? MasterGridFilter { get; set; }
+        protected virtual Expression<Func<TEntity, bool>>? MasterGridFilter
+            => null;
 
         protected virtual IEnumerable<GridAction> DefaultActions
             => new[]
@@ -75,8 +76,8 @@
         protected virtual IEnumerable<GridAction> CustomActions
             => Enumerable.Empty<GridAction>();
 
-        protected IEnumerable<AutoCrudAdminGridToolbarActionViewModel> CustomToolbarActions { get; set; }
-            = Enumerable.Empty<AutoCrudAdminGridToolbarActionViewModel>();
+        protected virtual IEnumerable<AutoCrudAdminGridToolbarActionViewModel> CustomToolbarActions
+            => Enumerable.Empty<AutoCrudAdminGridToolbarActionViewModel>();
 
         protected virtual IEnumerable<CustomGridColumn<TEntity>> CustomColumns
             => Enumerable.Empty<CustomGridColumn<TEntity>>();
