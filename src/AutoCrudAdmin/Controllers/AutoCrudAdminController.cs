@@ -463,16 +463,25 @@
             int number,
             string actionName = "Index",
             GridNumberFilterType numberFilterType = GridNumberFilterType.Equals)
-        {
-            var queryParamName = UrlsHelper.GetQueryParamForColumnFilter(columnName, numberFilterType);
-            var controller = controllerName.ToControllerBaseUri();
-            var routeValues = new Dictionary<string, string>
-            {
-                { queryParamName, number.ToString() },
-            };
+            => this.RedirectToActionWithFilter(
+                controllerName,
+                columnName,
+                number,
+                actionName,
+                numberFilterType.ToString());
 
-            return this.RedirectToAction(actionName, controller, routeValues);
-        }
+        protected IActionResult RedirectToActionWithStringFilter(
+            string controllerName,
+            string columnName,
+            string value,
+            string actionName = "Index",
+            GridStringFilterType gridStringFilterType = GridStringFilterType.Equals)
+            => this.RedirectToActionWithFilter(
+                controllerName,
+                columnName,
+                value,
+                actionName,
+                gridStringFilterType.ToString());
 
         private static IEnumerable<FormControlViewModel> SetFormControlsVisibility(
             List<FormControlViewModel> formControls,
@@ -673,6 +682,23 @@
             }
 
             return this.ApplyIncludes(setForGrid);
+        }
+
+        private IActionResult RedirectToActionWithFilter(
+            string controllerName,
+            string columnName,
+            object value,
+            string actionName,
+            string filter)
+        {
+            var queryParamName = UrlsHelper.GetQueryParamForColumnAndFilter(columnName, filter);
+            var controller = controllerName.ToControllerBaseUri();
+            var routeValues = new Dictionary<string, string?>
+            {
+                { queryParamName, value.ToString() },
+            };
+
+            return this.RedirectToAction(actionName, controller, routeValues);
         }
     }
 }

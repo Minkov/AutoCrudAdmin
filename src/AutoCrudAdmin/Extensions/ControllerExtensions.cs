@@ -6,11 +6,25 @@ using System;
 
 public static class ControllerExtensions
 {
-    public static bool TryGetEntityIdForColumnFilter<TEntityId>(
+    public static bool TryGetEntityIdForNumberColumnFilter(
         this Controller controller,
         string columnName,
-        out TEntityId? entityId,
+        out int entityId,
         GridNumberFilterType numberFilterType = GridNumberFilterType.Equals)
+        => TryGetEntityIdForColumnFilter(controller, columnName, out entityId, numberFilterType.ToString());
+
+    public static bool TryGetEntityIdForStringColumnFilter(
+        this Controller controller,
+        string columnName,
+        out string? entityId,
+        GridStringFilterType stringFilterType = GridStringFilterType.Equals)
+        => TryGetEntityIdForColumnFilter(controller, columnName, out entityId, stringFilterType.ToString());
+
+    private static bool TryGetEntityIdForColumnFilter<TEntityId>(
+        Controller controller,
+        string columnName,
+        out TEntityId? entityId,
+        string filter)
     {
         object? id = null;
         string? idAsString;
@@ -21,7 +35,7 @@ public static class ControllerExtensions
             idAsString = entityIdFromTempData?.ToString();
         }
         else if (controller.HttpContext.Request
-            .TryGetQueryValueForColumnFilter(columnName, out idAsString, numberFilterType))
+            .TryGetQueryValueForColumnFilter(columnName, out idAsString, filter))
         {
         }
 

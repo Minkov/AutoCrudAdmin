@@ -1,12 +1,9 @@
 namespace AutoCrudAdmin.Helpers;
 
-using AutoCrudAdmin.Enumerations;
 using AutoCrudAdmin.Extensions;
 
-public static class UrlsHelper
+internal static class UrlsHelper
 {
-    public static string GetQueryParamForColumnFilter(
-        string columnName,
-        GridNumberFilterType numberFilterType = GridNumberFilterType.Equals)
-        => $"{columnName}-{numberFilterType.ToString().ToHyphenSeparatedWords()}";
+    public static string GetQueryParamForColumnAndFilter(string columnName, string filterType)
+        => $"{columnName}-{filterType.ToHyphenSeparatedWords()}";
 }

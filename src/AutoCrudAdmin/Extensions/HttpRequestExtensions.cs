@@ -1,16 +1,15 @@
 namespace AutoCrudAdmin.Extensions;
 
-using AutoCrudAdmin.Enumerations;
 using AutoCrudAdmin.Helpers;
 using Microsoft.AspNetCore.Http;
 
-public static class HttpRequestExtensions
+internal static class HttpRequestExtensions
 {
     public static bool TryGetQueryValueForColumnFilter(
         this HttpRequest request,
         string columnName,
         out string value,
-        GridNumberFilterType numberFilterType = GridNumberFilterType.Equals)
+        string filter)
     {
         if (request.Query.TryGetValue(columnName, out var result))
         {
@@ -19,7 +18,7 @@ public static class HttpRequestExtensions
         }
 
         if (request.Query.TryGetValue(
-            UrlsHelper.GetQueryParamForColumnFilter(columnName, numberFilterType), out result))
+            UrlsHelper.GetQueryParamForColumnAndFilter(columnName, filter), out result))
         {
             value = result;
             return true;
