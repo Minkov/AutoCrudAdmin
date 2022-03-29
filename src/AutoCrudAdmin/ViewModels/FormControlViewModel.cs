@@ -20,7 +20,10 @@ namespace AutoCrudAdmin.ViewModels
 
         public string DisplayName
         {
-            get => this.displayName ?? this.Name.ToSpaceSeparatedWords();
+            get => this.displayName
+                ?? (this.Name.Any(char.IsWhiteSpace)
+                    ? this.Name
+                    : this.Name.ToSpaceSeparatedWords());
             set => this.displayName = value;
         }
 

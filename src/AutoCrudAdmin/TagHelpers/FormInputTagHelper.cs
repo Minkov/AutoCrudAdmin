@@ -4,11 +4,13 @@ namespace AutoCrudAdmin.TagHelpers
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
+    using System.Text.Encodings.Web;
     using System.Threading.Tasks;
     using AutoCrudAdmin.Enumerations;
     using AutoCrudAdmin.Extensions;
     using AutoCrudAdmin.ViewModels;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc.TagHelpers;
     using Microsoft.AspNetCore.Razor.TagHelpers;
     using static Constants.CssClassNames;
 
@@ -188,6 +190,7 @@ namespace AutoCrudAdmin.TagHelpers
         private void PrepareMultiChoiceCheckbox(TagHelperOutput output)
         {
             output.TagName = "fieldset";
+            output.RemoveClass(FormControl, HtmlEncoder.Default);
 
             var checkboxValues = (IEnumerable<CheckboxFormControlViewModel>)this.Options;
 
@@ -195,9 +198,10 @@ namespace AutoCrudAdmin.TagHelpers
             {
                 var isChecked = x.IsChecked ? "checked='checked'" : string.Empty;
 
-                return $"<label class='d-block'>{x.DisplayName}" +
-                       $"<input type='checkbox' class='{FormCheckboxInput}' data-name='{x.Name}' data-value='{x.Value}' {isChecked}/>" +
-                       "</label>";
+                return $"<div class='{FormCheckbox} {FormCheckboxInline}'>" +
+                    $"<input type='checkbox' class='{FormCheckboxInput}' data-name='{x.Name}' data-value='{x.Value}' {isChecked}/>" +
+                    $"<label class='{FormCheckboxLabel}'>{x.DisplayName}</label>" +
+                    "</div>";
             });
 
             output.Content.SetHtmlContent(string.Join(string.Empty, checkboxes));

@@ -14,6 +14,7 @@ namespace AutoCrudAdmin
             public const string FormCheckbox = "form-check";
             public const string FormCheckboxLabel = "form-check-label";
             public const string FormCheckboxInput = "form-check-input";
+            public const string FormCheckboxInline = "form-check-inline";
         }
 
         public static class TempDataKeys
