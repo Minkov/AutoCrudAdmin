@@ -195,7 +195,7 @@ namespace AutoCrudAdmin.TagHelpers
             {
                 var isChecked = x.IsChecked ? "checked='checked'" : string.Empty;
 
-                return $"<label class='d-block'>{x.Name}" +
+                return $"<label class='d-block'>{x.DisplayName}" +
                        $"<input type='checkbox' class='{FormCheckboxInput}' data-name='{x.Name}' data-value='{x.Value}' {isChecked}/>" +
                        "</label>";
             });

@@ -6,16 +6,23 @@
     var aspAction = Model?.CustomActionName ?? $"Post{ViewContext.RouteData.Values["action"]}";
 }
 
+<style>
+    .form-check-input {
+        margin-left: 0.5rem;
+    }
+</style>
+
 <form enctype="multipart/form-data" asp-action="@aspAction" style="display: flex; flex-direction: column">
     <div id="entity-form" style="display:flex; flex-direction: column; gap: 10px;">
         @foreach (var formControl in Model.FormControls)
         {
-            var className = formControl.Value is bool
-                ? FormCheckboxInput
-                : FormControl;
+            var isCheckbox = formControl.Value is bool;
+            var inputClassName = isCheckbox ? FormCheckboxInput : FormControl;
+            var labelClassName = isCheckbox ? FormCheckboxLabel : string.Empty;
             var hiddenAttribute = formControl.IsHidden ? "hidden" : string.Empty;
-            <label @hiddenAttribute>
-                @formControl.Name
+
+            <div class="@FormGroup" @hiddenAttribute>
+                <label class="@labelClassName">@formControl.DisplayName</label>
                 <formInput
                     for-type="@formControl.Type"
                     for-form-control-type="@formControl.FormControlType"
@@ -26,9 +33,9 @@
                     is-db-set="@formControl.IsDbSet"
                     is-readonly="@formControl.IsReadOnly"
                     readonly="@formControl.IsReadOnly"
-                    class="@className">
+                    class="@inputClassName">
                 </formInput>
-            </label>
+            </div>
         }
         <button class="btn btn-dark">@Model.Action</button>
     </div>

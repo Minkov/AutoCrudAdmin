@@ -9,7 +9,10 @@ namespace AutoCrudAdmin
 
         public static class CssClassNames
         {
+            public const string FormGroup = "form-group";
             public const string FormControl = "form-control";
+            public const string FormCheckbox = "form-check";
+            public const string FormCheckboxLabel = "form-check-label";
             public const string FormCheckboxInput = "form-check-input";
         }
 
