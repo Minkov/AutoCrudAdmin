@@ -63,24 +63,26 @@ namespace AutoCrudAdmin.Helpers.Implementations
             TEntity entity,
             EntityAction entityAction)
         {
-            var entityType = typeof(TEntity);
+            var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
 
             var primaryKeyValues = entityType.GetPrimaryKeyValue(entity)
                 .ToList();
 
-            if (entityAction == EntityAction.Create && primaryKeyValues.Count > 1)
+            if (primaryKeyValues.Count > 1)
             {
                 return primaryKeyValues
                     .Select(pair =>
                     {
                         var name = pair.Key[..^2];
                         var property = entityType.GetProperty(name);
+                        var value = ExpressionsBuilder.ForGetPropertyValue<TEntity>(
+                            entityType.GetProperty(pair.Key))(entity);
 
                         return new FormControlViewModel
                         {
                             Name = name,
                             Type = property.PropertyType,
-                            Value = null,
+                            Value = value,
                             Options = this.dbContext.Set(property.PropertyType),
                             IsDbSet = true,
                             IsReadOnly = false,
@@ -89,28 +91,33 @@ namespace AutoCrudAdmin.Helpers.Implementations
             }
 
             return primaryKeyValues
-                .Select(pair => new FormControlViewModel
+                .Select(pair =>
                 {
-                    Name = pair.Key == SinglePrimaryKeyName
-                        ? typeof(TEntity).GetPrimaryKeyPropertyInfos()
+                    var name = pair.Key == SinglePrimaryKeyName
+                        ? entityType.GetPrimaryKeyPropertyInfos()
                             .Select(pk => pk.Name)
                             .FirstOrDefault()
-                        : pair.Key,
-                    Type = pair.Value.GetType(),
-                    Value = pair.Key == SinglePrimaryKeyName
+                        : pair.Key;
+
+                    var value = pair.Key == SinglePrimaryKeyName
                         ? ExpressionsBuilder.ForGetPropertyValue<TEntity>(
-                            typeof(TEntity).GetPrimaryKeyPropertyInfos()
-                                .FirstOrDefault())(
-                            entity)
+                            entityType.GetPrimaryKeyPropertyInfos().FirstOrDefault())(entity)
                         : ExpressionsBuilder.ForGetPropertyValue<TEntity>(
-                            typeof(TEntity).GetProperty(pair.Key))(entity),
-                    IsReadOnly = true,
+                            entityType.GetProperty(pair.Key))(entity);
+
+                    return new FormControlViewModel
+                    {
+                        Name = name!,
+                        Type = pair.Value.GetType(),
+                        Value = value,
+                        IsReadOnly = true,
+                    };
                 });
         }
 
         private static IEnumerable<FormControlViewModel> GeneratePrimitiveFormControls<TEntity>(TEntity entity)
         {
-            var entityType = typeof(TEntity);
+            var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
 
             return entityType.GetProperties()
                 .Where(p => !p.GetCustomAttributes<NotMappedAttribute>().Any())
@@ -148,7 +155,7 @@ namespace AutoCrudAdmin.Helpers.Implementations
             TEntity entity,
             IDictionary<string, Expression<Func<object, bool>>> optionFilters = null)
         {
-            var entityType = entity.GetType();
+            var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
 
             return entityType.GetProperties()
                 .Where(property => IsDbContextEntity(property) && !this.IsPartOfPrimaryKey(property, entityType))
@@ -168,7 +175,7 @@ namespace AutoCrudAdmin.Helpers.Implementations
             PropertyInfo property,
             Expression<Func<object, bool>> optionsFilter = null)
         {
-            var entityType = entity.GetType();
+            var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
 
             var options = optionsFilter != null
                 ? this.dbContext.Set(property.PropertyType).Where(optionsFilter)

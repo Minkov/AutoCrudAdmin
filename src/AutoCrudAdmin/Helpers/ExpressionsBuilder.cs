@@ -14,7 +14,7 @@ namespace AutoCrudAdmin.Helpers
             IDictionary<string, string> primaryKeys)
             where TEntity : class
         {
-            var entityType = typeof(TEntity);
+            var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
             var parameter = Expression.Parameter(typeof(object), "model");
             var convertedParameter = Expression.Convert(
                 parameter,
@@ -54,7 +54,7 @@ namespace AutoCrudAdmin.Helpers
 
         public static Expression<Func<TEntity, TProperty>> ForGetProperty<TEntity, TProperty>(MemberInfo property)
         {
-            var entityType = typeof(TEntity);
+            var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
             var parameter = Expression.Parameter(entityType, "model");
 
             // model.Column
@@ -67,12 +67,12 @@ namespace AutoCrudAdmin.Helpers
         }
 
         public static Func<TEntity> ForCreateInstance<TEntity>()
-            => Expression.Lambda<Func<TEntity>>(Expression.New(typeof(TEntity)))
+            => Expression.Lambda<Func<TEntity>>(Expression.New(ReflectionHelper.GetEntityTypeUnproxied<TEntity>()))
                 .Compile();
 
         public static Func<TEntity, object> ForGetPropertyValue<TEntity>(PropertyInfo property)
         {
-            var type = typeof(TEntity);
+            var type = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
             var instanceParam = Expression.Parameter(type);
             return Expression.Lambda<Func<TEntity, object>>(
                 Expression.Convert(

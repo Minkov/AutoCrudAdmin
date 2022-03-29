@@ -8,6 +8,7 @@ namespace AutoCrudAdmin.TagHelpers
     using System.Threading.Tasks;
     using AutoCrudAdmin.Enumerations;
     using AutoCrudAdmin.Extensions;
+    using AutoCrudAdmin.Helpers;
     using AutoCrudAdmin.ViewModels;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc.TagHelpers;
@@ -130,7 +131,7 @@ namespace AutoCrudAdmin.TagHelpers
                 .Select(x => new DropDownViewModel
                 {
                     Name = x.ToString(),
-                    Value = x.GetType().UnProxy().GetPrimaryKeyValue(x).First().Value,
+                    Value = ReflectionHelper.GetEntityTypeUnproxied(x).GetPrimaryKeyValue(x).First().Value,
                 })
                 .ToList();
 

@@ -19,6 +19,15 @@ namespace AutoCrudAdmin.Helpers
 
         public static IEnumerable<PropertyInfo> DbSetProperties { get; }
 
+        public static Type GetEntityTypeUnproxied<TEntity>()
+            => GetEntityTypeUnproxied(typeof(TEntity));
+
+        public static Type GetEntityTypeUnproxied(object entity)
+            => GetEntityTypeUnproxied(entity.GetType());
+
+        private static Type GetEntityTypeUnproxied(Type entityType)
+            => entityType.UnProxy();
+
         private static IEnumerable<PropertyInfo> GetDbSetProperties()
         {
             var dbSetTypes = DbContexts
