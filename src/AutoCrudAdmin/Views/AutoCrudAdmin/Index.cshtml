@@ -1,6 +1,5 @@
 @using AutoCrudAdmin.Extensions
 @model AutoCrudAdmin.ViewModels.AutoCrudAdminIndexViewModel
-@using static AutoCrudAdmin.Constants.CssClassNames
 
 @{
     Layout = ViewBag.LayoutName;
@@ -42,28 +41,9 @@
         {
             <form enctype="multipart/form-data" asp-action="@action.Action" style="display: flex; flex-direction: row; gap: 20px">
                 <div id="form-for-@action.Action.ToLower()" style="display:flex; flex-direction: column; gap: 10px;">
-                    @foreach (var formControl in Model.ToolbarActions.SelectMany(x => x.FormControls))
-                    {
-                        var className = formControl.Value is bool
-                            ? FormCheckboxInput
-                            : FormControl;
-                        var hiddenAttribute = formControl.IsHidden ? "hidden" : string.Empty;
-                        <label @hiddenAttribute>
-                            @formControl.Name
-                            <formInput
-                                for-type="@formControl.Type"
-                                for-form-control-type="@formControl.FormControlType"
-                                for-name="@formControl.Name"
-                                with-value="@formControl.Value"
-                                with-options="@formControl.Options"
-                                is-hidden="@formControl.IsHidden"
-                                is-db-set="@formControl.IsDbSet"
-                                is-readonly="@formControl.IsReadOnly"
-                                readonly="@formControl.IsReadOnly"
-                                class="@className">
-                            </formInput>
-                        </label>
-                    }
+                    @await Html.PartialAsync(
+                        "_EnityFormControlsPartial",
+                        Model.ToolbarActions.SelectMany(x => x.FormControls))
                     <button class="btn btn-outline-primary">@action.Name</button>
                 </div>
             </form>

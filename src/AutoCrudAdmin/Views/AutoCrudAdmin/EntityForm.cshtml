@@ -1,46 +1,13 @@
 @model AutoCrudAdmin.ViewModels.AutoCrudAdminEntityFormViewModel
-@using static AutoCrudAdmin.Constants.CssClassNames;
 
 @{
     Layout = ViewBag.LayoutName;
-    var aspAction = Model?.CustomActionName ?? $"Post{ViewContext.RouteData.Values["action"]}";
+    var aspAction = Model.CustomActionName ?? $"Post{ViewContext.RouteData.Values["action"]}";
 }
-
-<style>
-    .form-group {
-        margin-bottom: 0;
-    }
-
-    .form-check-input {
-        margin-left: 0.5rem;
-    }
-</style>
 
 <form enctype="multipart/form-data" asp-action="@aspAction" style="display: flex; flex-direction: column">
     <div id="entity-form" style="display:flex; flex-direction: column; gap: 10px;">
-        @foreach (var formControl in Model.FormControls)
-        {
-            var isCheckbox = formControl.Value is bool;
-            var inputClassName = isCheckbox ? FormCheckboxInput : FormControl;
-            var labelClassName = isCheckbox ? FormCheckboxLabel : string.Empty;
-            var hiddenAttribute = formControl.IsHidden ? "hidden" : string.Empty;
-
-            <div class="@FormGroup" @hiddenAttribute>
-                <label class="@labelClassName">@formControl.DisplayName</label>
-                <formInput
-                    for-type="@formControl.Type"
-                    for-form-control-type="@formControl.FormControlType"
-                    for-name="@formControl.Name"
-                    with-value="@formControl.Value"
-                    with-options="@formControl.Options"
-                    is-hidden="@formControl.IsHidden"
-                    is-db-set="@formControl.IsDbSet"
-                    is-readonly="@formControl.IsReadOnly"
-                    readonly="@formControl.IsReadOnly"
-                    class="@inputClassName">
-                </formInput>
-            </div>
-        }
+        @await Html.PartialAsync("_EnityFormControlsPartial", Model.FormControls)
         <button class="btn btn-dark">@Model.Action</button>
     </div>
 </form>
