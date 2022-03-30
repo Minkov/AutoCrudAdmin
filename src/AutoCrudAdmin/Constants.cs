@@ -22,5 +22,10 @@ namespace AutoCrudAdmin
             public const string SuccessMessage = "SuccessMessage";
             public const string DangerMessage = "DangerMessage";
         }
+
+        public static class Grid
+        {
+            public const int DefaultColumnStringMaxLength = 40;
+        }
     }
 }

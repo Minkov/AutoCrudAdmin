@@ -52,7 +52,9 @@ namespace AutoCrudAdmin.Helpers
                 parameter);
         }
 
-        public static Expression<Func<TEntity, TProperty>> ForGetProperty<TEntity, TProperty>(MemberInfo property)
+        public static Expression<Func<TEntity, TProperty>> ForGetProperty<TEntity, TProperty>(
+            PropertyInfo property,
+            int? stringValueMaxLength = null)
         {
             var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
             var parameter = Expression.Parameter(entityType, "model");
@@ -61,6 +63,15 @@ namespace AutoCrudAdmin.Helpers
             var memberAccess = Expression.MakeMemberAccess(
                 parameter,
                 property);
+
+            if (property.PropertyType == typeof(string) && stringValueMaxLength.HasValue)
+            {
+                var maxLengthParameter = Expression.Constant(stringValueMaxLength.Value);
+                var toEllipsisMethodCall = Expression.Call(StringToEllipsisMethod, memberAccess, maxLengthParameter);
+
+                // model => model.StringColumn.ToEllipsis(stringMaxLength)
+                return Expression.Lambda<Func<TEntity, TProperty>>(toEllipsisMethodCall, parameter);
+            }
 
             // model => model.Column
             return Expression.Lambda<Func<TEntity, TProperty>>(memberAccess, parameter);
@@ -102,5 +113,11 @@ namespace AutoCrudAdmin.Helpers
 
             return Expression.Equal(cast, id);
         }
+
+        private static MethodInfo StringToEllipsisMethod
+            => typeof(StringExtensions)
+                .GetMethod(
+                    nameof(StringExtensions.ToEllipsis),
+                    BindingFlags.Public | BindingFlags.Static) !;
     }
 }

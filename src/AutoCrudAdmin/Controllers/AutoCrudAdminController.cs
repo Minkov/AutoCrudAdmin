@@ -21,6 +21,7 @@
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using NonFactors.Mvc.Grid;
+    using static Constants;
 
     [AutoCrudAdminControllerNameConvention]
     public class AutoCrudAdminController<TEntity>
@@ -101,6 +102,8 @@
 
         protected virtual IEnumerable<Tuple<int, string>> PageSizes
             => Enumerable.Empty<Tuple<int, string>>();
+
+        protected virtual int? ColumnStringMaxLength => Grid.DefaultColumnStringMaxLength;
 
         private static MethodInfo GenerateColumnExpressionMethod =>
             typeof(AutoCrudAdminController<TEntity>)
@@ -342,7 +345,7 @@
                 .Grid(this.GetQueryWithIncludes(this.MasterGridFilter))
                 .Build(columns =>
                 {
-                    this.BuildGridColumns(columns);
+                    this.BuildGridColumns(columns, this.ColumnStringMaxLength);
                     this.BuildGridActions(columns, htmlHelper);
                 })
                 .Using(GridFilterMode.Header)
@@ -356,7 +359,9 @@
                     pager.RowsPerPage = this.RowsPerPage;
                 });
 
-        protected virtual IGridColumnsOf<TEntity> BuildGridColumns(IGridColumnsOf<TEntity> columns)
+        protected virtual IGridColumnsOf<TEntity> BuildGridColumns(
+            IGridColumnsOf<TEntity> columns,
+            int? stringMaxLength)
         {
             if (this.ShownColumnNames.Any() && this.HiddenColumnNames.Any())
             {
@@ -395,7 +400,7 @@
                     columns,
                     (currentColumns, prop) => (IGridColumnsOf<TEntity>)GenerateColumnExpressionMethod
                         .MakeGenericMethod(prop.PropertyType)
-                        .Invoke(null, new object[] { currentColumns, prop }));
+                        .Invoke(null, new object[] { currentColumns, prop, stringMaxLength! }));
 
             foreach (var customGridColumn in this.CustomColumns)
             {
@@ -507,9 +512,11 @@
 
         private static IGridColumnsOf<TEntity> GenerateColumnConfiguration<TProperty>(
             IGridColumnsOf<TEntity> columns,
-            MemberInfo property)
+            PropertyInfo property,
+            int? columnStringMaxLength)
         {
-            var lambda = ExpressionsBuilder.ForGetProperty<TEntity, TProperty>(property);
+            var lambda = ExpressionsBuilder.ForGetProperty<TEntity, TProperty>(property, columnStringMaxLength);
+
             columns
                 .Add(lambda)
                 .Titled(property.Name)
