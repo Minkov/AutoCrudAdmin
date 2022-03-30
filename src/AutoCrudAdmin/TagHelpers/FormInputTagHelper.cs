@@ -67,42 +67,9 @@ namespace AutoCrudAdmin.TagHelpers
                 return Task.CompletedTask;
             }
 
-            output.TagName = "input";
-            output.Attributes.SetAttribute("value", this.Value);
-
-            if (this.Type == typeof(string))
+            if (this.FormControlType == FormControlType.TextArea)
             {
-                output.Attributes.SetAttribute("type", "text");
-            }
-            else if (this.Type == typeof(DateTime) || this.Type == typeof(DateTime?))
-            {
-                output.Attributes.SetAttribute("type", "datetime");
-            }
-            else if (this.Type == typeof(TimeSpan) || this.Type == typeof(TimeSpan?))
-            {
-                output.Attributes.SetAttribute("type", "timespan");
-            }
-            else if (NumberTypes.Contains(this.Type))
-            {
-                output.Attributes.SetAttribute("type", "number");
-            }
-            else if (this.Type == typeof(bool))
-            {
-                output.Attributes.SetAttribute("type", "checkbox");
-
-                if (this.Value is true)
-                {
-                    output.Attributes.SetAttribute("checked", "checked");
-                }
-            }
-            else if (this.Type == typeof(IFormFile) || this.Type == typeof(IFormFileCollection))
-            {
-                output.Attributes.SetAttribute("type", "file");
-
-                if (this.Type == typeof(IFormFileCollection))
-                {
-                    output.Attributes.SetAttribute("multiple", "multiple");
-                }
+                this.PrepareTextArea(output);
             }
             else if (this.FormControlType == FormControlType.MultiChoiceCheckbox)
             {
@@ -112,9 +79,13 @@ namespace AutoCrudAdmin.TagHelpers
             {
                 this.PrepareDropDownForDbSet(output);
             }
-            else
+            else if (this.Options.Any())
             {
                 this.PrepareDropdown(output, this.Options.Cast<DropDownViewModel>().ToList());
+            }
+            else
+            {
+                this.PrepareGenericInput(output);
             }
 
             if (this.IsHidden)
@@ -206,6 +177,56 @@ namespace AutoCrudAdmin.TagHelpers
             });
 
             output.Content.SetHtmlContent(string.Join(string.Empty, checkboxes));
+        }
+
+        private void PrepareTextArea(TagHelperOutput output)
+        {
+            output.TagName = "textarea";
+            output.Content.SetContent(this.Value.ToString());
+
+            // TODO: make height auto adjustable
+            output.Attributes.SetAttribute("rows", 10);
+        }
+
+        private void PrepareGenericInput(TagHelperOutput output)
+        {
+            output.TagName = "input";
+            output.Attributes.SetAttribute("value", this.Value);
+
+            if (this.Type == typeof(string))
+            {
+                output.Attributes.SetAttribute("type", "text");
+            }
+            else if (this.Type == typeof(DateTime) || this.Type == typeof(DateTime?))
+            {
+                output.Attributes.SetAttribute("type", "datetime");
+            }
+            else if (this.Type == typeof(TimeSpan) || this.Type == typeof(TimeSpan?))
+            {
+                output.Attributes.SetAttribute("type", "timespan");
+            }
+            else if (NumberTypes.Contains(this.Type))
+            {
+                output.Attributes.SetAttribute("type", "number");
+            }
+            else if (this.Type == typeof(bool))
+            {
+                output.Attributes.SetAttribute("type", "checkbox");
+
+                if (this.Value is true)
+                {
+                    output.Attributes.SetAttribute("checked", "checked");
+                }
+            }
+            else if (this.Type == typeof(IFormFile) || this.Type == typeof(IFormFileCollection))
+            {
+                output.Attributes.SetAttribute("type", "file");
+
+                if (this.Type == typeof(IFormFileCollection))
+                {
+                    output.Attributes.SetAttribute("multiple", "multiple");
+                }
+            }
         }
     }
 }
