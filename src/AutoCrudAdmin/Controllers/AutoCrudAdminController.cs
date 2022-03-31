@@ -283,20 +283,17 @@
             {
                 case EntityAction.Create:
                     await this.BeforeEntitySaveOnCreateAsync(newEntity, actionContext);
-                    await this.DbContext.AddAsync(newEntity);
-                    await this.DbContext.SaveChangesAsync();
+                    await this.CreateEntityAndSaveAsync(newEntity, actionContext);
                     await this.AfterEntitySaveOnCreateAsync(newEntity, actionContext);
                     break;
                 case EntityAction.Edit:
                     await this.BeforeEntitySaveOnEditAsync(originalEntity, newEntity, actionContext);
-                    this.DbContext.Update(newEntity);
-                    await this.DbContext.SaveChangesAsync();
+                    await this.EditEntityAndSaveAsync(newEntity, actionContext);
                     await this.AfterEntitySaveOnEditAsync(originalEntity, newEntity, actionContext);
                     break;
                 case EntityAction.Delete:
                     await this.BeforeEntitySaveOnDeleteAsync(originalEntity, actionContext);
-                    this.DbContext.Remove(originalEntity);
-                    await this.DbContext.SaveChangesAsync();
+                    await this.DeleteEntityAndSaveAsync(originalEntity, actionContext);
                     await this.AfterEntitySaveOnDeleteAsync(originalEntity, actionContext);
                     break;
                 default:
@@ -321,6 +318,24 @@
 
         protected virtual Task BeforeEntitySaveOnEditAsync(TEntity existingEntity, TEntity newEntity, AdminActionContext actionContext)
             => Task.CompletedTask;
+
+        protected virtual async Task CreateEntityAndSaveAsync(TEntity entity, AdminActionContext actionContext)
+        {
+            await this.DbContext.AddAsync(entity);
+            await this.DbContext.SaveChangesAsync();
+        }
+
+        protected virtual async Task EditEntityAndSaveAsync(TEntity entity, AdminActionContext actionContext)
+        {
+            this.DbContext.Update(entity);
+            await this.DbContext.SaveChangesAsync();
+        }
+
+        protected virtual async Task DeleteEntityAndSaveAsync(TEntity entity, AdminActionContext actionContext)
+        {
+            this.DbContext.Remove(entity);
+            await this.DbContext.SaveChangesAsync();
+        }
 
         protected virtual Task AfterEntitySaveAsync(TEntity entity, AdminActionContext actionContext)
             => Task.CompletedTask;
