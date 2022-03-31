@@ -51,10 +51,10 @@ namespace AutoCrudAdmin.Helpers.Implementations
         public IEnumerable<FormControlViewModel> GenerateFormControls<TEntity>(
             TEntity entity,
             EntityAction entityAction,
-            IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters = null)
+            IDictionary<string, Expression<Func<object, bool>>>? complexOptionFilters = null)
             => this.GeneratePrimaryKeyFormControls(entity, entityAction)
                 .Concat(GeneratePrimitiveFormControls(entity))
-                .Concat(this.GenerateComplexFormControls(entity, complexOptionFilters));
+                .Concat(this.GenerateComplexFormControls(entity, entityAction, complexOptionFilters));
 
         public string GetComplexFormControlNameForEntityName(string entityName)
             => entityName + "Id";
@@ -153,7 +153,8 @@ namespace AutoCrudAdmin.Helpers.Implementations
 
         private IEnumerable<FormControlViewModel> GenerateComplexFormControls<TEntity>(
             TEntity entity,
-            IDictionary<string, Expression<Func<object, bool>>> optionFilters = null)
+            EntityAction entityAction,
+            IDictionary<string, Expression<Func<object, bool>>>? optionFilters = null)
         {
             var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
 
@@ -164,7 +165,7 @@ namespace AutoCrudAdmin.Helpers.Implementations
                     var filter = optionFilters?.ContainsKey(property.Name) ?? false
                         ? optionFilters[property.Name]
                         : null;
-                    return this.GenerateFormControlForComplexProperty(entity, property, filter);
+                    return this.GenerateFormControlForComplexProperty(entity, property, entityAction, filter);
                 })
                 .OrderBy(x => x.Name)
                 .ToList();
@@ -173,26 +174,44 @@ namespace AutoCrudAdmin.Helpers.Implementations
         private FormControlViewModel GenerateFormControlForComplexProperty<TEntity>(
             TEntity entity,
             PropertyInfo property,
-            Expression<Func<object, bool>> optionsFilter = null)
+            EntityAction entityAction,
+            Expression<Func<object, bool>>? optionsFilter = null)
         {
             var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
-
-            var options = optionsFilter != null
-                ? this.dbContext.Set(property.PropertyType).Where(optionsFilter)
-                : this.dbContext.Set(property.PropertyType);
-
             var valueFunc = ExpressionsBuilder.ForGetPropertyValue<TEntity>(
-                entityType.GetProperty(this.GetComplexFormControlNameForEntityName(property.Name)));
+                entityType.GetProperty(this.GetComplexFormControlNameForEntityName(property.Name)) !);
+            var value = valueFunc(entity);
+            var options = this.GetComplexPropertyOptionsForAction(value, property, entityAction, optionsFilter);
 
             return new FormControlViewModel
             {
                 Name = property.Name,
                 Type = property.PropertyType,
-                Value = valueFunc(entity),
+                Value = value,
                 Options = options,
                 IsDbSet = true,
                 IsReadOnly = false,
             };
+        }
+
+        private IQueryable<object> GetComplexPropertyOptionsForAction(
+            object? value,
+            PropertyInfo property,
+            EntityAction entityAction,
+            Expression<Func<object, bool>>? optionsFilter = null)
+        {
+            if (entityAction == EntityAction.Delete)
+            {
+                var onlyOption = this.dbContext.Find(property.PropertyType, value);
+
+                return onlyOption != default
+                    ? new[] { onlyOption }.AsQueryable()
+                    : Enumerable.Empty<object>().AsQueryable();
+            }
+
+            return optionsFilter != null
+                ? this.dbContext.Set(property.PropertyType).Where(optionsFilter)
+                : this.dbContext.Set(property.PropertyType);
         }
     }
 }
