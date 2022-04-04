@@ -89,6 +89,7 @@
                 "dd/MM/yyyy hh:mm",
                 "M/dd/yyyy hh:mm:ss tt",
                 "M/dd/yyyy h:mm:ss tt",
+                "M/d/yyyy hh:mm:ss tt",
                 "M/d/yyyy h:mm:ss tt",
             };
 

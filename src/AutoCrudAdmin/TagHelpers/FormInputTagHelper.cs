@@ -199,7 +199,7 @@ namespace AutoCrudAdmin.TagHelpers
             }
             else if (this.Type == typeof(DateTime) || this.Type == typeof(DateTime?))
             {
-                output.Attributes.SetAttribute("type", "datetime");
+                this.PrepareDatetimePicker(output);
             }
             else if (this.Type == typeof(TimeSpan) || this.Type == typeof(TimeSpan?))
             {
@@ -227,6 +227,12 @@ namespace AutoCrudAdmin.TagHelpers
                     output.Attributes.SetAttribute("multiple", "multiple");
                 }
             }
+        }
+
+        private void PrepareDatetimePicker(TagHelperOutput output)
+        {
+            output.Attributes.SetAttribute("type", "datetime");
+            output.AddClass("datetimepicker", HtmlEncoder.Default);
         }
     }
 }
