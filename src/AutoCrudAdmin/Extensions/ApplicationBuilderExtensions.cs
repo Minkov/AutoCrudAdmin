@@ -7,8 +7,8 @@ namespace AutoCrudAdmin.Extensions
     {
         public static IApplicationBuilder AddAutoCrudAdmin(
             this IApplicationBuilder app,
-            string urlPrefix = null,
-            AutoCrudAdminOptions options = null)
+            string? urlPrefix = null,
+            AutoCrudAdminOptions? options = null)
         {
             var segment =
                 string.IsNullOrEmpty(urlPrefix)
@@ -21,6 +21,7 @@ namespace AutoCrudAdmin.Extensions
                 {
                     x.UseRouting()
                         .UseMiddleware<AuthMiddleware>(options ?? new AutoCrudAdminOptions())
+                        .UseAuthorization()
                         .Use(async (context, next) =>
                         {
                             context.Items["layout_name"] = options?.LayoutName ?? "_AutoCrudAdmin_Layout";
