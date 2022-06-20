@@ -1,0 +1,10 @@
+site_name: AutoCrudAdmin documentation
+theme:
+  name: 'material'
+  highlightjs: true
+  hljs_languages:
+    - yaml
+    - rust
+    - csharp
+    - javascript
+    - xml
