@@ -11,5 +11,6 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.x
-      - run: pip install -r docs/requirements.txt
-      - run: mkdocs -f docs/mkdocs.yml gh-deploy --force
+      - working_directory: docs
+      - run: pip install -r requirements.txt
+      - run: mkdocs gh-deploy --force
