@@ -1,6 +1,6 @@
-# AutoGridAdmin - Write the code that must be actually written
+# AutoCrudAdmin - Write the code that must be actually written
 
-AutoGridAdmin is an extensible admin panel with automatic CRUD operations. All CRUD operations on DbContext entities are handled automatically for you, including:
+AutoCrudAdmin is an extensible admin panel with automatic CRUD operations. All CRUD operations on DbContext entities are handled automatically for you, including:
 - Validation
 - Visualization
 - Relationships
