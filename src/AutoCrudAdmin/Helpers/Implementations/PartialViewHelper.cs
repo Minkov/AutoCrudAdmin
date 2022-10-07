@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace AutoCrudAdmin.Helpers.Implementations;
+﻿namespace AutoCrudAdmin.Helpers.Implementations;
 
 using System;
 using System.IO;
