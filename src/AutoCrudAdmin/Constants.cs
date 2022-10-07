@@ -15,6 +15,8 @@ namespace AutoCrudAdmin
             public const string FormCheckboxLabel = "form-check-label";
             public const string FormCheckboxInput = "form-check-input";
             public const string FormCheckboxInline = "form-check-inline";
+            public const string Hide = "d-none";
+            public const string ExpandableClassName = "expandable";
         }
 
         public static class TempDataKeys
@@ -26,6 +28,16 @@ namespace AutoCrudAdmin
         public static class Grid
         {
             public const int DefaultColumnStringMaxLength = 40;
+        }
+
+        public static class Html
+        {
+            public const string NewLine = "<br />";
+        }
+
+        public static class PartialView
+        {
+            public const string EntityFormControlPartial = "_EntityFormControlPartial";
         }
     }
 }

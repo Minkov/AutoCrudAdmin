@@ -1,4 +1,3 @@
-@using static AutoCrudAdmin.Constants.CssClassNames
 @model IEnumerable<AutoCrudAdmin.ViewModels.FormControlViewModel>
 
 <style>
@@ -13,26 +12,7 @@
 
 @foreach (var formControl in Model)
 {
-    var isCheckbox = formControl.Value is bool;
-    var inputClassName = isCheckbox ? FormCheckboxInput : FormControl;
-    var labelClassName = isCheckbox ? FormCheckboxLabel : string.Empty;
-    var hiddenAttribute = formControl.IsHidden ? "hidden" : string.Empty;
-
-    <div class="@FormGroup" @hiddenAttribute>
-        <label class="@labelClassName">@formControl.DisplayName</label>
-        <formInput
-            for-type="@formControl.Type"
-            for-form-control-type="@formControl.FormControlType"
-            for-name="@formControl.Name"
-            with-value="@formControl.Value"
-            with-options="@formControl.Options"
-            is-hidden="@formControl.IsHidden"
-            is-db-set="@formControl.IsDbSet"
-            is-readonly="@formControl.IsReadOnly"
-            readonly="@formControl.IsReadOnly"
-            class="@inputClassName">
-        </formInput>
-    </div>
+    <partial model="@formControl" name="@AutoCrudAdmin.Constants.PartialView.EntityFormControlPartial"/>
 }
 
 <script type="text/javascript">
@@ -43,4 +23,3 @@
        });
     });
 </script>
-
