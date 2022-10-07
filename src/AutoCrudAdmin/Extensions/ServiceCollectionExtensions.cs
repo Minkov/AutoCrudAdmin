@@ -11,6 +11,8 @@ namespace AutoCrudAdmin.Extensions
             this IServiceCollection services)
         {
             services.AddTransient<IFormControlsHelper, FormControlsHelper>();
+            services.AddTransient<IPartialViewHelper, PartialViewHelper>();
+
             services.AddHttpContextAccessor();
 
             services.AddMvc()
