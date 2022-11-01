@@ -53,15 +53,6 @@
 <script type="module" src="/js/mvc-grid-form.js"></script>
 <script>
    document.querySelectorAll(".mvc-grid").forEach(element => new MvcGrid(element));
-   $(document).ready(function () {
-       $(".expandable").on('click', function (event) {
-           const expandElementId = $(event.target).attr("expand");
-   
-           $(`#${expandElementId}`).attr('class').includes('d-none')
-               ? $(`#${expandElementId}`).removeClass('d-none')
-               : $(`#${expandElementId}`).addClass('d-none');
-       });
-   })
 </script>
 </body>
 </html>
