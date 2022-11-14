@@ -252,7 +252,30 @@
             EntityAction action,
             IDictionary<string, string> entityDict,
             IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters)
-            => this.FormControlsHelper.GenerateFormControls(entity, action, complexOptionFilters);
+            => this.FormControlsHelper.GenerateFormControls(entity, action, complexOptionFilters)
+                .Select(x =>
+                {
+                    if (x.Options.Any())
+                    {
+                        var generators = this.DefaultOptionsGenerators();
+
+                        var shouldUseCustomGenerator = generators.TryGetValue(x.Type, out var generator);
+
+                        var defaultOption = shouldUseCustomGenerator
+                            ? generator?.Invoke()
+                            : Activator.CreateInstance(x.Type);
+
+                        if (defaultOption != null)
+                        {
+                            x.Options = new List<object>() { defaultOption }.Concat(x.Options);
+                        }
+                    }
+
+                    return x;
+                });
+
+        protected virtual IDictionary<Type, Func<object>> DefaultOptionsGenerators()
+            => new Dictionary<Type, Func<object>>();
 
         protected virtual Task<IEnumerable<FormControlViewModel>> GenerateFormControlsAsync(
             TEntity entity,
