@@ -106,6 +106,9 @@
 
         protected virtual int? ColumnStringMaxLength => Grid.DefaultColumnStringMaxLength;
 
+        protected virtual IDictionary<Type, Func<object>> DefaultOptionsGenerators
+            => new Dictionary<Type, Func<object>>();
+
         private static MethodInfo GenerateColumnExpressionMethod =>
             typeof(AutoCrudAdminController<TEntity>)
                 .GetMethod(
@@ -257,9 +260,7 @@
                 {
                     if (x.Options.Any())
                     {
-                        var generators = this.DefaultOptionsGenerators();
-
-                        var shouldUseCustomGenerator = generators.TryGetValue(x.Type, out var generator);
+                        var shouldUseCustomGenerator = this.DefaultOptionsGenerators.TryGetValue(x.Type, out var generator);
 
                         var defaultOption = shouldUseCustomGenerator
                             ? generator?.Invoke()
@@ -523,9 +524,6 @@
                 value,
                 actionName,
                 gridStringFilterType.ToString());
-
-        protected virtual IDictionary<Type, Func<object>> DefaultOptionsGenerators()
-            => new Dictionary<Type, Func<object>>();
 
         private static IEnumerable<FormControlViewModel> SetFormControlsVisibility(
             List<FormControlViewModel> formControls,
