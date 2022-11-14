@@ -274,9 +274,6 @@
                     return x;
                 });
 
-        protected virtual IDictionary<Type, Func<object>> DefaultOptionsGenerators()
-            => new Dictionary<Type, Func<object>>();
-
         protected virtual Task<IEnumerable<FormControlViewModel>> GenerateFormControlsAsync(
             TEntity entity,
             EntityAction action,
@@ -526,6 +523,9 @@
                 value,
                 actionName,
                 gridStringFilterType.ToString());
+
+        protected virtual IDictionary<Type, Func<object>> DefaultOptionsGenerators()
+            => new Dictionary<Type, Func<object>>();
 
         private static IEnumerable<FormControlViewModel> SetFormControlsVisibility(
             List<FormControlViewModel> formControls,
