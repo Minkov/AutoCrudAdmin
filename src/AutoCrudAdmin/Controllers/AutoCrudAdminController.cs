@@ -533,11 +533,16 @@
         {
             var lambda = ExpressionsBuilder.ForGetProperty<TEntity, TProperty>(property, columnStringMaxLength);
 
-            columns
+            var columnBuilder = columns
                 .Add(lambda)
                 .Titled(property.Name)
                 .Filterable(true)
                 .Sortable(true);
+
+            if (property.PropertyType == typeof(string) && columnStringMaxLength.HasValue)
+            {
+                columnBuilder.RenderedAs((entity) => entity.ToString().ToEllipsis(columnStringMaxLength.Value));
+            }
 
             return columns;
         }

@@ -64,15 +64,6 @@ namespace AutoCrudAdmin.Helpers
                 parameter,
                 property);
 
-            if (property.PropertyType == typeof(string) && stringValueMaxLength.HasValue)
-            {
-                var maxLengthParameter = Expression.Constant(stringValueMaxLength.Value);
-                var toEllipsisMethodCall = Expression.Call(StringToEllipsisMethod, memberAccess, maxLengthParameter);
-
-                // model => model.StringColumn.ToEllipsis(stringMaxLength)
-                return Expression.Lambda<Func<TEntity, TProperty>>(toEllipsisMethodCall, parameter);
-            }
-
             // model => model.Column
             return Expression.Lambda<Func<TEntity, TProperty>>(memberAccess, parameter);
         }
@@ -113,11 +104,5 @@ namespace AutoCrudAdmin.Helpers
 
             return Expression.Equal(cast, id);
         }
-
-        private static MethodInfo StringToEllipsisMethod
-            => typeof(StringExtensions)
-                .GetMethod(
-                    nameof(StringExtensions.ToEllipsis),
-                    BindingFlags.Public | BindingFlags.Static) !;
     }
 }
