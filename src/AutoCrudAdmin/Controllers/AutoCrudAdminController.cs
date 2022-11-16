@@ -106,6 +106,9 @@
 
         protected virtual int? ColumnStringMaxLength => Grid.DefaultColumnStringMaxLength;
 
+        protected virtual IDictionary<Type, Func<object>> DefaultOptionsGenerators
+            => new Dictionary<Type, Func<object>>();
+
         private static MethodInfo GenerateColumnExpressionMethod =>
             typeof(AutoCrudAdminController<TEntity>)
                 .GetMethod(
@@ -252,7 +255,8 @@
             EntityAction action,
             IDictionary<string, string> entityDict,
             IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters)
-            => this.FormControlsHelper.GenerateFormControls(entity, action, complexOptionFilters);
+            => this.FormControlsHelper.GenerateFormControls(entity, action, complexOptionFilters)
+                .Select(this.AddDefaultOptions);
 
         protected virtual Task<IEnumerable<FormControlViewModel>> GenerateFormControlsAsync(
             TEntity entity,
@@ -727,6 +731,25 @@
             };
 
             return this.RedirectToAction(actionName, controller, routeValues);
+        }
+
+        private FormControlViewModel AddDefaultOptions(FormControlViewModel formControl)
+        {
+            if (formControl.Options.Any())
+            {
+                var shouldUseCustomGenerator = this.DefaultOptionsGenerators.TryGetValue(formControl.Type, out var generator);
+
+                var defaultOption = shouldUseCustomGenerator
+                    ? generator?.Invoke()
+                    : Activator.CreateInstance(formControl.Type);
+
+                if (defaultOption != null)
+                {
+                    formControl.Options = new List<object>() { defaultOption }.Concat(formControl.Options);
+                }
+            }
+
+            return formControl;
         }
     }
 }
