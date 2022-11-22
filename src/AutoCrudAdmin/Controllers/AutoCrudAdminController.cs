@@ -23,6 +23,10 @@
     using NonFactors.Mvc.Grid;
     using static Constants;
 
+    /// <summary>
+    /// The administration's controller.
+    /// </summary>
+    /// <typeparam name="TEntity">Generic type parameter.</typeparam>
     [AutoCrudAdminControllerNameConvention]
     public class AutoCrudAdminController<TEntity>
         : Controller
@@ -34,33 +38,63 @@
         private DbContext? db;
         private IFormControlsHelper? formControlsHelper;
 
+        /// <summary>
+        /// Gets names of the columns.
+        /// </summary>
         protected virtual IEnumerable<string> ShownColumnNames
             => Enumerable.Empty<string>();
 
+        /// <summary>
+        /// Gets the names of the hidden columns.
+        /// </summary>
         protected virtual IEnumerable<string> HiddenColumnNames
             => Enumerable.Empty<string>();
 
+        /// <summary>
+        /// Gets the names of the form controls that are shown.
+        /// </summary>
         protected virtual IEnumerable<string> ShownFormControlNames
             => Enumerable.Empty<string>();
 
+        /// <summary>
+        /// Gets the names of the shown form controls upon creation.
+        /// </summary>
         protected virtual IEnumerable<string> ShownFormControlNamesOnCreate
             => Enumerable.Empty<string>();
 
+        /// <summary>
+        /// Gets the names of the shown form controls on edit.
+        /// </summary>
         protected virtual IEnumerable<string> ShownFormControlNamesOnEdit
             => Enumerable.Empty<string>();
 
+        /// <summary>
+        /// Gets the names of the hidden form controls.
+        /// </summary>
         protected virtual IEnumerable<string> HiddenFormControlNames
             => Enumerable.Empty<string>();
 
+        /// <summary>
+        /// Gets the names of the hidden form control names upon creation.
+        /// </summary>
         protected virtual IEnumerable<string> HiddenFormControlNamesOnCreate
             => Enumerable.Empty<string>();
 
+        /// <summary>
+        /// Gets the names of the hidden form controls on edit.
+        /// </summary>
         protected virtual IEnumerable<string> HiddenFormControlNamesOnEdit
             => Enumerable.Empty<string>();
 
+        /// <summary>
+        /// Gets the entity's validation components needed to compute the validation result.
+        /// </summary>
         protected virtual IEnumerable<Func<TEntity, TEntity, AdminActionContext, ValidatorResult>> EntityValidators
             => Array.Empty<Func<TEntity, TEntity, AdminActionContext, ValidatorResult>>();
 
+        /// <summary>
+        /// Gets the entity's validation components needed to compute a validation result in an asynchronous setting.
+        /// </summary>
         protected virtual IEnumerable<Func<TEntity, TEntity, AdminActionContext, Task<ValidatorResult>>> AsyncEntityValidators
             => Array.Empty<Func<TEntity, TEntity, AdminActionContext, Task<ValidatorResult>>>();
 

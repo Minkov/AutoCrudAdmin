@@ -41,8 +41,12 @@ namespace AutoCrudAdmin.Helpers.Implementations
             => Types = ReflectionHelper.DbSetProperties
                 .Select(p => p.PropertyType)
                 .Select(dt => dt.GetGenericArguments().FirstOrDefault())
-                .ToHashSet();
+                .ToHashSet() !;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FormControlsHelper"/> class.
+        /// </summary>
+        /// <param name="dbContext">The database context that is injected as a dependency.</param>
         public FormControlsHelper(DbContext dbContext)
             => this.dbContext = dbContext;
 
@@ -65,7 +69,7 @@ namespace AutoCrudAdmin.Helpers.Implementations
         {
             var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
 
-            var primaryKeyValues = entityType.GetPrimaryKeyValue(entity)
+            var primaryKeyValues = entityType.GetPrimaryKeyValue(entity!)
                 .ToList();
 
             if (primaryKeyValues.Count > 1)
@@ -76,12 +80,12 @@ namespace AutoCrudAdmin.Helpers.Implementations
                         var name = pair.Key[..^2];
                         var property = entityType.GetProperty(name);
                         var value = ExpressionsBuilder.ForGetPropertyValue<TEntity>(
-                            entityType.GetProperty(pair.Key))(entity);
+                            entityType.GetProperty(pair.Key) !)(entity);
 
                         return new FormControlViewModel
                         {
                             Name = name,
-                            Type = property.PropertyType,
+                            Type = property!.PropertyType,
                             Value = value,
                             Options = this.dbContext.Set(property.PropertyType),
                             IsDbSet = true,
@@ -101,9 +105,9 @@ namespace AutoCrudAdmin.Helpers.Implementations
 
                     var value = pair.Key == SinglePrimaryKeyName
                         ? ExpressionsBuilder.ForGetPropertyValue<TEntity>(
-                            entityType.GetPrimaryKeyPropertyInfos().FirstOrDefault())(entity)
+                            entityType.GetPrimaryKeyPropertyInfos().FirstOrDefault() !)(entity)
                         : ExpressionsBuilder.ForGetPropertyValue<TEntity>(
-                            entityType.GetProperty(pair.Key))(entity);
+                            entityType.GetProperty(pair.Key) !)(entity);
 
                     return new FormControlViewModel
                     {

@@ -7,6 +7,9 @@ namespace AutoCrudAdmin.Helpers
     using AutoCrudAdmin.Extensions;
     using Microsoft.EntityFrameworkCore;
 
+    /// <summary>
+    /// A class that helps with reflection.
+    /// </summary>
     public static class ReflectionHelper
     {
         static ReflectionHelper()
@@ -15,13 +18,29 @@ namespace AutoCrudAdmin.Helpers
             DbSetProperties = GetDbSetProperties();
         }
 
+        /// <summary>
+        /// Gets or sets the database contexts in the executing assembly.
+        /// </summary>
         public static IEnumerable<Type> DbContexts { get; set; }
 
+        /// <summary>
+        /// Gets the database sets properties.
+        /// </summary>
         public static IEnumerable<PropertyInfo> DbSetProperties { get; }
 
+        /// <summary>
+        /// Gets the unproxied type of the entity.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity we want to get the type of.</typeparam>
+        /// <returns>The type of the entity.</returns>
         public static Type GetEntityTypeUnproxied<TEntity>()
             => GetEntityTypeUnproxied(typeof(TEntity));
 
+        /// <summary>
+        /// Gets the unproxied type of the entity.
+        /// </summary>
+        /// <param name="entity">The entity we want to get the type of.</param>
+        /// <returns>The unproxied entity's type.</returns>
         public static Type GetEntityTypeUnproxied(object entity)
             => GetEntityTypeUnproxied(entity.GetType());
 
@@ -42,9 +61,9 @@ namespace AutoCrudAdmin.Helpers
 
             var uniqueEntityTypes = entityTypes
                 .Where(parent =>
-                    !parent.IsGenericParameter
+                    !parent!.IsGenericParameter
                     && !entityTypes.Any(
-                        child => child.IsSubclassOfAnyType(parent)))
+                        child => child!.IsSubclassOfAnyType(parent)))
                 .ToHashSet();
 
             return dbSetTypes

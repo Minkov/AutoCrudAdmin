@@ -5,10 +5,19 @@ namespace AutoCrudAdmin.ViewModels
     using Microsoft.AspNetCore.Html;
     using Microsoft.AspNetCore.Mvc.Rendering;
 
+    /// <summary>
+    /// Gets the administration's index view model.
+    /// </summary>
     public class AutoCrudAdminIndexViewModel
     {
-        public Func<IHtmlHelper<AutoCrudAdminIndexViewModel>, IHtmlContent> GenerateGrid { get; set; }
+        /// <summary>
+        /// Gets or sets the administration's grid.
+        /// </summary>
+        public Func<IHtmlHelper<AutoCrudAdminIndexViewModel>, IHtmlContent> GenerateGrid { get; set; } = null!;
 
-        public IEnumerable<AutoCrudAdminGridToolbarActionViewModel> ToolbarActions { get; set; }
+        /// <summary>
+        /// Gets or sets the toolbar actions of the administration.
+        /// </summary>
+        public IEnumerable<AutoCrudAdminGridToolbarActionViewModel> ToolbarActions { get; set; } = null!;
     }
 }

@@ -15,9 +15,66 @@ namespace AutoCrudAdmin.TagHelpers
     using Microsoft.AspNetCore.Razor.TagHelpers;
     using static Constants.CssClassNames;
 
+    /// <summary>
+    /// A class for processing the elements of a form control.
+    /// </summary>
     [HtmlTargetElement("formInput", TagStructure = TagStructure.NormalOrSelfClosing)]
     public class FormInputTagHelper : TagHelper
     {
+        /// <summary>
+        /// Gets or sets the name of the form control form input.
+        /// </summary>
+        [HtmlAttributeName("for-name")]
+        public string Name { get; set; } = null!;
+
+        /// <summary>
+        /// Gets or sets the type of data the form control holds..
+        /// </summary>
+        [HtmlAttributeName("for-type")]
+        public Type Type { get; set; } = null!;
+
+        /// <summary>
+        /// Gets or sets the type of the form control.
+        /// </summary>
+        [HtmlAttributeName("for-form-control-type")]
+        public FormControlType FormControlType { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the form control is hidden.
+        /// </summary>
+        [HtmlAttributeName("is-hidden")]
+        public bool IsHidden { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the form control is read only.
+        /// </summary>
+        [HtmlAttributeName("is-readonly")]
+        public bool IsReadonly { get; set; }
+
+        /// <summary>
+        /// Gets or sets the text of the label of the form control.
+        /// </summary>
+        [HtmlAttributeName("with-label")]
+        public string LabelText { get; set; } = null!;
+
+        /// <summary>
+        /// Gets or sets the value of the form control.
+        /// </summary>
+        [HtmlAttributeName("with-value")]
+        public object Value { get; set; } = null!;
+
+        /// <summary>
+        /// Gets or sets the options of the form control.
+        /// </summary>
+        [HtmlAttributeName("with-options")]
+        public IEnumerable<object> Options { get; set; } = null!;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the form control has a database set.
+        /// </summary>
+        [HtmlAttributeName("is-db-set")]
+        public bool IsDbSet { get; set; }
+
         private static ISet<Type> NumberTypes => new HashSet<Type>
         {
             typeof(long),
@@ -30,33 +87,12 @@ namespace AutoCrudAdmin.TagHelpers
             typeof(float),
         };
 
-        [HtmlAttributeName("for-name")]
-        public string Name { get; set; }
-
-        [HtmlAttributeName("for-type")]
-        public Type Type { get; set; }
-
-        [HtmlAttributeName("for-form-control-type")]
-        public FormControlType FormControlType { get; set; }
-
-        [HtmlAttributeName("is-hidden")]
-        public bool IsHidden { get; set; }
-
-        [HtmlAttributeName("is-readonly")]
-        public bool IsReadonly { get; set; }
-
-        [HtmlAttributeName("with-label")]
-        public string LabelText { get; set; }
-
-        [HtmlAttributeName("with-value")]
-        public object Value { get; set; }
-
-        [HtmlAttributeName("with-options")]
-        public IEnumerable<object> Options { get; set; }
-
-        [HtmlAttributeName("is-db-set")]
-        public bool IsDbSet { get; set; }
-
+        /// <summary>
+        /// Processes the attributes of the form control.
+        /// </summary>
+        /// <param name="context">Contains information related to the execution of ITagHelpers.</param>
+        /// <param name="output">Represents the output of an ITagHelper.</param>
+        /// <returns>The successfully completed task.</returns>
         public override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             output.Attributes.SetAttribute("name", this.Name);
