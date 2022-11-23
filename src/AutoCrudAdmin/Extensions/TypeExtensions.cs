@@ -82,7 +82,7 @@ namespace AutoCrudAdmin.Extensions
                     return true;
                 }
 
-                type = type.BaseType;
+                type = type.BaseType!;
             }
 
             return false;

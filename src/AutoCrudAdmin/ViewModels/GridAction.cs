@@ -2,9 +2,9 @@ namespace AutoCrudAdmin.ViewModels
 {
     public class GridAction
     {
-        private string name;
+        private string? name;
 
-        public string Action { get; set; }
+        public string Action { get; set; } = null!;
 
         public string Name
         {

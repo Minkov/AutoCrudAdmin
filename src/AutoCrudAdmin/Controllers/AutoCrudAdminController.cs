@@ -448,9 +448,9 @@
             var columnsResult = properties
                 .Aggregate(
                     columns,
-                    (currentColumns, prop) => (IGridColumnsOf<TEntity>)GenerateColumnExpressionMethod
+                    (currentColumns, prop) => ((IGridColumnsOf<TEntity>)GenerateColumnExpressionMethod
                         .MakeGenericMethod(prop.PropertyType)
-                        .Invoke(null, new object[] { currentColumns, prop, stringMaxLength! }));
+                        .Invoke(null, new object[] { currentColumns, prop, stringMaxLength! })!)!);
 
             foreach (var customGridColumn in this.CustomColumns)
             {
@@ -477,9 +477,9 @@
                     columns.Add(model => htmlHelper.ActionLink(
                             action.Name,
                             action.Action,
-                            this.RouteData.Values["controller"].ToString(),
+                            this.RouteData.Values["controller"]!.ToString(),
                             RouteValueDictionary.FromArray(
-                                EntityType.GetPrimaryKeyValue(model).ToArray()),
+                                EntityType.GetPrimaryKeyValue(model).ToArray()!),
                             new { }))
                         .Titled("Action");
                 });
