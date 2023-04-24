@@ -111,6 +111,10 @@ namespace AutoCrudAdmin.TagHelpers
             {
                 this.PrepareMultiChoiceCheckbox(output);
             }
+            else if (this.FormControlType == FormControlType.Autocomplete)
+            {
+                this.PrepareAutocompleteDropdown(output);
+            }
             else if (this.IsDbSet)
             {
                 this.PrepareDropDownForDbSet(output);
@@ -130,6 +134,40 @@ namespace AutoCrudAdmin.TagHelpers
             }
 
             return Task.CompletedTask;
+        }
+
+        private void PrepareAutocompleteDropdown(TagHelperOutput output)
+        {
+            output.TagName = "input";
+            output.Attributes.SetAttribute("id", this.Name + "Id");
+            output.Attributes.SetAttribute("autocomplete", this.Name + "off");
+            output.Attributes.SetAttribute("list", this.Name + "Autocomplete");
+            var options = this.Options
+                .Select(x => new DropDownViewModel
+                {
+                    Name = x.ToString(),
+                    Value = ReflectionHelper.GetEntityTypeUnproxied(x).GetPrimaryKeyValue(x).First().Value,
+                })
+                .Take(20)
+                .ToList();
+
+            var values = options
+                .Select(x => x.Value!)
+                .ToList();
+            var names = options
+                .Select(x => x.Name)
+                .ToList();
+
+            var optionsResult = values
+                .Select((t, i) => new { Text = names[i], Value = values[i], })
+                .Select(x => $"<option value='{x.Text}'>{x.Text}</option>")
+                .ToList();
+
+            var sb = new StringBuilder();
+            optionsResult.ForEach(x => sb.AppendLine(x));
+            var result = $"<datalist id={this.Name}Autocomplete>" + sb + "</datalist>";
+
+            output.Content.SetHtmlContent(string.Join(string.Empty, result));
         }
 
         private void PrepareDropDownForDbSet(TagHelperOutput output)

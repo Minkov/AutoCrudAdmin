@@ -19,4 +19,9 @@ public enum FormControlType
     /// Text area form control type.
     /// </summary>
     TextArea = 2,
+
+    /// <summary>
+    /// Autocomplete form control type.
+    /// </summary>
+    Autocomplete = 3,
 }

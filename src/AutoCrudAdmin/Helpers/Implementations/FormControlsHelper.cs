@@ -161,7 +161,6 @@ namespace AutoCrudAdmin.Helpers.Implementations
             IDictionary<string, Expression<Func<object, bool>>>? optionFilters = null)
         {
             var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
-
             return entityType.GetProperties()
                 .Where(property => IsDbContextEntity(property) && !this.IsPartOfPrimaryKey(property, entityType))
                 .Select(property =>

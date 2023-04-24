@@ -70,5 +70,15 @@ namespace AutoCrudAdmin.ViewModels
         /// Gets or sets the type of the form control.
         /// </summary>
         public FormControlType FormControlType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the controller name, to which the autocomplete search query is directed.
+        /// </summary>
+        public string? FormControlAutocompleteController { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the Id property of the entity we are making an autocomplete search for.
+        /// </summary>
+        public string? FormControlAutocompleteEntityId { get; set; }
     }
 }
