@@ -6,4 +6,5 @@ public enum FormControlType
     MultiChoiceCheckbox = 1,
     TextArea = 2,
     ExpandableMultiChoiceCheckBox = 3,
+    Autocomplete = 4,
 }
