@@ -196,7 +196,7 @@ namespace AutoCrudAdmin.TagHelpers
         private void PrepareTextArea(TagHelperOutput output)
         {
             output.TagName = "textarea";
-            output.Content.SetContent(this.Value.ToString());
+            output.Content.SetContent(this.Value?.ToString() ?? string.Empty);
 
             // TODO: make height auto adjustable
             output.Attributes.SetAttribute("rows", 10);
