@@ -2,6 +2,7 @@ namespace AutoCrudAdmin.TagHelpers
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Text;
     using System.Text.Encodings.Web;
@@ -11,69 +12,23 @@ namespace AutoCrudAdmin.TagHelpers
     using AutoCrudAdmin.Helpers;
     using AutoCrudAdmin.ViewModels;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Abstractions;
+    using Microsoft.AspNetCore.Mvc.ModelBinding;
+    using Microsoft.AspNetCore.Mvc.Razor;
+    using Microsoft.AspNetCore.Mvc.Rendering;
     using Microsoft.AspNetCore.Mvc.TagHelpers;
+    using Microsoft.AspNetCore.Mvc.ViewFeatures;
     using Microsoft.AspNetCore.Razor.TagHelpers;
+    using Microsoft.AspNetCore.Routing;
     using static Constants.CssClassNames;
+    using static Constants.Html;
+    using static Constants.PartialView;
 
-    /// <summary>
-    /// A class for processing the elements of a form control.
-    /// </summary>
     [HtmlTargetElement("formInput", TagStructure = TagStructure.NormalOrSelfClosing)]
     public class FormInputTagHelper : TagHelper
     {
-        /// <summary>
-        /// Gets or sets the name of the form control form input.
-        /// </summary>
-        [HtmlAttributeName("for-name")]
-        public string Name { get; set; } = null!;
-
-        /// <summary>
-        /// Gets or sets the type of data the form control holds..
-        /// </summary>
-        [HtmlAttributeName("for-type")]
-        public Type Type { get; set; } = null!;
-
-        /// <summary>
-        /// Gets or sets the type of the form control.
-        /// </summary>
-        [HtmlAttributeName("for-form-control-type")]
-        public FormControlType FormControlType { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the form control is hidden.
-        /// </summary>
-        [HtmlAttributeName("is-hidden")]
-        public bool IsHidden { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the form control is read only.
-        /// </summary>
-        [HtmlAttributeName("is-readonly")]
-        public bool IsReadonly { get; set; }
-
-        /// <summary>
-        /// Gets or sets the text of the label of the form control.
-        /// </summary>
-        [HtmlAttributeName("with-label")]
-        public string LabelText { get; set; } = null!;
-
-        /// <summary>
-        /// Gets or sets the value of the form control.
-        /// </summary>
-        [HtmlAttributeName("with-value")]
-        public object Value { get; set; } = null!;
-
-        /// <summary>
-        /// Gets or sets the options of the form control.
-        /// </summary>
-        [HtmlAttributeName("with-options")]
-        public IEnumerable<object> Options { get; set; } = null!;
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the form control has a database set.
-        /// </summary>
-        [HtmlAttributeName("is-db-set")]
-        public bool IsDbSet { get; set; }
+        private readonly IPartialViewHelper partialViewHelper;
 
         private static ISet<Type> NumberTypes => new HashSet<Type>
         {
@@ -87,12 +42,39 @@ namespace AutoCrudAdmin.TagHelpers
             typeof(float),
         };
 
-        /// <summary>
-        /// Processes the attributes of the form control.
-        /// </summary>
-        /// <param name="context">Contains information related to the execution of ITagHelpers.</param>
-        /// <param name="output">Represents the output of an ITagHelper.</param>
-        /// <returns>The successfully completed task.</returns>
+        public FormInputTagHelper(IPartialViewHelper partialViewHelper)
+            => this.partialViewHelper = partialViewHelper;
+
+        [HtmlAttributeName("for-name")]
+        public string Name { get; set; }
+
+        [HtmlAttributeName("for-type")]
+        public Type Type { get; set; }
+
+        [HtmlAttributeName("for-form-control-type")]
+        public FormControlType FormControlType { get; set; }
+
+        [HtmlAttributeName("is-hidden")]
+        public bool IsHidden { get; set; }
+
+        [HtmlAttributeName("is-readonly")]
+        public bool IsReadonly { get; set; }
+
+        [HtmlAttributeName("with-label")]
+        public string LabelText { get; set; }
+
+        [HtmlAttributeName("with-value")]
+        public object Value { get; set; }
+
+        [HtmlAttributeName("with-options")]
+        public IEnumerable<object> Options { get; set; }
+
+        [HtmlAttributeName("is-db-set")]
+        public bool IsDbSet { get; set; }
+
+        [HtmlAttributeName("http-context")]
+        public HttpContext HttpContext { get; set; }
+
         public override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             output.Attributes.SetAttribute("name", this.Name);
@@ -240,15 +222,7 @@ namespace AutoCrudAdmin.TagHelpers
 
             var checkboxValues = (IEnumerable<CheckboxFormControlViewModel>)this.Options;
 
-            var checkboxes = checkboxValues.Select(x =>
-            {
-                var isChecked = x.IsChecked ? "checked='checked'" : string.Empty;
-
-                return $"<div class='{FormCheckbox} {FormCheckboxInline}'>" +
-                    $"<input type='checkbox' class='{FormCheckboxInput}' data-name='{x.Name}' data-value='{x.Value}' {isChecked}/>" +
-                    $"<label class='{FormCheckboxLabel}'>{x.DisplayName}</label>" +
-                    "</div>";
-            });
+            var checkboxes = checkboxValues.Select(x => this.GenerateCheckboxHtml(x));
 
             output.Content.SetHtmlContent(string.Join(string.Empty, checkboxes));
         }
@@ -256,7 +230,7 @@ namespace AutoCrudAdmin.TagHelpers
         private void PrepareTextArea(TagHelperOutput output)
         {
             output.TagName = "textarea";
-            output.Content.SetContent(this.Value.ToString());
+            output.Content.SetContent(this.Value?.ToString() ?? string.Empty);
 
             // TODO: make height auto adjustable
             output.Attributes.SetAttribute("rows", 10);
@@ -308,5 +282,44 @@ namespace AutoCrudAdmin.TagHelpers
             output.Attributes.SetAttribute("type", "datetime");
             output.AddClass("datetimepicker", HtmlEncoder.Default);
         }
+
+        private void PrepareExpandableMultiChoiceCheckBox(TagHelperOutput output)
+        {
+            output.TagName = "fieldset";
+            output.RemoveClass(FormControl, HtmlEncoder.Default);
+
+            var checkboxValues = (IEnumerable<ExpandableMultiChoiceCheckBoxFormControlViewModel>)this.Options;
+
+            var checkboxes = checkboxValues.Select(x =>
+            {
+                var result = this.partialViewHelper.GetViewResult(this.HttpContext, x, EntityFormControlPartial);
+
+                result = this.WrapExpandableComponent(x, result);
+
+                return this.GenerateCheckboxHtml(x, x.ExpandedValuePrefix) + result;
+            });
+
+            output.Content.SetHtmlContent(string.Join(NewLine, checkboxes));
+        }
+
+        private string GenerateCheckboxHtml(CheckboxFormControlViewModel checkboxFromControl, string expandedValuePrefix = "")
+        {
+            var isChecked = checkboxFromControl.IsChecked ? "checked='checked'" : string.Empty;
+            var showExpandable = string.IsNullOrWhiteSpace(expandedValuePrefix);
+
+            var expandableClass = showExpandable ? string.Empty : ExpandableClassName;
+
+            var expandableAttribute = showExpandable
+                ? string.Empty
+                : $"expand='{expandedValuePrefix}'";
+
+            return $"<div class='{FormCheckbox} {FormCheckboxInline}'>" +
+                   $"<input type='checkbox' class='{FormCheckboxInput} {expandableClass}' data-name='{checkboxFromControl.Name}' data-value='{checkboxFromControl.Value}' {isChecked} {expandableAttribute} />" +
+                   $"<label class='{FormCheckboxLabel}'>{checkboxFromControl.DisplayName}</label>" +
+                   "</div>";
+        }
+
+        private string WrapExpandableComponent(ExpandableMultiChoiceCheckBoxFormControlViewModel x, string result)
+            => $"<div id={x.ExpandedValuePrefix} class='{(x.IsChecked ? string.Empty : Hide)}'>" + result + "</div>";
     }
 }
