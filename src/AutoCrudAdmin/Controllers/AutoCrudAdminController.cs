@@ -86,6 +86,7 @@
         protected virtual IEnumerable<string> DateTimeFormats
             => new[]
             {
+                "dd/MM/yyyy 'г.' hh:mm:ss tt",
                 "dd/MM/yyyy hh:mm",
                 "M/dd/yyyy hh:mm:ss tt",
                 "M/dd/yyyy h:mm:ss tt",
