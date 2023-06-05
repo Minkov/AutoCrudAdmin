@@ -127,7 +127,6 @@ namespace AutoCrudAdmin.TagHelpers
             output.TagName = "input";
             output.Attributes.SetAttribute("id", this.Name + "Id");
             output.Attributes.SetAttribute("autocomplete", "off");
-            output.Attributes.SetAttribute("list", this.Name + "Autocomplete");
         }
 
         private void PrepareDropDownForDbSet(TagHelperOutput output)
