@@ -15,6 +15,8 @@
         list-style: none;
         padding: 0;
         margin: 0;
+        cursor: default;
+        display: block;
         
         max-height:200px; 
         max-width: 236px; 
@@ -74,10 +76,6 @@ $(function() {
          event.preventDefault();
          $(autocompleteId).val(ui.item.label);
         },
-    focus: function(event, ui) {
-        event.preventDefault();
-        $(autocompleteId).val(ui.item.label);
-    }
     });
 });
 </script>

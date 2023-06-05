@@ -122,9 +122,9 @@ namespace AutoCrudAdmin.TagHelpers
         {
             output.TagName = "input";
             output.Attributes.SetAttribute("id", this.Name + "Id");
-            output.Attributes.SetAttribute("autocomplete", this.Name + "off");
+            output.Attributes.SetAttribute("autocomplete", "off");
             output.Attributes.SetAttribute("list", this.Name + "Autocomplete");
-            var options = this.Options
+            /*var options = this.Options
                 .Select(x => new DropDownViewModel
                 {
                     Name = x.ToString(),
@@ -149,7 +149,7 @@ namespace AutoCrudAdmin.TagHelpers
             optionsResult.ForEach(x => sb.AppendLine(x));
             var result = $"<datalist id={this.Name}Autocomplete>" + sb + "</datalist>";
 
-            output.Content.SetHtmlContent(string.Join(string.Empty, result));
+            output.Content.SetHtmlContent(string.Join(string.Empty, result));*/
         }
 
         private void PrepareDropDownForDbSet(TagHelperOutput output)
