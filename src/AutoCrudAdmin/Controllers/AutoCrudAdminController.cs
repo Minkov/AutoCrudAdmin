@@ -141,6 +141,28 @@
         }
 
         [HttpGet]
+        public virtual IEnumerable<DropDownViewModel> Autocomplete([FromQuery]string searchTerm, string searchProperty)
+        {
+            var entityType = typeof(TEntity);
+            var searchedProperty = entityType.GetProperty(searchProperty);
+            var idProperty = entityType.GetProperty("Id");
+
+            if (searchedProperty == null || idProperty == null)
+            {
+                throw new ArgumentException("No such property exists on the entity!");
+            }
+
+            var entities = this.Set
+                .AsNoTracking()
+                .Where(e => EF.Property<string>(e, searchProperty).Contains(searchTerm))
+                .Select(x => new DropDownViewModel { Value = idProperty.GetValue(x) !.ToString() !, Name = searchedProperty.GetValue(x) !.ToString() ! })
+                .Take(20)
+                .ToList();
+
+            return entities;
+        }
+
+        [HttpGet]
         public virtual IActionResult Index()
             => this.View(
                 "../AutoCrudAdmin/Index",
