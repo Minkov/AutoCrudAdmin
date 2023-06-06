@@ -31,12 +31,7 @@
 
 @foreach (var formControl in Model)
 {
-    var autocompleteExists = Model.Count(fc => fc.DisplayName == formControl.DisplayName) > 1;
-
-    if (!autocompleteExists || formControl.FormControlType == FormControlType.Autocomplete)
-    {
-        <partial model="@formControl" name="@AutoCrudAdmin.Constants.PartialView.EntityFormControlPartial"/>
-    }
+    <partial model="@formControl" name="@AutoCrudAdmin.Constants.PartialView.EntityFormControlPartial"/>
     
     if (formControl.FormControlType == FormControlType.Autocomplete)
     {
@@ -45,39 +40,39 @@
         @Html.Hidden("ControllerName", controllerName);
         @Html.Hidden(formControl.FormControlAutocompleteEntityId, "");
         
-<script type="text/javascript">
-$(function() {
-    const autocompleteId= $('#AutocompleteId').val();
-    const controllerName = $('#ControllerName').val();
-    const hiddenId = '@formControl.FormControlAutocompleteEntityId';
-    
-  $(autocompleteId).autocomplete({
-    source: function(request, response) {
-      $.ajax({
-        type: "GET",
-
-        url: `/${controllerName}/Autocomplete`,
-        data: { 
-          searchTerm: request.term
-        },
-        success: function (data) {
-              response($.map(data, function (item) {
-                  $(`#${hiddenId}`).val(item.value);
-                  return { label: item.name, value: item.value };
-              }));
-          },
-        error: function(error){
-            console.log(error);
-         },
-       });
-      },
-    select: function(event, ui) {
-         event.preventDefault();
-         $(autocompleteId).val(ui.item.label);
-        },
-    });
-});
-</script>
+        <script type="text/javascript">
+           $(function() {
+               const autocompleteId= $('#AutocompleteId').val();
+               const controllerName = $('#ControllerName').val();
+               const hiddenId = '@formControl.FormControlAutocompleteEntityId';
+               
+             $(autocompleteId).autocomplete({
+               source: function(request, response) {
+                 $.ajax({
+                   type: "GET",
+           
+                   url: `/${controllerName}/Autocomplete`,
+                   data: { 
+                     searchTerm: request.term
+                   },
+                   success: function (data) {
+                         response($.map(data, function (item) {
+                             $(`#${hiddenId}`).val(item.value);
+                             return { label: item.name, value: item.value };
+                         }));
+                     },
+                   error: function(error){
+                       console.log(error);
+                    },
+                  });
+                 },
+               select: function(event, ui) {
+                    event.preventDefault();
+                    $(autocompleteId).val(ui.item.label);
+                   },
+               });
+           });
+        </script>
     }
 }
 

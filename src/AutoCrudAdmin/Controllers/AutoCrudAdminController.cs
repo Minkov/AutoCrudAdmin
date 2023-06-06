@@ -155,7 +155,7 @@
             var entities = this.Set
                 .AsNoTracking()
                 .Where(e => EF.Property<string>(e, searchProperty).Contains(searchTerm))
-                .Select(x => new DropDownViewModel { Value = idProperty.GetValue(x)!.ToString()!, Name = searchedProperty.GetValue(x)!.ToString()! })
+                .Select(x => new DropDownViewModel { Value = idProperty.GetValue(x) !.ToString() !, Name = searchedProperty.GetValue(x) !.ToString() ! })
                 .Take(20)
                 .ToList();
 
