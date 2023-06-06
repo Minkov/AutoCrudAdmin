@@ -97,6 +97,10 @@ namespace AutoCrudAdmin.TagHelpers
             {
                 this.PrepareExpandableMultiChoiceCheckBox(output);
             }
+            else if (this.FormControlType == FormControlType.Autocomplete)
+            {
+                this.PrepareAutocompleteDropdown(output);
+            }
             else if (this.IsDbSet)
             {
                 this.PrepareDropDownForDbSet(output);
@@ -116,6 +120,13 @@ namespace AutoCrudAdmin.TagHelpers
             }
 
             return Task.CompletedTask;
+        }
+
+        private void PrepareAutocompleteDropdown(TagHelperOutput output)
+        {
+            output.TagName = "input";
+            output.Attributes.SetAttribute("id", this.Name + "Id");
+            output.Attributes.SetAttribute("autocomplete", "off");
         }
 
         private void PrepareDropDownForDbSet(TagHelperOutput output)

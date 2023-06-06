@@ -40,5 +40,9 @@ namespace AutoCrudAdmin.ViewModels
         public bool IsDbSet { get; set; }
 
         public FormControlType FormControlType { get; set; }
+
+        public string? FormControlAutocompleteController { get; set; }
+
+        public string? FormControlAutocompleteEntityId { get; set; }
     }
 }
