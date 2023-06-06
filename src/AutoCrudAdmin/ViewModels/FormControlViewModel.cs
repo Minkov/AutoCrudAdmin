@@ -10,6 +10,9 @@ namespace AutoCrudAdmin.ViewModels
     {
         private string? displayName;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FormControlViewModel"/> class.
+        /// </summary>
         public FormControlViewModel()
             => this.Options = Enumerable.Empty<object>();
 
