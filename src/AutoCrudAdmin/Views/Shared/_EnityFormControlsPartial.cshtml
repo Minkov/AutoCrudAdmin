@@ -77,10 +77,13 @@
 }
 
 <script type="text/javascript">
-    $(function () {
-        $(".datetimepicker").flatpickr({
+   $(function () {
+       $(".datetimepicker").flatpickr({
            enableTime: true,
            dateFormat: "d/m/Y G:i K",
+           onChange: function(selectedDates, dateStr, instance) {
+              console.log(`Current selected flatPickr date value: ${dateStr}`);
+          }
        });
-    });
+   });
 </script>
