@@ -274,8 +274,9 @@
             TEntity entity,
             EntityAction action,
             IDictionary<string, string> entityDict,
-            IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters)
-            => this.FormControlsHelper.GenerateFormControls(entity, action, complexOptionFilters)
+            IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters,
+            Type autocompleteType = null)
+            => this.FormControlsHelper.GenerateFormControls(entity, action, complexOptionFilters, autocompleteType)
                 .Select(this.AddDefaultOptions);
 
         protected virtual Task<IEnumerable<FormControlViewModel>> GenerateFormControlsAsync(

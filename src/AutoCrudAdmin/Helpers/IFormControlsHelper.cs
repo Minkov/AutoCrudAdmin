@@ -10,7 +10,8 @@ namespace AutoCrudAdmin.Helpers
         IEnumerable<FormControlViewModel> GenerateFormControls<TEntity>(
             TEntity entity,
             EntityAction entityAction,
-            IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters = null);
+            IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters = null,
+            Type autocompleteType = null);
 
         string GetComplexFormControlNameForEntityName(string entityName);
     }
