@@ -36,7 +36,10 @@ namespace AutoCrudAdmin.TagHelpers
             typeof(int),
             typeof(int?),
             typeof(short),
+        };
 
+        private static ISet<Type> FloatingPointTypes => new HashSet<Type>
+        {
             typeof(decimal),
             typeof(double),
             typeof(float),
@@ -233,6 +236,11 @@ namespace AutoCrudAdmin.TagHelpers
             else if (NumberTypes.Contains(this.Type))
             {
                 output.Attributes.SetAttribute("type", "number");
+            }
+            else if (FloatingPointTypes.Contains(this.Type))
+            {
+                output.Attributes.SetAttribute("type", "number");
+                output.Attributes.SetAttribute("step", "0.5");
             }
             else if (this.Type == typeof(bool))
             {
