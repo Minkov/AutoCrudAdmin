@@ -57,7 +57,6 @@
                    },
                    success: function (data) {
                          response($.map(data, function (item) {
-                             $(`#${hiddenId}`).val(item.value);
                              return { label: item.name, value: item.value };
                          }));
                      },
@@ -68,6 +67,7 @@
                  },
                select: function(event, ui) {
                     event.preventDefault();
+                    $(`#${hiddenId}`).val(ui.item.value);
                     $(autocompleteId).val(ui.item.label);
                    },
                });

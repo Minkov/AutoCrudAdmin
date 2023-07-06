@@ -51,8 +51,9 @@ namespace AutoCrudAdmin.Helpers.Implementations
         public IEnumerable<FormControlViewModel> GenerateFormControls<TEntity>(
             TEntity entity,
             EntityAction entityAction,
-            IDictionary<string, Expression<Func<object, bool>>>? complexOptionFilters = null)
-            => this.GeneratePrimaryKeyFormControls(entity, entityAction)
+            IDictionary<string, Expression<Func<object, bool>>>? complexOptionFilters = null,
+            Type autocompleteType = null)
+            => this.GeneratePrimaryKeyFormControls(entity, entityAction, autocompleteType)
                 .Concat(GeneratePrimitiveFormControls(entity))
                 .Concat(this.GenerateComplexFormControls(entity, entityAction, complexOptionFilters));
 
@@ -61,7 +62,8 @@ namespace AutoCrudAdmin.Helpers.Implementations
 
         private IEnumerable<FormControlViewModel> GeneratePrimaryKeyFormControls<TEntity>(
             TEntity entity,
-            EntityAction entityAction)
+            EntityAction entityAction,
+            Type autocompleteType)
         {
             var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
 
@@ -78,12 +80,14 @@ namespace AutoCrudAdmin.Helpers.Implementations
                         var value = ExpressionsBuilder.ForGetPropertyValue<TEntity>(
                             entityType.GetProperty(pair.Key))(entity);
 
+                        var isAutocompleteFormcontrol = property.PropertyType == autocompleteType;
+
                         return new FormControlViewModel
                         {
                             Name = name,
                             Type = property.PropertyType,
                             Value = value,
-                            Options = this.dbContext.Set(property.PropertyType),
+                            Options = isAutocompleteFormcontrol ? Enumerable.Empty<object>() : this.dbContext.Set(property.PropertyType),
                             IsDbSet = true,
                             IsReadOnly = false,
                         };
