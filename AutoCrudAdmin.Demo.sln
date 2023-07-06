@@ -12,6 +12,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoCrudAdmin.Demo.PostgreS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoCrudAdmin.Demo.Sqlite", "demo\AutoCrudAdmin.Demo.Sqlite\AutoCrudAdmin.Demo.Sqlite.csproj", "{24C3C7CC-79CF-4498-A7F8-B4B4C4E0F4C9}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analyzers", "Analyzers", "{8CD9327B-2D4B-49DA-AF59-3F8C86BF8058}"
+	ProjectSection(SolutionItems) = preProject
+		Analyzers\rulesets.xml = Analyzers\rulesets.xml
+		Analyzers\stylecop.json = Analyzers\stylecop.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
