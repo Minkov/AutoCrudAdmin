@@ -11,11 +11,11 @@ namespace AutoCrudAdmin.Helpers
         /// Generates the form controls for the respective entity.
         /// </summary>
         /// <param name="entity">The entity we want to generate the form controls for.</param>
-        /// <param name="entityAction">Create, edit or delete form control action.</param>
-        /// <param name="complexOptionFilters">Filters for generating complex form controls.</param>
-        /// <param name="autocompleteType">The type of the autocomplete form control.</param>
-        /// <typeparam name="TEntity">The entity we are generating the form controls for.</typeparam>
-        /// <returns>The generated form controls.</returns>
+        /// <param name="entityAction">The action to be performed on the entity.</param>
+        /// <param name="complexOptionFilters">Optional. A dictionary containing complex option filters, based on which we are loading the data for the form control.</param>
+        /// <param name="autocompleteType">Optional. The type used for autocomplete functionality.</param>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <returns>An enumerable collection of FormControlViewModel objects.</returns>
         IEnumerable<FormControlViewModel> GenerateFormControls<TEntity>(
             TEntity entity,
             EntityAction entityAction,
