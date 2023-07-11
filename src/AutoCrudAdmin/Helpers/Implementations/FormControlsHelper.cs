@@ -52,7 +52,7 @@ namespace AutoCrudAdmin.Helpers.Implementations
             TEntity entity,
             EntityAction entityAction,
             IDictionary<string, Expression<Func<object, bool>>>? complexOptionFilters = null,
-            Type autocompleteType = null)
+            Type? autocompleteType = null)
             => this.GeneratePrimaryKeyFormControls(entity, entityAction, autocompleteType)
                 .Concat(GeneratePrimitiveFormControls(entity))
                 .Concat(this.GenerateComplexFormControls(entity, entityAction, complexOptionFilters));

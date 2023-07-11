@@ -44,7 +44,7 @@ namespace AutoCrudAdmin.Demo.Sqlite
                 {
                     Authorization = new[] { new AutoCrudAuthFilter(), },
                     // LayoutName = "_Layout",
-                    ApplicationName = "AutoCrudAdmin Demo"
+                    ApplicationName = "AutoCrudAdmin Demo",
                 });
 
             this.SetupDb(app);

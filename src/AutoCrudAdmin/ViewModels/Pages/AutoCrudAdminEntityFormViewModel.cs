@@ -4,9 +4,9 @@ namespace AutoCrudAdmin.ViewModels
 
     public class AutoCrudAdminEntityFormViewModel
     {
-        public IEnumerable<FormControlViewModel> FormControls { get; set; }
+        public IEnumerable<FormControlViewModel>? FormControls { get; set; }
 
-        public EntityAction Action { get; set; }
+        public EntityAction? Action { get; set; }
 
         public string? CustomActionName { get; set; }
     }

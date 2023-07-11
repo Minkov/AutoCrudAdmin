@@ -213,6 +213,7 @@
 
         protected virtual IQueryable<TEntity> ApplyIncludes(IQueryable<TEntity> queryable) => queryable;
 
+        
         protected virtual async Task<IActionResult> GetEntityForm(
             TEntity entity,
             EntityAction action,
@@ -270,21 +271,65 @@
                 });
         }
 
+        /// <summary>
+        /// Generates the form controls for the given entity and action. 
+        /// It uses the `IFormControlsHelper` to generate form controls for both primitive and complex properties of the entity. 
+        /// Complex properties can have their options filtered using the `complexOptionFilters` parameter.
+        /// </summary>
+        /// <param name="entity">The entity for which the form controls are generated.</param>
+        /// <param name="action">The action for which the form controls are generated.</param>
+        /// <param name="entityDict">A dictionary containing the entity's primary key value pairs.</param>
+        /// <param name="complexOptionFilters">A dictionary containing lambda expressions to filter the options of complex properties.</param>
+        /// <param name="autocompleteType">A type that specifies which property should have autocomplete functionality. If not provided, no property will have autocomplete functionality.</param>
+        /// <returns>Returns a list of `FormControlViewModel` objects representing the generated form controls.</returns>
         protected virtual IEnumerable<FormControlViewModel> GenerateFormControls(
             TEntity entity,
             EntityAction action,
             IDictionary<string, string> entityDict,
             IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters,
-            Type autocompleteType = null)
+            Type autocompleteType)
             => this.FormControlsHelper.GenerateFormControls(entity, action, complexOptionFilters, autocompleteType)
                 .Select(this.AddDefaultOptions);
 
-        protected virtual Task<IEnumerable<FormControlViewModel>> GenerateFormControlsAsync(
+        /// <summary>
+        /// Generates the form controls for the given entity and action.
+        /// It uses the `IFormControlsHelper` to generate form controls for both primitive and complex properties of the entity. 
+        /// Complex properties can have their options filtered using the `complexOptionFilters` parameter.
+        /// </summary>
+        /// <param name="entity">The entity for which the form controls are generated.</param>
+        /// <param name="action">The action for which the form controls are generated.</param>
+        /// <param name="entityDict">A dictionary containing the entity's primary key value pairs.</param>
+        /// <param name="complexOptionFilters">A dictionary containing lambda expressions to filter the options of complex properties.</param>
+        /// <returns>Returns a list of `FormControlViewModel` objects representing the generated form controls.</returns>
+        protected virtual IEnumerable<FormControlViewModel> GenerateFormControls(
             TEntity entity,
             EntityAction action,
             IDictionary<string, string> entityDict,
             IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters)
-            => Task.FromResult(this.GenerateFormControls(entity, action, entityDict, complexOptionFilters));
+            => this.GenerateFormControls(entity,
+                action,
+                entityDict,
+                complexOptionFilters,
+                null)
+
+        /// <summary>
+        /// Generates the form controls for the given entity and action. 
+        /// It uses the `IFormControlsHelper` to generate form controls for both primitive and complex properties of the entity. 
+        /// Complex properties can have their options filtered using the `complexOptionFilters` parameter.
+        /// </summary>
+        /// <param name="entity">The entity for which the form controls are generated.</param>
+        /// <param name="action">The action for which the form controls are generated.</param>
+        /// <param name="entityDict">A dictionary containing the entity's primary key value pairs.</param>
+        /// <param name="complexOptionFilters">A dictionary containing lambda expressions to filter the options of complex properties.</param>
+        /// <param name="autocompleteType">A type that specifies which property should have autocomplete functionality. If not provided, no property will have autocomplete functionality.</param>
+        /// <returns>Returns a list of `FormControlViewModel` objects representing the generated form controls.</returns>
+        protected virtual Task<IEnumerable<FormControlViewModel>> GenerateFormControlsAsync(
+            TEntity entity,
+            EntityAction action,
+            IDictionary<string, string> entityDict,
+            IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters,
+            Type autocompleteType = null)
+            => Task.FromResult(this.GenerateFormControls(entity, action, entityDict, complexOptionFilters, autocompleteType));
 
         protected virtual async Task<IActionResult> PostEntityForm(
             IDictionary<string, string> entityDict,

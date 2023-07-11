@@ -12,10 +12,8 @@
         [MaxLength(30)]
         public string Username { get; set; }
 
-
         [MaxLength(30)]
         public string Email { get; set; }
-
 
         [MaxLength(30)]
         public string Phone { get; set; }
