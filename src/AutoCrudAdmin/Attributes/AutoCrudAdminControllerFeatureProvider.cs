@@ -16,6 +16,8 @@ namespace AutoCrudAdmin.Attributes
             => Types = ReflectionHelper.DbSetProperties
                 .Select(p => p.PropertyType)
                 .Select(dt => dt.GetGenericArguments().FirstOrDefault())
+                .Where(t => t != null)
+                .Select(t => t!)
                 .ToList();
 
         private static IEnumerable<Type> Types { get; set; }

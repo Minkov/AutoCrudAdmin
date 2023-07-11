@@ -21,7 +21,7 @@ namespace AutoCrudAdmin.Attributes
             EntityTypeToNameMap = ReflectionHelper.DbSetProperties
                 .DistinctBy(x => x.PropertyType.GetGenericArguments().FirstOrDefault())
                 .ToDictionary(
-                    set => set.PropertyType.GetGenericArguments().FirstOrDefault(),
+                    set => set.PropertyType.GetGenericArguments().FirstOrDefault() !,
                     set => set.Name);
         }
 

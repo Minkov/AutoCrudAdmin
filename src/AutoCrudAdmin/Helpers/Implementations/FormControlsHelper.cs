@@ -155,38 +155,6 @@ namespace AutoCrudAdmin.Helpers.Implementations
                 });
         }
 
-        private static IEnumerable<FormControlViewModel> GeneratePrimitiveFormControls<TEntity>(TEntity entity)
-        {
-            var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
-
-            return entityType.GetProperties()
-                .Where(p => !p.GetCustomAttributes<NotMappedAttribute>().Any())
-                .Where(property => IsPrimitiveProperty(property, entityType)
-                                   && !IsComplexPrimaryKey(property, entityType))
-                .OrderBy(p => p.MetadataToken)
-                .Select(property => new FormControlViewModel
-                {
-                    Name = property.Name,
-                    Type = property.PropertyType,
-                    Value = ExpressionsBuilder.ForGetPropertyValue<TEntity>(property)(entity),
-                });
-        }
-
-        private static bool IsDbContextEntity(PropertyInfo property)
-            => Types.Contains(property.PropertyType);
-
-        private static bool IsPrimitiveProperty(PropertyInfo property, Type entityType)
-            => entityType
-                   .GetPrimaryKeyPropertyInfos()
-                   .Any(pk => pk == property)
-               || property.PropertyType.IsEnum
-               || (PrimitiveTypes.Contains(property.PropertyType) && !property.Name.ToLower().EndsWith("id"));
-
-        private static bool IsComplexPrimaryKey(PropertyInfo property, Type entityType)
-            => entityType
-                .GetPrimaryKeyPropertyInfos()
-                .Any(p => p == property);
-
         private bool IsPartOfPrimaryKey(PropertyInfo property, Type entityType)
             => entityType.GetPrimaryKeyPropertyInfos()
                 .Any(pk => pk.Name == this.GetComplexFormControlNameForEntityName(property.Name));
@@ -253,5 +221,37 @@ namespace AutoCrudAdmin.Helpers.Implementations
                 ? this.dbContext.Set(property.PropertyType).Where(optionsFilter)
                 : this.dbContext.Set(property.PropertyType);
         }
+
+        private static IEnumerable<FormControlViewModel> GeneratePrimitiveFormControls<TEntity>(TEntity entity)
+        {
+            var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
+
+            return entityType.GetProperties()
+                .Where(p => !p.GetCustomAttributes<NotMappedAttribute>().Any())
+                .Where(property => IsPrimitiveProperty(property, entityType)
+                                   && !IsComplexPrimaryKey(property, entityType))
+                .OrderBy(p => p.MetadataToken)
+                .Select(property => new FormControlViewModel
+                {
+                    Name = property.Name,
+                    Type = property.PropertyType,
+                    Value = ExpressionsBuilder.ForGetPropertyValue<TEntity>(property)(entity),
+                });
+        }
+
+        private static bool IsDbContextEntity(PropertyInfo property)
+            => Types.Contains(property.PropertyType);
+
+        private static bool IsPrimitiveProperty(PropertyInfo property, Type entityType)
+            => entityType
+                   .GetPrimaryKeyPropertyInfos()
+                   .Any(pk => pk == property)
+               || property.PropertyType.IsEnum
+               || (PrimitiveTypes.Contains(property.PropertyType) && !property.Name.ToLower().EndsWith("id"));
+
+        private static bool IsComplexPrimaryKey(PropertyInfo property, Type entityType)
+            => entityType
+                .GetPrimaryKeyPropertyInfos()
+                .Any(p => p == property);
     }
 }

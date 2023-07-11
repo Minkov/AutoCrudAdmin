@@ -30,24 +30,6 @@ namespace AutoCrudAdmin.TagHelpers
     {
         private readonly IPartialViewHelper partialViewHelper;
 
-        private static ISet<Type> NumberTypes => new HashSet<Type>
-        {
-            typeof(long),
-            typeof(int),
-            typeof(int?),
-            typeof(short),
-        };
-
-        private static ISet<Type> FloatingPointTypes => new HashSet<Type>
-        {
-            typeof(decimal),
-            typeof(double),
-            typeof(float),
-        };
-
-        public FormInputTagHelper(IPartialViewHelper partialViewHelper)
-            => this.partialViewHelper = partialViewHelper;
-
         [HtmlAttributeName("for-name")]
         public string Name { get; set; }
 
@@ -77,6 +59,24 @@ namespace AutoCrudAdmin.TagHelpers
 
         [HtmlAttributeName("http-context")]
         public HttpContext HttpContext { get; set; }
+
+        public FormInputTagHelper(IPartialViewHelper partialViewHelper)
+            => this.partialViewHelper = partialViewHelper;
+
+        private static ISet<Type> NumberTypes => new HashSet<Type>
+        {
+            typeof(long),
+            typeof(int),
+            typeof(int?),
+            typeof(short),
+        };
+
+        private static ISet<Type> FloatingPointTypes => new HashSet<Type>
+        {
+            typeof(decimal),
+            typeof(double),
+            typeof(float),
+        };
 
         public override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {

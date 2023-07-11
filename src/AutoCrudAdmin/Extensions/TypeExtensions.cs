@@ -24,6 +24,7 @@ namespace AutoCrudAdmin.Extensions
                 .Where(dbContext => dbContext != null)
                 .Select(dbContext => dbContext.Model.FindEntityType(type))
                 .Where(x => x != null)
+                .Select(x => x!)
                 .Select(entity => entity.FindPrimaryKey()
                     ?.Properties
                     .Select(x => x.Name)
@@ -47,13 +48,13 @@ namespace AutoCrudAdmin.Extensions
             {
                 var primaryKeyValue = primaryKeyInfos
                     .Select(property => property.GetValue(value))
-                    .FirstOrDefault();
+                    .FirstOrDefault() !;
 
                 return new[] { new KeyValuePair<string, object>(SinglePrimaryKeyName, primaryKeyValue) };
             }
 
             return primaryKeyInfos
-                .Select(property => new KeyValuePair<string, object>(property.Name, property.GetValue(value)));
+                .Select(property => new KeyValuePair<string, object>(property.Name, property.GetValue(value) !));
         }
 
         public static bool IsSubclassOfRawGeneric(this Type type, Type genericParent)

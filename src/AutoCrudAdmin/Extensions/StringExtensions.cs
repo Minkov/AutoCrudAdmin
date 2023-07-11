@@ -35,7 +35,7 @@ public static class StringExtensions
 
         if (longText?.Length > maxLength)
         {
-            return longText[..(maxLength - Ellipsis.Length + 1)] + Ellipsis;
+            return longText[.. (maxLength - Ellipsis.Length + 1)] + Ellipsis;
         }
 
         return longText;

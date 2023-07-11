@@ -50,7 +50,7 @@ public class PartialViewHelper : IPartialViewHelper
         var viewDictionary =
             new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary())
             {
-                Model = checkbox.Expand
+                Model = checkbox.Expand,
             };
 
         var viewContext = new ViewContext(
@@ -59,8 +59,7 @@ public class PartialViewHelper : IPartialViewHelper
             viewDictionary,
             new TempDataDictionary(actionContext.HttpContext, this.tempDataProvider),
             sw,
-            new HtmlHelperOptions()
-        );
+            new HtmlHelperOptions());
 
         viewResult.View.RenderAsync(viewContext).GetAwaiter().GetResult();
         return sw.ToString();

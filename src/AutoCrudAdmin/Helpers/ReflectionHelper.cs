@@ -33,7 +33,8 @@ namespace AutoCrudAdmin.Helpers
             var dbSetTypes = DbContexts
                 .SelectMany(t => t.GetProperties())
                 .Where(p => p.PropertyType.IsGenericType
-                            && p.PropertyType.Name.StartsWith("DbSet"));
+                            && p.PropertyType.Name.StartsWith("DbSet"))
+                .ToList();
 
             var entityTypes = dbSetTypes
                 .Select(dbSet => dbSet.PropertyType.GenericTypeArguments.FirstOrDefault())
@@ -42,9 +43,8 @@ namespace AutoCrudAdmin.Helpers
 
             var uniqueEntityTypes = entityTypes
                 .Where(parent =>
-                    !parent.IsGenericParameter
-                    && !entityTypes.Any(
-                        child => child.IsSubclassOfAnyType(parent)))
+                    parent?.IsGenericParameter == true
+                    && entityTypes.All(child => child?.IsSubclassOfAnyType(parent) != true))
                 .ToHashSet();
 
             return dbSetTypes

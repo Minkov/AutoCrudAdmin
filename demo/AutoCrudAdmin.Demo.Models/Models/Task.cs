@@ -6,20 +6,25 @@
 
     public class Task
     {
-        [Key] public int Id { get; set; }
+        [Key]
+        public int Id { get; set; }
 
         [Required]
         [MinLength(5)]
         [MaxLength(30)]
         public string Name { get; set; }
 
-        [Required] public DateTime OpenDate { get; set; }
+        [Required]
+        public DateTime OpenDate { get; set; }
 
-        [Required] public DateTime DueDate { get; set; }
+        [Required]
+        public DateTime DueDate { get; set; }
 
-        [Required] public TaskExecutionType ExecutionType { get; set; }
+        [Required]
+        public TaskExecutionType ExecutionType { get; set; }
 
-        [Required] public TaskLabelType LabelType { get; set; }
+        [Required]
+        public TaskLabelType LabelType { get; set; }
 
         [Required]
         public int ProjectId { get; set; }

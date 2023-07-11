@@ -18,9 +18,9 @@
         [MaxLength(30)]
         public string Phone { get; set; }
 
+        public ICollection<EmployeeTasks> EmployeeTasks { get; set; }
+
         public override string ToString()
             => $"{this.Id}, {this.Username}";
-        
-        public ICollection<EmployeeTasks> EmployeeTasks { get; set; }
     }
 }
