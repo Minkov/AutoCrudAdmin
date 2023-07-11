@@ -96,14 +96,45 @@ namespace AutoCrudAdmin.Helpers.Implementations
         public string GetComplexFormControlNameForEntityName(string entityName)
             => entityName + "Id";
 
+        private static IEnumerable<FormControlViewModel> GeneratePrimitiveFormControls<TEntity>(TEntity entity)
+        {
+            var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
+
+            return entityType.GetProperties()
+                .Where(p => !p.GetCustomAttributes<NotMappedAttribute>().Any())
+                .Where(property => IsPrimitiveProperty(property, entityType)
+                                   && !IsComplexPrimaryKey(property, entityType))
+                .OrderBy(p => p.MetadataToken)
+                .Select(property => new FormControlViewModel
+                {
+                    Name = property.Name,
+                    Type = property.PropertyType,
+                    Value = ExpressionsBuilder.ForGetPropertyValue<TEntity>(property)(entity),
+                });
+        }
+
+        private static bool IsDbContextEntity(PropertyInfo property)
+            => Types.Contains(property.PropertyType);
+
+        private static bool IsPrimitiveProperty(PropertyInfo property, Type entityType)
+            => entityType
+                   .GetPrimaryKeyPropertyInfos()
+                   .Any(pk => pk == property)
+               || property.PropertyType.IsEnum
+               || (PrimitiveTypes.Contains(property.PropertyType) && !property.Name.ToLower().EndsWith("id"));
+
+        private static bool IsComplexPrimaryKey(PropertyInfo property, Type entityType)
+            => entityType
+                .GetPrimaryKeyPropertyInfos()
+                .Any(p => p == property);
+
         private IEnumerable<FormControlViewModel> GeneratePrimaryKeyFormControls<TEntity>(
             TEntity entity,
-            EntityAction entityAction,
             Type autocompleteType)
         {
             var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
 
-            var primaryKeyValues = entityType.GetPrimaryKeyValue(entity)
+            var primaryKeyValues = entityType.GetPrimaryKeyValue(entity !)
                 .ToList();
 
             if (primaryKeyValues.Count > 1)
@@ -112,18 +143,18 @@ namespace AutoCrudAdmin.Helpers.Implementations
                     .Select(pair =>
                     {
                         var name = pair.Key[..^2];
-                        var property = entityType.GetProperty(name);
+                        var property = entityType.GetProperty(name) !;
                         var value = ExpressionsBuilder.ForGetPropertyValue<TEntity>(
-                            entityType.GetProperty(pair.Key))(entity);
+                            entityType.GetProperty(pair.Key) !)(entity);
 
-                        var isAutocompleteFormcontrol = property.PropertyType == autocompleteType;
+                        var isAutocompleteFormControl = property.PropertyType == autocompleteType;
 
                         return new FormControlViewModel
                         {
                             Name = name,
                             Type = property.PropertyType,
                             Value = value,
-                            Options = isAutocompleteFormcontrol ? Enumerable.Empty<object>() : this.dbContext.Set(property.PropertyType),
+                            Options = isAutocompleteFormControl ? Enumerable.Empty<object>() : this.dbContext.Set(property.PropertyType),
                             IsDbSet = true,
                             IsReadOnly = false,
                         };
@@ -141,9 +172,9 @@ namespace AutoCrudAdmin.Helpers.Implementations
 
                     var value = pair.Key == SinglePrimaryKeyName
                         ? ExpressionsBuilder.ForGetPropertyValue<TEntity>(
-                            entityType.GetPrimaryKeyPropertyInfos().FirstOrDefault())(entity)
+                            entityType.GetPrimaryKeyPropertyInfos().FirstOrDefault() !)(entity)
                         : ExpressionsBuilder.ForGetPropertyValue<TEntity>(
-                            entityType.GetProperty(pair.Key))(entity);
+                            entityType.GetProperty(pair.Key) !)(entity);
 
                     return new FormControlViewModel
                     {
@@ -221,37 +252,5 @@ namespace AutoCrudAdmin.Helpers.Implementations
                 ? this.dbContext.Set(property.PropertyType).Where(optionsFilter)
                 : this.dbContext.Set(property.PropertyType);
         }
-
-        private static IEnumerable<FormControlViewModel> GeneratePrimitiveFormControls<TEntity>(TEntity entity)
-        {
-            var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
-
-            return entityType.GetProperties()
-                .Where(p => !p.GetCustomAttributes<NotMappedAttribute>().Any())
-                .Where(property => IsPrimitiveProperty(property, entityType)
-                                   && !IsComplexPrimaryKey(property, entityType))
-                .OrderBy(p => p.MetadataToken)
-                .Select(property => new FormControlViewModel
-                {
-                    Name = property.Name,
-                    Type = property.PropertyType,
-                    Value = ExpressionsBuilder.ForGetPropertyValue<TEntity>(property)(entity),
-                });
-        }
-
-        private static bool IsDbContextEntity(PropertyInfo property)
-            => Types.Contains(property.PropertyType);
-
-        private static bool IsPrimitiveProperty(PropertyInfo property, Type entityType)
-            => entityType
-                   .GetPrimaryKeyPropertyInfos()
-                   .Any(pk => pk == property)
-               || property.PropertyType.IsEnum
-               || (PrimitiveTypes.Contains(property.PropertyType) && !property.Name.ToLower().EndsWith("id"));
-
-        private static bool IsComplexPrimaryKey(PropertyInfo property, Type entityType)
-            => entityType
-                .GetPrimaryKeyPropertyInfos()
-                .Any(p => p == property);
     }
 }

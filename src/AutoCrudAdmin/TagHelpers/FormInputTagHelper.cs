@@ -30,6 +30,9 @@ namespace AutoCrudAdmin.TagHelpers
     {
         private readonly IPartialViewHelper partialViewHelper;
 
+        public FormInputTagHelper(IPartialViewHelper partialViewHelper)
+            => this.partialViewHelper = partialViewHelper;
+
         [HtmlAttributeName("for-name")]
         public string Name { get; set; }
 
@@ -59,9 +62,6 @@ namespace AutoCrudAdmin.TagHelpers
 
         [HtmlAttributeName("http-context")]
         public HttpContext HttpContext { get; set; }
-
-        public FormInputTagHelper(IPartialViewHelper partialViewHelper)
-            => this.partialViewHelper = partialViewHelper;
 
         private static ISet<Type> NumberTypes => new HashSet<Type>
         {

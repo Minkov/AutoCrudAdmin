@@ -31,6 +31,7 @@ namespace AutoCrudAdmin.Helpers
                         ? entityType.GetPrimaryKeyPropertyInfos()
                             .Select(x => x.Name)
                             .FirstOrDefault()
+                        !
                         : pair.Key;
 
                     return new KeyValuePair<string, string>(key, pair.Value);
@@ -80,7 +81,7 @@ namespace AutoCrudAdmin.Helpers
                 Expression.Convert(
                     Expression.Call(
                         instanceParam,
-                        property.GetGetMethod()),
+                        property.GetGetMethod() !),
                     typeof(object)),
                 instanceParam).Compile();
         }
@@ -93,7 +94,7 @@ namespace AutoCrudAdmin.Helpers
         {
             var memberAccess = Expression.MakeMemberAccess(
                 parameter,
-                entityType.GetProperty(name));
+                entityType.GetProperty(name) !);
 
             var cast = Expression.Convert(
                 memberAccess,
