@@ -286,6 +286,13 @@
             IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters)
             => Task.FromResult(this.GenerateFormControls(entity, action, entityDict, complexOptionFilters));
 
+        protected virtual Task ModifyFormControls(
+            ICollection<FormControlViewModel> formControls,
+            TEntity entity,
+            EntityAction action,
+            IDictionary<string, string> entityDict)
+            => Task.CompletedTask;
+
         protected virtual async Task<IActionResult> PostEntityForm(
             IDictionary<string, string> entityDict,
             EntityAction action,

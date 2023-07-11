@@ -241,6 +241,7 @@ namespace AutoCrudAdmin.TagHelpers
             {
                 output.Attributes.SetAttribute("type", "number");
                 output.Attributes.SetAttribute("step", "0.5");
+                output.Attributes.SetAttribute("min", 0);
             }
             else if (this.Type == typeof(bool))
             {
