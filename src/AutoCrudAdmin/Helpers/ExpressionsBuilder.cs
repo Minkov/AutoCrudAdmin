@@ -33,7 +33,7 @@ namespace AutoCrudAdmin.Helpers
                             .FirstOrDefault()
                         : pair.Key;
 
-                    return new KeyValuePair<string, string>(key, pair.Value);
+                    return new KeyValuePair<string, string>(key!, pair.Value);
                 })
                 .Select(pair =>
                     ForPrimaryKeySubExpression(

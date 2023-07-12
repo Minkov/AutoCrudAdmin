@@ -99,7 +99,7 @@ namespace AutoCrudAdmin.Helpers.Implementations
         {
             var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
 
-            var primaryKeyValues = entityType.GetPrimaryKeyValue(entity)
+            var primaryKeyValues = entityType.GetPrimaryKeyValue(entity!)
                 .ToList();
 
             if (primaryKeyValues.Count > 1)
