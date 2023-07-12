@@ -14,12 +14,21 @@ using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Routing;
 using AutoCrudAdmin.ViewModels;
 
+/// <summary>
+/// The PartialViewHelper class is an implementation of the IPartialViewHelper interface.
+/// It provides methods for working with partial views in the context of the AutoCrudAdmin system.
+/// </summary>
 public class PartialViewHelper : IPartialViewHelper
 {
     private readonly IRazorViewEngine razorViewEngine;
     private readonly ITempDataProvider tempDataProvider;
     private readonly Dictionary<string, ViewEngineResult> cache;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PartialViewHelper"/> class.
+    /// </summary>
+    /// <param name="razorViewEngine">The razor view engine used to render views.</param>
+    /// <param name="tempDataProvider">The temporary data provider used to store data between requests.</param>
     public PartialViewHelper(IRazorViewEngine razorViewEngine, ITempDataProvider tempDataProvider)
     {
         this.razorViewEngine = razorViewEngine;
@@ -27,6 +36,13 @@ public class PartialViewHelper : IPartialViewHelper
         this.cache = new Dictionary<string, ViewEngineResult>();
     }
 
+    /// <summary>
+    /// The GetViewResult method retrieves the result of a rendered view as a string.
+    /// </summary>
+    /// <param name="httpContext">The HTTP context.</param>
+    /// <param name="checkbox">The checkbox form control view model which will be passed to the view.</param>
+    /// <param name="viewName">The name of the view to render.</param>
+    /// <returns>A string containing the result of the rendered view.</returns>
     public string GetViewResult(
         HttpContext httpContext,
         ExpandableMultiChoiceCheckBoxFormControlViewModel checkbox,

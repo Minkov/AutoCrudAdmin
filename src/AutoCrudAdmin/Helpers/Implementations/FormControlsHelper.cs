@@ -11,6 +11,11 @@ namespace AutoCrudAdmin.Helpers.Implementations
     using Microsoft.EntityFrameworkCore;
     using static AutoCrudAdmin.Constants.Entity;
 
+    /// <summary>
+    /// The <see cref="FormControlsHelper"/> class provides implementation for <see cref="IFormControlsHelper"/>.
+    /// It contains methods to generate form controls for a given entity,
+    /// to get complex form control name for provided entity name and more.
+    /// </summary>
     public class FormControlsHelper
         : IFormControlsHelper
     {
@@ -37,12 +42,20 @@ namespace AutoCrudAdmin.Helpers.Implementations
 
         private readonly DbContext dbContext;
 
+        /// <summary>
+        /// Initializes static members of the <see cref="FormControlsHelper"/> class.
+        /// It initializes the Types property with the set of types that are used in DbSet properties.
+        /// </summary>
         static FormControlsHelper()
             => Types = ReflectionHelper.DbSetProperties
                 .Select(p => p.PropertyType)
                 .Select(dt => dt.GetGenericArguments().FirstOrDefault())
                 .ToHashSet();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FormControlsHelper"/> class.
+        /// </summary>
+        /// <param name="dbContext">The DbContext instance that this class interacts with.</param>
         public FormControlsHelper(DbContext dbContext)
             => this.dbContext = dbContext;
 
