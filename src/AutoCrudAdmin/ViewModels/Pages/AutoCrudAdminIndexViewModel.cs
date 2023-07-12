@@ -1,4 +1,4 @@
-namespace AutoCrudAdmin.ViewModels;
+namespace AutoCrudAdmin.ViewModels.Pages;
 
 using System;
 using System.Collections.Generic;

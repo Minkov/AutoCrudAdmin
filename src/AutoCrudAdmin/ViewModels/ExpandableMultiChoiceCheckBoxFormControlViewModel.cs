@@ -1,4 +1,5 @@
 ﻿namespace AutoCrudAdmin.ViewModels;
+
 using System;
 
 public class ExpandableMultiChoiceCheckBoxFormControlViewModel : CheckboxFormControlViewModel
