@@ -4,7 +4,7 @@ namespace AutoCrudAdmin.ViewModels
     {
         public bool IsValid { get; set; }
 
-        public string Message { get; set; }
+        public string Message { get; set; } = default!;
 
         public static ValidatorResult Success()
             => new ()

@@ -13,6 +13,6 @@ namespace AutoCrudAdmin.Extensions
                 .GetMethods()
                 .FirstOrDefault(m => m.Name == "Set" && m.GetParameters().Length == 0)
                 ?.MakeGenericMethod(entityType)
-                .Invoke(dbContext, null);
+                .Invoke(dbContext, null) !;
     }
 }

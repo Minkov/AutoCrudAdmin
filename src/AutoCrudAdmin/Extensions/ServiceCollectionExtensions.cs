@@ -19,9 +19,7 @@ namespace AutoCrudAdmin.Extensions
                 .AddMvcOptions(o =>
                     o.Conventions.Add(new AutoCrudAdminControllerNameConvention()))
                 .ConfigureApplicationPartManager(c =>
-                {
-                    c.FeatureProviders.Add(new AutoCrudAdminControllerFeatureProvider());
-                });
+                    c.FeatureProviders.Add(new AutoCrudAdminControllerFeatureProvider()));
 
             return services;
         }

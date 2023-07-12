@@ -2,7 +2,6 @@ namespace AutoCrudAdmin.TagHelpers
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
     using System.Text;
     using System.Text.Encodings.Web;
@@ -12,15 +11,8 @@ namespace AutoCrudAdmin.TagHelpers
     using AutoCrudAdmin.Helpers;
     using AutoCrudAdmin.ViewModels;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.Abstractions;
-    using Microsoft.AspNetCore.Mvc.ModelBinding;
-    using Microsoft.AspNetCore.Mvc.Razor;
-    using Microsoft.AspNetCore.Mvc.Rendering;
     using Microsoft.AspNetCore.Mvc.TagHelpers;
-    using Microsoft.AspNetCore.Mvc.ViewFeatures;
     using Microsoft.AspNetCore.Razor.TagHelpers;
-    using Microsoft.AspNetCore.Routing;
     using static Constants.CssClassNames;
     using static Constants.Html;
     using static Constants.PartialView;
@@ -28,9 +20,7 @@ namespace AutoCrudAdmin.TagHelpers
     [HtmlTargetElement("formInput", TagStructure = TagStructure.NormalOrSelfClosing)]
     public class FormInputTagHelper : TagHelper
     {
-        private readonly IPartialViewHelper partialViewHelper;
-
-        private static ISet<Type> NumberTypes => new HashSet<Type>
+        private static readonly ISet<Type> NumberTypes = new HashSet<Type>
         {
             typeof(long),
             typeof(int),
@@ -38,21 +28,23 @@ namespace AutoCrudAdmin.TagHelpers
             typeof(short),
         };
 
-        private static ISet<Type> FloatingPointTypes => new HashSet<Type>
+        private static readonly ISet<Type> FloatingPointTypes = new HashSet<Type>
         {
             typeof(decimal),
             typeof(double),
             typeof(float),
         };
 
+        private readonly IPartialViewHelper partialViewHelper;
+
         public FormInputTagHelper(IPartialViewHelper partialViewHelper)
             => this.partialViewHelper = partialViewHelper;
 
         [HtmlAttributeName("for-name")]
-        public string Name { get; set; }
+        public string Name { get; set; } = default!;
 
         [HtmlAttributeName("for-type")]
-        public Type Type { get; set; }
+        public Type Type { get; set; } = default!;
 
         [HtmlAttributeName("for-form-control-type")]
         public FormControlType FormControlType { get; set; }
@@ -64,19 +56,19 @@ namespace AutoCrudAdmin.TagHelpers
         public bool IsReadonly { get; set; }
 
         [HtmlAttributeName("with-label")]
-        public string LabelText { get; set; }
+        public string? LabelText { get; set; }
 
         [HtmlAttributeName("with-value")]
-        public object Value { get; set; }
+        public object? Value { get; set; }
 
         [HtmlAttributeName("with-options")]
-        public IEnumerable<object> Options { get; set; }
+        public IEnumerable<object> Options { get; set; } = default!;
 
         [HtmlAttributeName("is-db-set")]
         public bool IsDbSet { get; set; }
 
         [HtmlAttributeName("http-context")]
-        public HttpContext HttpContext { get; set; }
+        public HttpContext HttpContext { get; set; } = default!;
 
         public override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
@@ -125,6 +117,32 @@ namespace AutoCrudAdmin.TagHelpers
             return Task.CompletedTask;
         }
 
+        private static string GenerateCheckboxHtml(CheckboxFormControlViewModel checkboxFromControl, string expandedValuePrefix = "")
+        {
+            var isChecked = checkboxFromControl.IsChecked ? "checked='checked'" : string.Empty;
+            var showExpandable = string.IsNullOrWhiteSpace(expandedValuePrefix);
+
+            var expandableClass = showExpandable ? string.Empty : ExpandableClassName;
+
+            var expandableAttribute = showExpandable
+                ? string.Empty
+                : $"expand='{expandedValuePrefix}'";
+
+            return $"<div class='{FormCheckbox} {FormCheckboxInline}'>" +
+                   $"<input type='checkbox' class='{FormCheckboxInput} {expandableClass}' data-name='{checkboxFromControl.Name}' data-value='{checkboxFromControl.Value}' {isChecked} {expandableAttribute} />" +
+                   $"<label class='{FormCheckboxLabel}'>{checkboxFromControl.DisplayName}</label>" +
+                   "</div>";
+        }
+
+        private static string WrapExpandableComponent(ExpandableMultiChoiceCheckBoxFormControlViewModel x, string result)
+            => $"<div id={x.ExpandedValuePrefix} class='{(x.IsChecked ? string.Empty : Hide)}'>" + result + "</div>";
+
+        private static void PrepareDatetimePicker(TagHelperOutput output)
+        {
+            output.Attributes.SetAttribute("type", "datetime");
+            output.AddClass("datetimepicker", HtmlEncoder.Default);
+        }
+
         private void PrepareAutocompleteDropdown(TagHelperOutput output)
         {
             output.TagName = "input";
@@ -137,7 +155,7 @@ namespace AutoCrudAdmin.TagHelpers
             var values = this.Options
                 .Select(x => new DropDownViewModel
                 {
-                    Name = x.ToString(),
+                    Name = x.ToString() !,
                     Value = ReflectionHelper.GetEntityTypeUnproxied(x).GetPrimaryKeyValue(x).First().Value,
                 })
                 .ToList();
@@ -159,7 +177,7 @@ namespace AutoCrudAdmin.TagHelpers
             }
 
             var values = options
-                .Select(x => x.Value!)
+                .Select(x => x.Value)
                 .ToList();
             var names = options
                 .Select(x => x.Name)
@@ -187,7 +205,7 @@ namespace AutoCrudAdmin.TagHelpers
                     .Cast<object>()
                     .Select((t, i) => new { Text = names[i], Value = values.GetValue(i)?.ToString(), })
                     .Select(x =>
-                        x.Value == this.Value.ToString()
+                        x.Value == this.Value?.ToString()
                             ? $"<option value='{x.Value}' selected>{x.Text}</option>"
                             : $"<option value='{x.Value}'>{x.Text}</option>")
                     .ToList();
@@ -202,7 +220,7 @@ namespace AutoCrudAdmin.TagHelpers
 
             var checkboxValues = (IEnumerable<CheckboxFormControlViewModel>)this.Options;
 
-            var checkboxes = checkboxValues.Select(x => this.GenerateCheckboxHtml(x));
+            var checkboxes = checkboxValues.Select(x => GenerateCheckboxHtml(x));
 
             output.Content.SetHtmlContent(string.Join(string.Empty, checkboxes));
         }
@@ -227,7 +245,7 @@ namespace AutoCrudAdmin.TagHelpers
             }
             else if (this.Type == typeof(DateTime) || this.Type == typeof(DateTime?))
             {
-                this.PrepareDatetimePicker(output);
+                PrepareDatetimePicker(output);
             }
             else if (this.Type == typeof(TimeSpan) || this.Type == typeof(TimeSpan?))
             {
@@ -262,12 +280,6 @@ namespace AutoCrudAdmin.TagHelpers
             }
         }
 
-        private void PrepareDatetimePicker(TagHelperOutput output)
-        {
-            output.Attributes.SetAttribute("type", "datetime");
-            output.AddClass("datetimepicker", HtmlEncoder.Default);
-        }
-
         private void PrepareExpandableMultiChoiceCheckBox(TagHelperOutput output)
         {
             output.TagName = "fieldset";
@@ -279,32 +291,12 @@ namespace AutoCrudAdmin.TagHelpers
             {
                 var result = this.partialViewHelper.GetViewResult(this.HttpContext, x, EntityFormControlPartial);
 
-                result = this.WrapExpandableComponent(x, result);
+                result = WrapExpandableComponent(x, result);
 
-                return this.GenerateCheckboxHtml(x, x.ExpandedValuePrefix) + result;
+                return GenerateCheckboxHtml(x, x.ExpandedValuePrefix) + result;
             });
 
             output.Content.SetHtmlContent(string.Join(NewLine, checkboxes));
         }
-
-        private string GenerateCheckboxHtml(CheckboxFormControlViewModel checkboxFromControl, string expandedValuePrefix = "")
-        {
-            var isChecked = checkboxFromControl.IsChecked ? "checked='checked'" : string.Empty;
-            var showExpandable = string.IsNullOrWhiteSpace(expandedValuePrefix);
-
-            var expandableClass = showExpandable ? string.Empty : ExpandableClassName;
-
-            var expandableAttribute = showExpandable
-                ? string.Empty
-                : $"expand='{expandedValuePrefix}'";
-
-            return $"<div class='{FormCheckbox} {FormCheckboxInline}'>" +
-                   $"<input type='checkbox' class='{FormCheckboxInput} {expandableClass}' data-name='{checkboxFromControl.Name}' data-value='{checkboxFromControl.Value}' {isChecked} {expandableAttribute} />" +
-                   $"<label class='{FormCheckboxLabel}'>{checkboxFromControl.DisplayName}</label>" +
-                   "</div>";
-        }
-
-        private string WrapExpandableComponent(ExpandableMultiChoiceCheckBoxFormControlViewModel x, string result)
-            => $"<div id={x.ExpandedValuePrefix} class='{(x.IsChecked ? string.Empty : Hide)}'>" + result + "</div>";
     }
 }

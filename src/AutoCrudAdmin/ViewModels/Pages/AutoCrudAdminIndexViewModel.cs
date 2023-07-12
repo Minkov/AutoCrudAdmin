@@ -7,8 +7,8 @@ namespace AutoCrudAdmin.ViewModels
 
     public class AutoCrudAdminIndexViewModel
     {
-        public Func<IHtmlHelper<AutoCrudAdminIndexViewModel>, IHtmlContent> GenerateGrid { get; set; }
+        public Func<IHtmlHelper<AutoCrudAdminIndexViewModel>, IHtmlContent> GenerateGrid { get; set; } = default!;
 
-        public IEnumerable<AutoCrudAdminGridToolbarActionViewModel> ToolbarActions { get; set; }
+        public IEnumerable<AutoCrudAdminGridToolbarActionViewModel> ToolbarActions { get; set; } = default!;
     }
 }

@@ -152,7 +152,11 @@
             var entities = this.Set
                 .AsNoTracking()
                 .Where(e => EF.Property<string>(e, searchProperty).Contains(searchTerm))
-                .Select(x => new DropDownViewModel { Value = idProperty.GetValue(x) !.ToString() !, Name = searchedProperty.GetValue(x) !.ToString() ! })
+                .Select(x => new DropDownViewModel
+                {
+                    Value = idProperty.GetValue(x) !.ToString() !,
+                    Name = searchedProperty.GetValue(x) !.ToString() !,
+                })
                 .Take(20)
                 .ToList();
 
@@ -275,7 +279,7 @@
             EntityAction action,
             IDictionary<string, string> entityDict,
             IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters,
-            Type autocompleteType = null)
+            Type? autocompleteType = null)
             => this.FormControlsHelper.GenerateFormControls(entity, action, complexOptionFilters, autocompleteType)
                 .Select(this.AddDefaultOptions);
 
@@ -429,7 +433,8 @@
                 .Where(filter)
                 .OrderBy(property => property != primaryKeys.FirstOrDefault());
 
-            properties = primaryKeys.Skip(1)
+            properties = primaryKeys
+                .Skip(1)
                 .Aggregate(
                     properties,
                     (current, pk)
@@ -441,7 +446,7 @@
                     columns,
                     (currentColumns, prop) => (IGridColumnsOf<TEntity>)GenerateColumnExpressionMethod
                         .MakeGenericMethod(prop.PropertyType)
-                        .Invoke(null, new object[] { currentColumns, prop, stringMaxLength! }));
+                        .Invoke(null, new object[] { currentColumns, prop, stringMaxLength! }) !);
 
             foreach (var customGridColumn in this.CustomColumns)
             {
@@ -468,9 +473,9 @@
                     columns.Add(model => htmlHelper.ActionLink(
                             action.Name,
                             action.Action,
-                            this.RouteData.Values["controller"].ToString(),
+                            this.RouteData.Values["controller"] !.ToString(),
                             RouteValueDictionary.FromArray(
-                                EntityType.GetPrimaryKeyValue(model).ToArray()),
+                                EntityType.GetPrimaryKeyValue(model).ToArray() !),
                             new { }))
                         .Titled("Action");
                 });
@@ -574,7 +579,7 @@
 
         private static void CopyFormPropertiesToExistingEntityFromNewEntity(TEntity existingEntity, TEntity newEntity)
         {
-            foreach (PropertyInfo property in typeof(TEntity)
+            foreach (var property in typeof(TEntity)
                 .GetProperties()
                 .Where(p => p.CanWrite && !p.PropertyType.IsNavigationProperty()))
             {

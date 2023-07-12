@@ -80,7 +80,7 @@ namespace AutoCrudAdmin.Helpers
                 Expression.Convert(
                     Expression.Call(
                         instanceParam,
-                        property.GetGetMethod()),
+                        property.GetGetMethod() !),
                     typeof(object)),
                 instanceParam).Compile();
         }
@@ -93,11 +93,12 @@ namespace AutoCrudAdmin.Helpers
         {
             var memberAccess = Expression.MakeMemberAccess(
                 parameter,
-                entityType.GetProperty(name));
+                entityType.GetProperty(name) !);
 
             var cast = Expression.Convert(
                 memberAccess,
                 typeof(object));
+
             var id = Expression.Convert(
                 Expression.Constant(value),
                 typeof(object));

@@ -42,9 +42,9 @@ namespace AutoCrudAdmin.Helpers
 
             var uniqueEntityTypes = entityTypes
                 .Where(parent =>
-                    !parent.IsGenericParameter
+                    !parent!.IsGenericParameter
                     && !entityTypes.Any(
-                        child => child.IsSubclassOfAnyType(parent)))
+                        child => child!.IsSubclassOfAnyType(parent)))
                 .ToHashSet();
 
             return dbSetTypes
@@ -56,7 +56,8 @@ namespace AutoCrudAdmin.Helpers
 
         private static IEnumerable<Type> FindDbContexts()
         {
-            var allDbContexts = AppDomain.CurrentDomain.GetAssemblies()
+            var allDbContexts = AppDomain.CurrentDomain
+                .GetAssemblies()
                 .SelectMany(s => s.GetTypes())
                 .Where(t => t.IsSubclassOf(typeof(DbContext)))
                 .Distinct()

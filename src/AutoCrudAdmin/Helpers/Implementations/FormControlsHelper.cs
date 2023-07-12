@@ -40,7 +40,7 @@ namespace AutoCrudAdmin.Helpers.Implementations
         static FormControlsHelper()
             => Types = ReflectionHelper.DbSetProperties
                 .Select(p => p.PropertyType)
-                .Select(dt => dt.GetGenericArguments().FirstOrDefault())
+                .Select(dt => dt.GetGenericArguments().First())
                 .ToHashSet();
 
         public FormControlsHelper(DbContext dbContext)
@@ -52,72 +52,13 @@ namespace AutoCrudAdmin.Helpers.Implementations
             TEntity entity,
             EntityAction entityAction,
             IDictionary<string, Expression<Func<object, bool>>>? complexOptionFilters = null,
-            Type autocompleteType = null)
+            Type? autocompleteType = null)
             => this.GeneratePrimaryKeyFormControls(entity, entityAction, autocompleteType)
                 .Concat(GeneratePrimitiveFormControls(entity))
                 .Concat(this.GenerateComplexFormControls(entity, entityAction, complexOptionFilters));
 
         public string GetComplexFormControlNameForEntityName(string entityName)
             => entityName + "Id";
-
-        private IEnumerable<FormControlViewModel> GeneratePrimaryKeyFormControls<TEntity>(
-            TEntity entity,
-            EntityAction entityAction,
-            Type autocompleteType)
-        {
-            var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
-
-            var primaryKeyValues = entityType.GetPrimaryKeyValue(entity)
-                .ToList();
-
-            if (primaryKeyValues.Count > 1)
-            {
-                return primaryKeyValues
-                    .Select(pair =>
-                    {
-                        var name = pair.Key[..^2];
-                        var property = entityType.GetProperty(name);
-                        var value = ExpressionsBuilder.ForGetPropertyValue<TEntity>(
-                            entityType.GetProperty(pair.Key))(entity);
-
-                        var isAutocompleteFormcontrol = property.PropertyType == autocompleteType;
-
-                        return new FormControlViewModel
-                        {
-                            Name = name,
-                            Type = property.PropertyType,
-                            Value = value,
-                            Options = isAutocompleteFormcontrol ? Enumerable.Empty<object>() : this.dbContext.Set(property.PropertyType),
-                            IsDbSet = true,
-                            IsReadOnly = false,
-                        };
-                    });
-            }
-
-            return primaryKeyValues
-                .Select(pair =>
-                {
-                    var name = pair.Key == SinglePrimaryKeyName
-                        ? entityType.GetPrimaryKeyPropertyInfos()
-                            .Select(pk => pk.Name)
-                            .FirstOrDefault()
-                        : pair.Key;
-
-                    var value = pair.Key == SinglePrimaryKeyName
-                        ? ExpressionsBuilder.ForGetPropertyValue<TEntity>(
-                            entityType.GetPrimaryKeyPropertyInfos().FirstOrDefault())(entity)
-                        : ExpressionsBuilder.ForGetPropertyValue<TEntity>(
-                            entityType.GetProperty(pair.Key))(entity);
-
-                    return new FormControlViewModel
-                    {
-                        Name = name!,
-                        Type = pair.Value.GetType(),
-                        Value = value,
-                        IsReadOnly = true,
-                    };
-                });
-        }
 
         private static IEnumerable<FormControlViewModel> GeneratePrimitiveFormControls<TEntity>(TEntity entity)
         {
@@ -150,6 +91,65 @@ namespace AutoCrudAdmin.Helpers.Implementations
             => entityType
                 .GetPrimaryKeyPropertyInfos()
                 .Any(p => p == property);
+
+        private IEnumerable<FormControlViewModel> GeneratePrimaryKeyFormControls<TEntity>(
+            TEntity entity,
+            EntityAction entityAction,
+            Type? autocompleteType = null)
+        {
+            var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
+
+            var primaryKeyValues = entityType.GetPrimaryKeyValue(entity)
+                .ToList();
+
+            if (primaryKeyValues.Count > 1)
+            {
+                return primaryKeyValues
+                    .Select(pair =>
+                    {
+                        var name = pair.Key[..^2];
+                        var property = entityType.GetProperty(name) !;
+                        var value = ExpressionsBuilder.ForGetPropertyValue<TEntity>(
+                            entityType.GetProperty(pair.Key) !)(entity);
+
+                        var isAutocompleteFormcontrol = property.PropertyType == autocompleteType;
+
+                        return new FormControlViewModel
+                        {
+                            Name = name,
+                            Type = property.PropertyType,
+                            Value = value,
+                            Options = isAutocompleteFormcontrol ? Enumerable.Empty<object>() : this.dbContext.Set(property.PropertyType),
+                            IsDbSet = true,
+                            IsReadOnly = false,
+                        };
+                    });
+            }
+
+            return primaryKeyValues
+                .Select(pair =>
+                {
+                    var name = pair.Key == SinglePrimaryKeyName
+                        ? entityType.GetPrimaryKeyPropertyInfos()
+                            .Select(pk => pk.Name)
+                            .FirstOrDefault()
+                        : pair.Key;
+
+                    var value = pair.Key == SinglePrimaryKeyName
+                        ? ExpressionsBuilder.ForGetPropertyValue<TEntity>(
+                            entityType.GetPrimaryKeyPropertyInfos().First())(entity)
+                        : ExpressionsBuilder.ForGetPropertyValue<TEntity>(
+                            entityType.GetProperty(pair.Key) !)(entity);
+
+                    return new FormControlViewModel
+                    {
+                        Name = name!,
+                        Type = pair.Value.GetType(),
+                        Value = value,
+                        IsReadOnly = true,
+                    };
+                });
+        }
 
         private bool IsPartOfPrimaryKey(PropertyInfo property, Type entityType)
             => entityType.GetPrimaryKeyPropertyInfos()
