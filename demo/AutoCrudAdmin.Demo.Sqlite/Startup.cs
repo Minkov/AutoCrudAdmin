@@ -1,60 +1,59 @@
-namespace AutoCrudAdmin.Demo.Sqlite
+namespace AutoCrudAdmin.Demo.Sqlite;
+
+using AutoCrudAdmin.Demo.Sqlite.Extensions;
+using AutoCrudAdmin.Demo.Sqlite.Filters;
+using AutoCrudAdmin.Extensions;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+public class Startup
 {
-    using AutoCrudAdmin.Demo.Sqlite.Extensions;
-    using AutoCrudAdmin.Demo.Sqlite.Filters;
-    using AutoCrudAdmin.Extensions;
-    using Microsoft.AspNetCore.Builder;
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Hosting;
-
-    public class Startup
+    public void ConfigureServices(IServiceCollection services)
     {
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddScoped<DbContext, TaskSystemDbContext>()
-                .AddDbContext<TaskSystemDbContext>(options => options
-                    .Configure());
+        services.AddScoped<DbContext, TaskSystemDbContext>()
+            .AddDbContext<TaskSystemDbContext>(options => options
+                .Configure());
 
-            services.UseAutoCrudAdmin();
+        services.UseAutoCrudAdmin();
+    }
+
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        if (env.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        app.UseStaticFiles();
+
+        app.UseRouting();
+
+        app.UseEndpoints(endpoints =>
         {
-            if (env.IsDevelopment())
+            endpoints.MapControllerRoute(
+                "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+        });
+
+        app.AddAutoCrudAdmin(
+            "admin",
+            new AutoCrudAdminOptions
             {
-                app.UseDeveloperExceptionPage();
-            }
-
-            app.UseStaticFiles();
-
-            app.UseRouting();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                Authorization = new[] { new AutoCrudAuthFilter(), },
+                // LayoutName = "_Layout",
+                ApplicationName = "AutoCrudAdmin Demo"
             });
 
-            app.AddAutoCrudAdmin(
-                "admin",
-                new AutoCrudAdminOptions
-                {
-                    Authorization = new[] { new AutoCrudAuthFilter(), },
-                    // LayoutName = "_Layout",
-                    ApplicationName = "AutoCrudAdmin Demo"
-                });
+        this.SetupDb(app);
+    }
 
-            this.SetupDb(app);
-        }
-
-        private void SetupDb(IApplicationBuilder app)
-        {
-            using var scope = app.ApplicationServices.CreateScope();
-            var dbContext = scope.ServiceProvider.GetService<DbContext>();
-            dbContext.Database.Migrate();
-        }
+    private void SetupDb(IApplicationBuilder app)
+    {
+        using var scope = app.ApplicationServices.CreateScope();
+        var dbContext = scope.ServiceProvider.GetService<DbContext>();
+        dbContext.Database.Migrate();
     }
 }

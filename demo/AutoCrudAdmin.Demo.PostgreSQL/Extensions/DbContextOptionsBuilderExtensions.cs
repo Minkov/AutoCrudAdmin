@@ -1,20 +1,19 @@
-namespace AutoCrudAdmin.Demo.PostgreSQL.Extensions
-{
-    using Microsoft.EntityFrameworkCore;
+namespace AutoCrudAdmin.Demo.PostgreSQL.Extensions;
 
-    public static class DbContextOptionsBuilderExtensions
+using Microsoft.EntityFrameworkCore;
+
+public static class DbContextOptionsBuilderExtensions
+{
+    public static DbContextOptionsBuilder Configure(this DbContextOptionsBuilder options)
     {
-        public static DbContextOptionsBuilder Configure(this DbContextOptionsBuilder options)
+        if (options.IsConfigured)
         {
-            if (options.IsConfigured)
-            {
-                return options;
-            }
+            return options;
+        }
 
           
-            options.UseNpgsql("Host=192.168.0.186;Database=AutoCrudAdminDb;Username=postgres;Password=1123QwER");
+        options.UseNpgsql("Host=192.168.0.186;Database=AutoCrudAdminDb;Username=postgres;Password=1123QwER");
 
-            return options; 
-        }
+        return options; 
     }
 }
