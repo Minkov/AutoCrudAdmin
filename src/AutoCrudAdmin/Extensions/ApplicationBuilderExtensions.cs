@@ -15,7 +15,7 @@ namespace AutoCrudAdmin.Extensions
         /// <param name="app">The IApplicationBuilder instance that this method extends.</param>
         /// <param name="urlPrefix">An optional string that specifies the URL prefix for the AutoCrudAdmin system. If not provided, no prefix will be used.</param>
         /// <param name="options">An optional <see cref="AutoCrudAdminOptions"/> object that specifies options for the AutoCrudAdmin system.
-        /// If not provided, a new <see cref="AutoCrudAdminOptions"/> object will be created with default values for `LayoutName` and `ApplicationName`</param>
+        /// If not provided, a new <see cref="AutoCrudAdminOptions"/> object will be created with default values for `LayoutName` and `ApplicationName`.</param>
         /// <returns>The same IApplicationBuilder instance that this method extends, allowing for further configuration.</returns>
         public static IApplicationBuilder AddAutoCrudAdmin(
             this IApplicationBuilder app,
