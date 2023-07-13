@@ -352,3 +352,7 @@ MigrationBackup/
 
 # IntelliJ/Rider
 .idea
+
+# sqlite
+*.sqlite-shm
+*.sqlite-wal

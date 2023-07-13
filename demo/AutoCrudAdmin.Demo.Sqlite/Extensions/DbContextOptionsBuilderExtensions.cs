@@ -11,8 +11,7 @@ public static class DbContextOptionsBuilderExtensions
             return options;
         }
 
-        options.UseSqlite(
-            "Filename=AutoCrudAdminDb.sqlite;");
+        options.UseSqlite("Filename=AutoCrudAdminDb.sqlite;");
 
         return options;
     }

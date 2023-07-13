@@ -177,7 +177,7 @@ public class AutoCrudAdminController<TEntity>
     [HttpGet]
     public virtual async Task<IActionResult> Create(
         [FromQuery] IDictionary<string, string> complexId,
-        string postEndpointName)
+        string? postEndpointName)
         => await this.GetEntityForm(
             ExpressionsBuilder.ForCreateInstance<TEntity>()(),
             EntityAction.Create,
@@ -187,7 +187,7 @@ public class AutoCrudAdminController<TEntity>
     [HttpGet]
     public virtual async Task<IActionResult> Edit(
         [FromQuery] IDictionary<string, string> complexId,
-        string postEndpointName)
+        string? postEndpointName)
         => await this.GetEntityForm(
             this.Set.First(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(complexId)),
             EntityAction.Edit,
@@ -197,7 +197,7 @@ public class AutoCrudAdminController<TEntity>
     [HttpGet]
     public virtual async Task<IActionResult> Delete(
         [FromQuery] IDictionary<string, string> complexId,
-        string postEndpointName)
+        string? postEndpointName)
         => await this.GetEntityForm(
             this.Set.First(ExpressionsBuilder.ForByEntityPrimaryKey<TEntity>(complexId)),
             EntityAction.Delete,
@@ -292,9 +292,10 @@ public class AutoCrudAdminController<TEntity>
         EntityAction action,
         IDictionary<string, string> entityDict,
         IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters,
-        Type autocompleteType)
-        => this.GenerateFormControlsAsync(entity, action, entityDict, complexOptionFilters, autocompleteType)
-            .Result;
+        Type? autocompleteType)
+        => this.FormControlsHelper
+            .GenerateFormControls(entity, action, complexOptionFilters, autocompleteType)
+            .Select(this.AddDefaultOptions);
 
     /// <summary>
     /// Generates the form controls for the given entity and action.
@@ -311,8 +312,7 @@ public class AutoCrudAdminController<TEntity>
         EntityAction action,
         IDictionary<string, string> entityDict,
         IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters)
-        => this.GenerateFormControlsAsync(entity, action, entityDict, complexOptionFilters, null)
-            .Result;
+        => this.GenerateFormControls(entity, action, entityDict, complexOptionFilters, null);
 
     /// <summary>
     /// Generates the form controls for the given entity and action.
