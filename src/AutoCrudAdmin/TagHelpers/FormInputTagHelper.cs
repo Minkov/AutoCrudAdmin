@@ -16,6 +16,13 @@ using static Constants.CssClassNames;
 using static Constants.Html;
 using static Constants.PartialView;
 
+/// <summary>
+/// The <see cref="FormInputTagHelper"/> class is a custom ASP.NET Core TagHelper used to generate form inputs based on certain attributes.
+/// This includes support for Enums, text areas, multi-choice checkboxes, dropdowns, and more.
+/// </summary>
+/// <remarks>
+/// This tag helper is designed to be used in the Razor view and is targeted at the 'formInput' element.
+/// </remarks>
 [HtmlTargetElement("formInput", TagStructure = TagStructure.NormalOrSelfClosing)]
 public class FormInputTagHelper : TagHelper
 {
@@ -36,39 +43,79 @@ public class FormInputTagHelper : TagHelper
 
     private readonly IPartialViewHelper partialViewHelper;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FormInputTagHelper"/> class.
+    /// </summary>
+    /// <param name="partialViewHelper">An instance of <see cref="IPartialViewHelper"/> to assist with the rendering of partial views.</param>
     public FormInputTagHelper(IPartialViewHelper partialViewHelper)
         => this.partialViewHelper = partialViewHelper;
 
+    /// <summary>
+    /// Gets or sets the name of the form input.
+    /// </summary>
     [HtmlAttributeName("for-name")]
     public string Name { get; set; } = default!;
 
+    /// <summary>
+    /// Gets or sets the type of the data bound to the form input.
+    /// </summary>
     [HtmlAttributeName("for-type")]
     public Type Type { get; set; } = default!;
 
+    /// <summary>
+    /// Gets or sets the type of the form control.
+    /// </summary>
     [HtmlAttributeName("for-form-control-type")]
     public FormControlType FormControlType { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the form input is hidden.
+    /// </summary>
     [HtmlAttributeName("is-hidden")]
     public bool IsHidden { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the form input is read-only.
+    /// </summary>
     [HtmlAttributeName("is-readonly")]
     public bool IsReadonly { get; set; }
 
+    /// <summary>
+    /// Gets or sets the label text associated with the form input.
+    /// </summary>
     [HtmlAttributeName("with-label")]
     public string? LabelText { get; set; }
 
+    /// <summary>
+    /// Gets or sets the value of the form input.
+    /// </summary>
     [HtmlAttributeName("with-value")]
     public object? Value { get; set; }
 
+    /// <summary>
+    /// Gets or sets the options for the form input. This is used for dropdowns and checkboxes.
+    /// </summary>
     [HtmlAttributeName("with-options")]
     public IEnumerable<object> Options { get; set; } = default!;
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the form input is a DbSet.
+    /// </summary>
     [HtmlAttributeName("is-db-set")]
     public bool IsDbSet { get; set; }
 
+    /// <summary>
+    /// Gets or sets the HttpContext for the current request.
+    /// </summary>
     [HtmlAttributeName("http-context")]
     public HttpContext HttpContext { get; set; } = default!;
 
+    /// <summary>
+    /// Processes the form input tag helper and writes the output.
+    /// </summary>
+    /// <param name="context">Contains information associated with a <see cref="FormInputTagHelper"/>.</param>
+    /// <param name="output">A stateful HTML element used to generate an HTML tag.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
         output.Attributes.SetAttribute("name", this.Name);

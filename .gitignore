@@ -352,3 +352,6 @@ MigrationBackup/
 
 # IntelliJ/Rider
 .idea
+
+
+global.json
