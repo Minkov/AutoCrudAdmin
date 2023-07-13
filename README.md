@@ -1,0 +1,2 @@
+# AutoCrudAdmin
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f6c58125106d4590be9f3d28642324dc)](https://app.codacy.com/gh/Minkov/AutoCrudAdmin?utm_source=github.com&utm_medium=referral&utm_content=Minkov/AutoCrudAdmin&utm_campaign=Badge_Grade)
