@@ -1,23 +1,22 @@
-﻿namespace AutoCrudAdmin.Demo.Models.Models
+﻿namespace AutoCrudAdmin.Demo.Models.Models;
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+
+public class Project
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
+    [Key]
+    public int Id { get; set; }
 
-    public class Project
-    {
-        [Key]
-        public int Id { get; set; }
+    public string Name { get; set; } = default!;
 
-        public string Name { get; set; }
+    public DateTime OpenDate { get; set; }
 
-        public DateTime OpenDate { get; set; }
+    public DateTime DueDate { get; set; }
 
-        public DateTime DueDate { get; set; }
+    public ICollection<Task> Tasks { get; set; } = new HashSet<Task>();
 
-        public ICollection<Task> Tasks { get; set; }
-
-        public override string ToString()
-            => $"{this.Id}, {this.Name}";
-    }
+    public override string ToString()
+        => $"{this.Id}, {this.Name}";
 }

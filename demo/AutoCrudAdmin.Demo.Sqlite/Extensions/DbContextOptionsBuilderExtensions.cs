@@ -1,20 +1,19 @@
-namespace AutoCrudAdmin.Demo.Sqlite.Extensions
+namespace AutoCrudAdmin.Demo.Sqlite.Extensions;
+
+using Microsoft.EntityFrameworkCore;
+
+public static class DbContextOptionsBuilderExtensions
 {
-    using Microsoft.EntityFrameworkCore;
-
-    public static class DbContextOptionsBuilderExtensions
+    public static DbContextOptionsBuilder Configure(this DbContextOptionsBuilder options)
     {
-        public static DbContextOptionsBuilder Configure(this DbContextOptionsBuilder options)
+        if (options.IsConfigured)
         {
-            if (options.IsConfigured)
-            {
-                return options;
-            }
-
-            options.UseSqlite(
-                "Filename=AutoCrudAdminDb.sqlite;");
-
             return options;
         }
+
+        options.UseSqlite(
+            "Filename=AutoCrudAdminDb.sqlite;");
+
+        return options;
     }
 }

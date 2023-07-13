@@ -5,5 +5,8 @@ using Microsoft.AspNetCore.Http;
 
 public interface IPartialViewHelper
 {
-    string GetViewResult(HttpContext httpContext, ExpandableMultiChoiceCheckBoxFormControlViewModel checkbox, string viewName);
+    string GetViewResult(
+        HttpContext httpContext,
+        ExpandableMultiChoiceCheckBoxFormControlViewModel checkbox,
+        string viewName);
 }

@@ -17,6 +17,8 @@ public class AutoCrudAdminOptions
     {
         this.Authorization = Enumerable.Empty<IAutoCrudAuthFilter>();
         this.AsyncAuthorization = Enumerable.Empty<IAsyncAuthCrudFilter>();
+        this.LayoutName = string.Empty;
+        this.ApplicationName = string.Empty;
     }
 
     /// <summary>
