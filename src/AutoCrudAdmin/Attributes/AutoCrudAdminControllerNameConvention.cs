@@ -18,12 +18,12 @@ public class AutoCrudAdminControllerNameConvention : Attribute, IControllerModel
             .Where(p => p.IsSubclassOfRawGeneric(typeof(AutoCrudAdminController<>)))
             .ToList();
 
-        EntityTypeToNameMap = ReflectionHelper.DbSetProperties
-            .DistinctBy(x => x.PropertyType.GetGenericArguments().FirstOrDefault() !)
-            .ToDictionary(
-                set => set.PropertyType.GetGenericArguments().FirstOrDefault() !,
-                set => set.Name);
-    }
+            EntityTypeToNameMap = ReflectionHelper.DbSetProperties
+                .DistinctBy(x => x.PropertyType.GetGenericArguments().FirstOrDefault())
+                .ToDictionary(
+                    set => set.PropertyType.GetGenericArguments().FirstOrDefault() !,
+                    set => set.Name);
+        }
 
     private static IEnumerable<Type> Controllers { get; set; }
 

@@ -9,13 +9,15 @@ using AutoCrudAdmin.Helpers;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Controllers;
 
-public class AutoCrudAdminControllerFeatureProvider : IApplicationFeatureProvider<ControllerFeature>
-{
-    static AutoCrudAdminControllerFeatureProvider()
-        => Types = ReflectionHelper.DbSetProperties
-            .Select(p => p.PropertyType)
-            .Select(dt => dt.GetGenericArguments().FirstOrDefault() !)
-            .ToList();
+    public class AutoCrudAdminControllerFeatureProvider : IApplicationFeatureProvider<ControllerFeature>
+    {
+        static AutoCrudAdminControllerFeatureProvider()
+            => Types = ReflectionHelper.DbSetProperties
+                .Select(p => p.PropertyType)
+                .Select(dt => dt.GetGenericArguments().FirstOrDefault())
+                .Where(t => t != null)
+                .Select(t => t!)
+                .ToList();
 
     private static IEnumerable<Type> Types { get; set; }
 

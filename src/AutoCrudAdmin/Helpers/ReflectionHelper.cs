@@ -28,24 +28,24 @@ public static class ReflectionHelper
     private static Type GetEntityTypeUnproxied(Type entityType)
         => entityType.UnProxy();
 
-    private static IEnumerable<PropertyInfo> GetDbSetProperties()
-    {
-        var dbSetTypes = DbContexts
-            .SelectMany(t => t.GetProperties())
-            .Where(p => p.PropertyType.IsGenericType
-                        && p.PropertyType.Name.StartsWith("DbSet"));
+        private static IEnumerable<PropertyInfo> GetDbSetProperties()
+        {
+            var dbSetTypes = DbContexts
+                .SelectMany(t => t.GetProperties())
+                .Where(p => p.PropertyType.IsGenericType
+                            && p.PropertyType.Name.StartsWith("DbSet"))
+                .ToList();
 
         var entityTypes = dbSetTypes
             .Select(dbSet => dbSet.PropertyType.GenericTypeArguments.FirstOrDefault())
             .Distinct()
             .ToHashSet();
 
-        var uniqueEntityTypes = entityTypes
-            .Where(parent =>
-                !parent!.IsGenericParameter
-                && !entityTypes.Any(
-                    child => child!.IsSubclassOfAnyType(parent)))
-            .ToHashSet();
+            var uniqueEntityTypes = entityTypes
+                .Where(parent =>
+                    parent?.IsGenericParameter == true
+                    && entityTypes.All(child => child?.IsSubclassOfAnyType(parent) != true))
+                .ToHashSet();
 
         return dbSetTypes
             .DistinctBy(x => x.PropertyType.GenericTypeArguments.FirstOrDefault())

@@ -35,7 +35,6 @@ public class PartialViewHelper : IPartialViewHelper
         var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
 
         using var sw = new StringWriter();
-
         if (!this.cache.TryGetValue(viewName, out var viewResult))
         {
             viewResult = this.razorViewEngine.FindView(actionContext, viewName, false);
@@ -48,23 +47,21 @@ public class PartialViewHelper : IPartialViewHelper
             this.cache.TryAdd(viewName, viewResult);
         }
 
-        var viewDictionary = new ViewDataDictionary(
-            new EmptyModelMetadataProvider(),
-            new ModelStateDictionary())
-        {
-            Model = checkbox.Expand,
-        };
+        var viewDictionary =
+            new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary())
+            {
+                Model = checkbox.Expand,
+            };
 
         var viewContext = new ViewContext(
             actionContext,
-            viewResult.View!,
+            viewResult.View,
             viewDictionary,
             new TempDataDictionary(actionContext.HttpContext, this.tempDataProvider),
             sw,
             new HtmlHelperOptions());
 
-        viewResult.View!.RenderAsync(viewContext).GetAwaiter().GetResult();
-
+        viewResult.View.RenderAsync(viewContext).GetAwaiter().GetResult();
         return sw.ToString();
     }
 }
