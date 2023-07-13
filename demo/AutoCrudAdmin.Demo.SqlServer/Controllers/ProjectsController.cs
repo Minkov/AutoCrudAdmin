@@ -17,8 +17,8 @@ public class ProjectsController
     protected override IEnumerable<Func<Project, Project, AdminActionContext, ValidatorResult>> EntityValidators
         => new[]
         {
-            ValidateProjectNameLength,
-            ValidateProjectNameCharacters,
+            (Project _, Project newProject, AdminActionContext _) => ValidateProjectNameLength(newProject),
+            (Project _, Project newProject, AdminActionContext _) => ValidateProjectNameCharacters(newProject),
         };
 
     protected override IEnumerable<string> ShownColumnNames
@@ -82,19 +82,13 @@ public class ProjectsController
             .ThenInclude(t => t.EmployeeTasks)
             .ThenInclude(et => et.Employee);
 
-    private static ValidatorResult ValidateProjectNameLength(
-        Project existingProject,
-        Project newProject,
-        AdminActionContext context)
-        => newProject.Name.Length <= 40
+    private static ValidatorResult ValidateProjectNameLength(Project project)
+        => project.Name.Length <= 40
             ? ValidatorResult.Success()
             : ValidatorResult.Error("Name must be at max 40 characters");
 
-    private static ValidatorResult ValidateProjectNameCharacters(
-        Project existingProject,
-        Project newProject,
-        AdminActionContext context)
-        => newProject.Name.Contains('@')
+    private static ValidatorResult ValidateProjectNameCharacters(Project project)
+        => project.Name.Contains('@')
             ? ValidatorResult.Error("Name cannot contain '@'")
             : ValidatorResult.Success();
 }
