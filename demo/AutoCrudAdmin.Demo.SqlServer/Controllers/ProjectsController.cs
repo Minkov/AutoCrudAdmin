@@ -15,10 +15,10 @@ public class ProjectsController
     : AutoCrudAdminController<Project>
 {
     protected override IEnumerable<Func<Project, Project, AdminActionContext, ValidatorResult>> EntityValidators
-        => new[]
+        => new Func<Project, Project, AdminActionContext, ValidatorResult>[]
         {
-            (Project _, Project newProject, AdminActionContext _) => ValidateProjectNameLength(newProject),
-            (Project _, Project newProject, AdminActionContext _) => ValidateProjectNameCharacters(newProject),
+            (_,  newProject,  _) => ValidateProjectNameLength(newProject),
+            (_,  newProject,  _) => ValidateProjectNameCharacters(newProject),
         };
 
     protected override IEnumerable<string> ShownColumnNames
