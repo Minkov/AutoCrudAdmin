@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<OutputType>Library</OutputType>
@@ -14,26 +13,16 @@
 		<RepositoryType>git</RepositoryType>
 	</PropertyGroup>
 
-	<PropertyGroup>
-		<WarningsAsErrors/>
-		<Nullable>enable</Nullable>
-		<NullableReferenceTypesWarnings>Warnings</NullableReferenceTypesWarnings>
-	</PropertyGroup>
-
 	<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0"/>
 		<PackageReference Include="NonFactors.Grid.Core.Mvc6" Version="6.2.4"/>
-		<!--        <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">-->
-		<!--            <PrivateAssets>all</PrivateAssets>-->
-		<!--            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
-		<!--        </PackageReference>-->
 	</ItemGroup>
 
-	<PropertyGroup>
-		<AnalysisLevel>5.0</AnalysisLevel>
-		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-		<CodeAnalysisRuleSet>AutoCrudAdmin.ruleset</CodeAnalysisRuleSet>
-	</PropertyGroup>
+<!--	<PropertyGroup>-->
+<!--		<AnalysisLevel>5.0</AnalysisLevel>-->
+<!--		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>-->
+<!--		<CodeAnalysisRuleSet>AutoCrudAdmin.ruleset</CodeAnalysisRuleSet>-->
+<!--	</PropertyGroup>-->
 
 	<ItemGroup>
 		<_ContentIncludedByDefault Remove="Pages\Admin\Index.cshtml"/>
@@ -79,20 +68,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Remove="Utils\**"/>
-	</ItemGroup>
-
-	<ItemGroup>
-		<EmbeddedResource Remove="Utils\**"/>
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Remove="Utils\**"/>
-
 		<None Include="..\..\docs\README.md" Pack="true" PackagePath="\"/>
 	</ItemGroup>
 
-	<ItemGroup>
-		<Content Remove="Utils\**"/>
-	</ItemGroup>
 </Project>

@@ -1,14 +1,14 @@
 <Project>
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>CA1819, SA1011</NoWarn>
+    <NoWarn>CA1819, SA1011, SA0001</NoWarn>
   </PropertyGroup>
   
   <PropertyGroup>
     <RepoRoot>$(MsBuildThisFileDirectory)</RepoRoot>
     <LangVersion>latest</LangVersion>
     <TargetFramework>net6.0</TargetFramework>
-    <CodeAnalysisRuleSet>$(MsBuildThisFileDirectory)Analyzers/rulesets.xml</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>$(MsBuildThisFileDirectory)/Analyzers/rulesets.xml</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,8 +22,8 @@
     <AdditionalFiles Include="$(MsBuildThisFileDirectory)/Analyzers/stylecop.json" Link="stylecop.json" />
   </ItemGroup>
   
-  <PropertyGroup>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-
+	<PropertyGroup>
+		<Nullable>enable</Nullable>
+		<NullableReferenceTypesWarnings>Warnings</NullableReferenceTypesWarnings>
+	</PropertyGroup>
 </Project>

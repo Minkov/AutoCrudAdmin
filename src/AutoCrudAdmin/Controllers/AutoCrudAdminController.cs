@@ -518,7 +518,7 @@ public class AutoCrudAdminController<TEntity>
                 columns.Add(model => htmlHelper.ActionLink(
                         action.Name,
                         action.Action,
-                        this.RouteData.Values["controller"]!.ToString(),
+                        this.RouteData.Values["controller"] !.ToString(),
                         RouteValueDictionary.FromArray(
                             EntityType.GetPrimaryKeyValue(model)
                                 .ToArray() !),

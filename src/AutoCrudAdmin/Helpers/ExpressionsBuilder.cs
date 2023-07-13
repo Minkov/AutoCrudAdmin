@@ -8,7 +8,7 @@ using System.Reflection;
 using AutoCrudAdmin.Extensions;
 using static AutoCrudAdmin.Constants.Entity;
 
-public class ExpressionsBuilder
+public static class ExpressionsBuilder
 {
     public static Expression<Func<TEntity, bool>> ForByEntityPrimaryKey<TEntity>(
         IDictionary<string, string> primaryKeys)
