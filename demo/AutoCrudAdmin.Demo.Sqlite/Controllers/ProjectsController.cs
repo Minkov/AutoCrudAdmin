@@ -17,8 +17,8 @@ public class ProjectsController
     protected override IEnumerable<Func<Project, Project, AdminActionContext, ValidatorResult>> EntityValidators
         => new Func<Project, Project, AdminActionContext, ValidatorResult>[]
         {
-            (_,  newProject,  _) => ValidateProjectNameLength(newProject),
-            (_,  newProject,  _) => ValidateProjectNameCharacters(newProject),
+            (_, newProject, _) => ValidateProjectNameLength(newProject),
+            (_, newProject, _) => ValidateProjectNameCharacters(newProject),
         };
 
     protected override IEnumerable<string> ShownColumnNames
