@@ -230,7 +230,8 @@ public class AutoCrudAdminController<TEntity>
                 entity,
                 action,
                 entityDict,
-                new Dictionary<string, Expression<Func<object, bool>>>()))
+                new Dictionary<string, Expression<Func<object, bool>>>(),
+                autocompleteType: null))
             .ToList();
 
         switch (action)
@@ -310,7 +311,7 @@ public class AutoCrudAdminController<TEntity>
         EntityAction action,
         IDictionary<string, string> entityDict,
         IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters)
-        => this.GenerateFormControlsAsync(entity, action, entityDict, complexOptionFilters)
+        => this.GenerateFormControlsAsync(entity, action, entityDict, complexOptionFilters, null)
             .Result;
 
     /// <summary>
@@ -329,7 +330,7 @@ public class AutoCrudAdminController<TEntity>
         EntityAction action,
         IDictionary<string, string> entityDict,
         IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters,
-        Type? autocompleteType = null)
+        Type? autocompleteType)
         => Task.FromResult(autocompleteType == null
             ? this.GenerateFormControls(entity, action, entityDict, complexOptionFilters)
             : this.GenerateFormControls(entity, action, entityDict, complexOptionFilters, autocompleteType));
