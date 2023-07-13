@@ -1,14 +1,13 @@
-namespace AutoCrudAdmin.ViewModels
+namespace AutoCrudAdmin.ViewModels.Pages;
+
+using System;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Html;
+using Microsoft.AspNetCore.Mvc.Rendering;
+
+public class AutoCrudAdminIndexViewModel
 {
-    using System;
-    using System.Collections.Generic;
-    using Microsoft.AspNetCore.Html;
-    using Microsoft.AspNetCore.Mvc.Rendering;
+    public Func<IHtmlHelper<AutoCrudAdminIndexViewModel>, IHtmlContent> GenerateGrid { get; set; } = default!;
 
-    public class AutoCrudAdminIndexViewModel
-    {
-        public Func<IHtmlHelper<AutoCrudAdminIndexViewModel>, IHtmlContent> GenerateGrid { get; set; }
-
-        public IEnumerable<AutoCrudAdminGridToolbarActionViewModel> ToolbarActions { get; set; }
-    }
+    public IEnumerable<AutoCrudAdminGridToolbarActionViewModel> ToolbarActions { get; set; } = default!;
 }

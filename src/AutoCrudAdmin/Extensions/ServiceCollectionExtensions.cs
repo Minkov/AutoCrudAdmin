@@ -1,29 +1,26 @@
-namespace AutoCrudAdmin.Extensions
+namespace AutoCrudAdmin.Extensions;
+
+using AutoCrudAdmin.Attributes;
+using AutoCrudAdmin.Helpers;
+using AutoCrudAdmin.Helpers.Implementations;
+using Microsoft.Extensions.DependencyInjection;
+
+public static class ServiceCollectionExtensions
 {
-    using AutoCrudAdmin.Attributes;
-    using AutoCrudAdmin.Helpers;
-    using AutoCrudAdmin.Helpers.Implementations;
-    using Microsoft.Extensions.DependencyInjection;
-
-    public static class ServiceCollectionExtensions
+    public static IServiceCollection UseAutoCrudAdmin(
+        this IServiceCollection services)
     {
-        public static IServiceCollection UseAutoCrudAdmin(
-            this IServiceCollection services)
-        {
-            services.AddTransient<IFormControlsHelper, FormControlsHelper>();
-            services.AddTransient<IPartialViewHelper, PartialViewHelper>();
+        services.AddTransient<IFormControlsHelper, FormControlsHelper>();
+        services.AddTransient<IPartialViewHelper, PartialViewHelper>();
 
-            services.AddHttpContextAccessor();
+        services.AddHttpContextAccessor();
 
-            services.AddMvc()
-                .AddMvcOptions(o =>
-                    o.Conventions.Add(new AutoCrudAdminControllerNameConvention()))
-                .ConfigureApplicationPartManager(c =>
-                {
-                    c.FeatureProviders.Add(new AutoCrudAdminControllerFeatureProvider());
-                });
+        services.AddMvc()
+            .AddMvcOptions(o =>
+                o.Conventions.Add(new AutoCrudAdminControllerNameConvention()))
+            .ConfigureApplicationPartManager(c =>
+                c.FeatureProviders.Add(new AutoCrudAdminControllerFeatureProvider()));
 
-            return services;
-        }
+        return services;
     }
 }

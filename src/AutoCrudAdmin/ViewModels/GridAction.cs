@@ -1,15 +1,14 @@
-namespace AutoCrudAdmin.ViewModels
+namespace AutoCrudAdmin.ViewModels;
+
+public class GridAction
 {
-    public class GridAction
+    private string name = default!;
+
+    public string Action { get; set; } = default!;
+
+    public string Name
     {
-        private string name;
-
-        public string Action { get; set; }
-
-        public string Name
-        {
-            get => this.name ??= this.Action;
-            init => this.name = value;
-        }
+        get => this.name ??= this.Action;
+        init => this.name = value;
     }
 }

@@ -1,22 +1,21 @@
-namespace AutoCrudAdmin.ViewModels
+namespace AutoCrudAdmin.ViewModels;
+
+public class ValidatorResult
 {
-    public class ValidatorResult
-    {
-        public bool IsValid { get; set; }
+    public bool IsValid { get; set; }
 
-        public string Message { get; set; }
+    public string Message { get; set; } = default!;
 
-        public static ValidatorResult Success()
-            => new ()
-            {
-                IsValid = true,
-            };
+    public static ValidatorResult Success()
+        => new ()
+        {
+            IsValid = true,
+        };
 
-        public static ValidatorResult Error(string message)
-            => new ()
-            {
-                IsValid = false,
-                Message = message,
-            };
-    }
+    public static ValidatorResult Error(string message)
+        => new ()
+        {
+            IsValid = false,
+            Message = message,
+        };
 }

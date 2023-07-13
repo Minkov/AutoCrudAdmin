@@ -1,13 +1,11 @@
-namespace AutoCrudAdmin.Helpers
-{
-    using System.Collections.Generic;
-    using System.Linq;
-    using AutoCrudAdmin.Extensions;
+namespace AutoCrudAdmin.Helpers;
 
-    public static class NavHelper
-    {
-        public static IEnumerable<string> GetNavItems()
-            => ReflectionHelper.DbSetProperties
-                .Select(property => property.Name);
-    }
+using System.Collections.Generic;
+using System.Linq;
+
+public static class NavHelper
+{
+    public static IEnumerable<string> GetNavItems()
+        => ReflectionHelper.DbSetProperties
+            .Select(property => property.Name);
 }

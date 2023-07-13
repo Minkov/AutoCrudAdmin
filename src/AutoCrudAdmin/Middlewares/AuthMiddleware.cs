@@ -1,46 +1,45 @@
-namespace AutoCrudAdmin.Middlewares
+namespace AutoCrudAdmin.Middlewares;
+
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+
+public class AuthMiddleware
 {
-    using System.Linq;
-    using System.Net;
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Http;
+    private readonly RequestDelegate next;
+    private readonly AutoCrudAdminOptions options;
 
-    public class AuthMiddleware
+    public AuthMiddleware(RequestDelegate next, AutoCrudAdminOptions options)
     {
-        private readonly RequestDelegate next;
-        private readonly AutoCrudAdminOptions options;
+        this.next = next;
+        this.options = options;
+    }
 
-        public AuthMiddleware(RequestDelegate next, AutoCrudAdminOptions options)
+    public async Task Invoke(HttpContext httpContext)
+    {
+        if (this.options.Authorization.Any(filter => !filter.Authorize(httpContext)))
         {
-            this.next = next;
-            this.options = options;
+            var statusCode = GetUnauthorizedStatusCode(httpContext);
+            httpContext.Response.StatusCode = statusCode;
+            return;
         }
 
-        public async Task Invoke(HttpContext httpContext)
+        foreach (var filter in this.options.AsyncAuthorization)
         {
-            if (this.options.Authorization.Any(filter => !filter.Authorize(httpContext)))
+            if (!await filter.Authorize(httpContext))
             {
                 var statusCode = GetUnauthorizedStatusCode(httpContext);
                 httpContext.Response.StatusCode = statusCode;
                 return;
             }
-
-            foreach (var filter in this.options.AsyncAuthorization)
-            {
-                if (!await filter.Authorize(httpContext))
-                {
-                    var statusCode = GetUnauthorizedStatusCode(httpContext);
-                    httpContext.Response.StatusCode = statusCode;
-                    return;
-                }
-            }
-
-            await this.next.Invoke(httpContext);
         }
 
-        private static int GetUnauthorizedStatusCode(HttpContext httpContext)
-            => httpContext.User?.Identity?.IsAuthenticated == true
-                ? (int)HttpStatusCode.Forbidden
-                : (int)HttpStatusCode.Unauthorized;
+        await this.next.Invoke(httpContext);
     }
+
+    private static int GetUnauthorizedStatusCode(HttpContext httpContext)
+        => httpContext.User?.Identity?.IsAuthenticated == true
+            ? (int)HttpStatusCode.Forbidden
+            : (int)HttpStatusCode.Unauthorized;
 }
