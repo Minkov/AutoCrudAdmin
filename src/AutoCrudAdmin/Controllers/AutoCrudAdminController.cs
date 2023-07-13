@@ -625,9 +625,12 @@ public class AutoCrudAdminController<TEntity>
 
     private static void CopyFormPropertiesToExistingEntityFromNewEntity(TEntity existingEntity, TEntity newEntity)
     {
-        foreach (var property in typeof(TEntity)
-                     .GetProperties()
-                     .Where(p => p.CanWrite && !p.PropertyType.IsNavigationProperty()))
+        var propertiesToCopy = typeof(TEntity)
+            .GetProperties()
+            .Where(p => p.CanWrite && !p.PropertyType.IsNavigationProperty())
+            .ToList();
+
+        foreach (var property in propertiesToCopy)
         {
             property.SetValue(existingEntity, property.GetValue(newEntity, null), null);
         }

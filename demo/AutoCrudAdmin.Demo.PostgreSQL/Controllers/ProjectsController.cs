@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoCrudAdmin.Controllers;
-using AutoCrudAdmin.Demo.Models;
 using AutoCrudAdmin.Demo.Models.Models;
+using AutoCrudAdmin.Models;
 using AutoCrudAdmin.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,13 +14,8 @@ using NonFactors.Mvc.Grid;
 public class ProjectsController
     : AutoCrudAdminController<Project>
 {
-    protected override IQueryable<Project> Set
-        => base.Set.Include(x => x.Tasks)
-            .ThenInclude(t => t.EmployeeTasks)
-            .ThenInclude(et => et.Employee);
-
-    protected override IEnumerable<Func<Project, ValidatorResult>> EntityValidators
-        => new Func<Project, ValidatorResult>[]
+    protected override IEnumerable<Func<Project, Project, AdminActionContext, ValidatorResult>> EntityValidators
+        => new[]
         {
             ValidateProjectNameLength,
             ValidateProjectNameCharacters,
@@ -47,9 +42,18 @@ public class ProjectsController
             },
         };
 
-    protected override IGridColumnsOf<Project> BuildGridColumns(IGridColumnsOf<Project> columns)
+    public IActionResult This()
+        => this.Ok("It works!");
+
+    public IActionResult That(string id)
+        => this.Ok($"It works with Id: {id}");
+
+    protected override IGridColumnsOf<Project> BuildGridColumns(
+        IGridColumnsOf<Project> columns,
+        int? stringMaxLength)
     {
-        base.BuildGridColumns(columns);
+        base.BuildGridColumns(columns, stringMaxLength);
+
         columns.Add(c => c.Tasks.Count).Titled("Tasks Count");
         columns.Add(p => string.Join(
                 ", ",
@@ -62,20 +66,24 @@ public class ProjectsController
         return columns;
     }
 
-    public IActionResult This()
-        => this.Ok("It works!");
+    protected override IQueryable<Project> ApplyIncludes(IQueryable<Project> set)
+        => set.Include(x => x.Tasks)
+            .ThenInclude(t => t.EmployeeTasks)
+            .ThenInclude(et => et.Employee);
 
-    public IActionResult That(string id)
-        => this.Ok($"It works with Id: {id}");
-
-
-    private static ValidatorResult ValidateProjectNameLength(Project project)
-        => project.Name.Length <= 40
+    private static ValidatorResult ValidateProjectNameLength(
+        Project existingProject,
+        Project newProject,
+        AdminActionContext context)
+        => newProject.Name.Length <= 40
             ? ValidatorResult.Success()
             : ValidatorResult.Error("Name must be at max 40 characters");
 
-    private static ValidatorResult ValidateProjectNameCharacters(Project project)
-        => project.Name.Contains('@')
+    private static ValidatorResult ValidateProjectNameCharacters(
+        Project existingProject,
+        Project newProject,
+        AdminActionContext context)
+        => newProject.Name.Contains('@')
             ? ValidatorResult.Error("Name cannot contain '@'")
             : ValidatorResult.Success();
 }
