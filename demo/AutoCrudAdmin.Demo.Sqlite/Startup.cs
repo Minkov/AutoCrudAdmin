@@ -38,14 +38,14 @@ public class Startup
                 pattern: "{controller=Home}/{action=Index}/{id?}");
         });
 
-            app.AddAutoCrudAdmin(
-                "admin",
-                new AutoCrudAdminOptions
-                {
-                    Authorization = new[] { new AutoCrudAuthFilter(), },
-                    // LayoutName = "_Layout",
-                    ApplicationName = "AutoCrudAdmin Demo",
-                });
+        app.AddAutoCrudAdmin(
+            "admin",
+            new AutoCrudAdminOptions
+            {
+                Authorization = new[] { new AutoCrudAuthFilter(), },
+                // LayoutName = "_Layout",
+                ApplicationName = "AutoCrudAdmin Demo",
+            });
 
         this.SetupDb(app);
     }

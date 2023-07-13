@@ -44,7 +44,7 @@ public class Startup
             {
                 Authorization = new[] { new AutoCrudAuthFilter(), },
                 // LayoutName = "_Layout",
-                ApplicationName = "AutoCrudAdmin Demo"
+                ApplicationName = "AutoCrudAdmin Demo",
             });
 
         this.SetupDb(app);
@@ -53,7 +53,7 @@ public class Startup
     private void SetupDb(IApplicationBuilder app)
     {
         using var scope = app.ApplicationServices.CreateScope();
-        var dbContext = scope.ServiceProvider.GetService<DbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<DbContext>();
         dbContext.Database.Migrate();
     }
 }

@@ -43,18 +43,18 @@ public static class TypeExtensions
 
         var primaryKeyInfos = PrimaryKeyPropertyInfosCache[type];
 
-            if (primaryKeyInfos.Count == 1)
-            {
-                var primaryKeyValue = primaryKeyInfos
-                    .Select(property => property.GetValue(value))
-                    .FirstOrDefault() !;
+        if (primaryKeyInfos.Count == 1)
+        {
+            var primaryKeyValue = primaryKeyInfos
+                .Select(property => property.GetValue(value))
+                .FirstOrDefault() !;
 
-            return new[] { new KeyValuePair<string, object>(SinglePrimaryKeyName, primaryKeyValue !) };
+            return new[] { new KeyValuePair<string, object>(SinglePrimaryKeyName, primaryKeyValue) };
         }
 
-            return primaryKeyInfos
-                .Select(property => new KeyValuePair<string, object>(property.Name, property.GetValue(value) !));
-        }
+        return primaryKeyInfos
+            .Select(property => new KeyValuePair<string, object>(property.Name, property.GetValue(value) !));
+    }
 
     public static bool IsSubclassOfRawGeneric(this Type? type, Type genericParent)
     {

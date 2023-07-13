@@ -92,5 +92,4 @@ public static class DbContextOptionsBuilderExtensions
         builder.Entity<Task>()
             .HasData(Tasks);
     }
-
 }

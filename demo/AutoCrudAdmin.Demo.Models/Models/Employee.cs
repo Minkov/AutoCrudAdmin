@@ -10,17 +10,16 @@ public class Employee
 
     [Required]
     [MaxLength(30)]
-    public string Username { get; set; }
+    public string Username { get; set; } = default!;
 
-        [MaxLength(30)]
-        public string Email { get; set; }
+    [MaxLength(30)]
+    public string Email { get; set; } = default!;
 
-        [MaxLength(30)]
-        public string Phone { get; set; }
+    [MaxLength(30)]
+    public string Phone { get; set; } = default!;
 
-        public ICollection<EmployeeTasks> EmployeeTasks { get; set; }
+    public ICollection<EmployeeTasks> EmployeeTasks { get; set; } = new HashSet<EmployeeTasks>();
 
-        public override string ToString()
-            => $"{this.Id}, {this.Username}";
-    }
+    public override string ToString()
+        => $"{this.Id}, {this.Username}";
 }

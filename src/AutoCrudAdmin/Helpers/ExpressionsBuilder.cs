@@ -24,29 +24,28 @@ public class ExpressionsBuilder
             Expression.Constant(true),
             Expression.Constant(true));
 
-            primaryKeys
-                .Select(pair =>
-                {
-                    var key = pair.Key == SinglePrimaryKeyName
-                        ? entityType.GetPrimaryKeyPropertyInfos()
-                            .Select(x => x.Name)
-                            .FirstOrDefault()
-                        !
-                        : pair.Key;
+        primaryKeys
+            .Select(pair =>
+            {
+                var key = pair.Key == SinglePrimaryKeyName
+                    ? entityType.GetPrimaryKeyPropertyInfos()
+                        .Select(x => x.Name)
+                        .FirstOrDefault() !
+                    : pair.Key;
 
                 return new KeyValuePair<string, string>(key!, pair.Value);
             })
-            .Select(pair =>
-                ForPrimaryKeySubExpression(
-                    pair.Key,
-                    pair.Value,
-                    convertedParameter,
-                    entityType))
-            .ToList()
-            .ForEach(expression =>
-                equals = Expression.And(
-                    equals,
-                    expression));
+        .Select(pair =>
+            ForPrimaryKeySubExpression(
+                pair.Key,
+                pair.Value,
+                convertedParameter,
+                entityType))
+        .ToList()
+        .ForEach(expression =>
+            equals = Expression.And(
+                equals,
+                expression));
 
         return Expression.Lambda<Func<TEntity, bool>>(
             equals,
@@ -73,28 +72,28 @@ public class ExpressionsBuilder
         => Expression.Lambda<Func<TEntity>>(Expression.New(ReflectionHelper.GetEntityTypeUnproxied<TEntity>()))
             .Compile();
 
-        public static Func<TEntity, object> ForGetPropertyValue<TEntity>(PropertyInfo property)
-        {
-            var type = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
-            var instanceParam = Expression.Parameter(type);
-            return Expression.Lambda<Func<TEntity, object>>(
-                Expression.Convert(
-                    Expression.Call(
-                        instanceParam,
-                        property.GetGetMethod() !),
-                    typeof(object)),
-                instanceParam).Compile();
-        }
+    public static Func<TEntity, object> ForGetPropertyValue<TEntity>(PropertyInfo property)
+    {
+        var type = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
+        var instanceParam = Expression.Parameter(type);
+        return Expression.Lambda<Func<TEntity, object>>(
+            Expression.Convert(
+                Expression.Call(
+                    instanceParam,
+                    property.GetGetMethod() !),
+                typeof(object)),
+            instanceParam).Compile();
+    }
 
-        private static Expression ForPrimaryKeySubExpression(
-            string name,
-            string value,
-            Expression parameter,
-            Type entityType)
-        {
-            var memberAccess = Expression.MakeMemberAccess(
-                parameter,
-                entityType.GetProperty(name) !);
+    private static Expression ForPrimaryKeySubExpression(
+        string name,
+        string value,
+        Expression parameter,
+        Type entityType)
+    {
+        var memberAccess = Expression.MakeMemberAccess(
+            parameter,
+            entityType.GetProperty(name) !);
 
         var cast = Expression.Convert(
             memberAccess,
