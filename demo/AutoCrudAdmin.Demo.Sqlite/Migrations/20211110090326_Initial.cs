@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 public partial class Initial : Migration
 {
+    /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
     {
         migrationBuilder.CreateTable(
@@ -148,6 +149,7 @@ public partial class Initial : Migration
             column: "ProjectId");
     }
 
+    /// <inheritdoc />
     protected override void Down(MigrationBuilder migrationBuilder)
     {
         migrationBuilder.DropTable(
