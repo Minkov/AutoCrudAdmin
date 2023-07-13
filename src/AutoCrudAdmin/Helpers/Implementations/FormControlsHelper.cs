@@ -1,221 +1,258 @@
-namespace AutoCrudAdmin.Helpers.Implementations
+namespace AutoCrudAdmin.Helpers.Implementations;
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using AutoCrudAdmin.Extensions;
+using AutoCrudAdmin.ViewModels;
+using Microsoft.EntityFrameworkCore;
+using static AutoCrudAdmin.Constants.Entity;
+
+public class FormControlsHelper
+    : IFormControlsHelper
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using System.Linq;
-    using System.Linq.Expressions;
-    using System.Reflection;
-    using AutoCrudAdmin.Extensions;
-    using AutoCrudAdmin.ViewModels;
-    using Microsoft.EntityFrameworkCore;
-    using static AutoCrudAdmin.Constants.Entity;
-
-    public class FormControlsHelper
-        : IFormControlsHelper
+    private static readonly ISet<Type> PrimitiveTypes = new HashSet<Type>
     {
-        private static readonly ISet<Type> PrimitiveTypes = new HashSet<Type>
-        {
-            typeof(string),
-            typeof(int),
-            typeof(int?),
-            typeof(short),
-            typeof(short?),
-            typeof(long),
-            typeof(long?),
-            typeof(double),
-            typeof(double?),
-            typeof(decimal),
-            typeof(decimal?),
-            typeof(bool),
-            typeof(bool?),
-            typeof(DateTime),
-            typeof(DateTime?),
-            typeof(TimeSpan),
-            typeof(TimeSpan?),
-        };
+        typeof(string),
+        typeof(int),
+        typeof(int?),
+        typeof(short),
+        typeof(short?),
+        typeof(long),
+        typeof(long?),
+        typeof(double),
+        typeof(double?),
+        typeof(decimal),
+        typeof(decimal?),
+        typeof(bool),
+        typeof(bool?),
+        typeof(DateTime),
+        typeof(DateTime?),
+        typeof(TimeSpan),
+        typeof(TimeSpan?),
+    };
 
-        private readonly DbContext dbContext;
+    private readonly DbContext dbContext;
 
-        static FormControlsHelper()
-            => Types = ReflectionHelper.DbSetProperties
-                .Select(p => p.PropertyType)
-                .Select(dt => dt.GetGenericArguments().FirstOrDefault())
-                .ToHashSet();
+    static FormControlsHelper()
+        => Types = ReflectionHelper.DbSetProperties
+            .Select(p => p.PropertyType)
+            .Select(dt => dt.GetGenericArguments().First())
+            .ToHashSet();
 
-        public FormControlsHelper(DbContext dbContext)
-            => this.dbContext = dbContext;
+    public FormControlsHelper(DbContext dbContext)
+        => this.dbContext = dbContext;
 
-        private static ISet<Type> Types { get; set; }
+    private static ISet<Type> Types { get; set; }
 
-        public IEnumerable<FormControlViewModel> GenerateFormControls<TEntity>(
-            TEntity entity,
-            EntityAction entityAction,
-            IDictionary<string, Expression<Func<object, bool>>>? complexOptionFilters = null,
-            Type autocompleteType = null)
-            => this.GeneratePrimaryKeyFormControls(entity, entityAction, autocompleteType)
-                .Concat(GeneratePrimitiveFormControls(entity))
-                .Concat(this.GenerateComplexFormControls(entity, entityAction, complexOptionFilters));
+    /// <summary>
+    /// Generates the form controls for the respective entity.
+    /// </summary>
+    /// <param name="entity">The entity we want to generate the form controls for.</param>
+    /// <param name="entityAction">The action to be performed on the entity.</param>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    /// <returns>An enumerable collection of FormControlViewModel objects.</returns>
+    public IEnumerable<FormControlViewModel> GenerateFormControls<TEntity>(TEntity entity, EntityAction entityAction)
+        => this.GenerateFormControls(entityAction, entityAction, null, null);
 
-        public string GetComplexFormControlNameForEntityName(string entityName)
-            => entityName + "Id";
+    /// <summary>
+    /// Generates the form controls for the respective entity.
+    /// </summary>
+    /// <param name="entity">The entity we want to generate the form controls for.</param>
+    /// <param name="entityAction">The action to be performed on the entity.</param>
+    /// <param name="complexOptionFilters">Optional. A dictionary containing complex option filters, based on which we are loading the data for the form control.</param>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    /// <returns>An enumerable collection of FormControlViewModel objects.</returns>
+    public IEnumerable<FormControlViewModel> GenerateFormControls<TEntity>(
+        TEntity entity,
+        EntityAction entityAction,
+        IDictionary<string, Expression<Func<object, bool>>> complexOptionFilters)
+        => this.GenerateFormControls(entityAction, entityAction, complexOptionFilters, null);
 
-        private IEnumerable<FormControlViewModel> GeneratePrimaryKeyFormControls<TEntity>(
-            TEntity entity,
-            EntityAction entityAction,
-            Type autocompleteType)
-        {
-            var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
+    /// <summary>
+    /// Generates the form controls for the respective entity.
+    /// </summary>
+    /// <param name="entity">The entity we want to generate the form controls for.</param>
+    /// <param name="entityAction">The action to be performed on the entity.</param>
+    /// <param name="complexOptionFilters">Optional. A dictionary containing complex option filters, based on which we are loading the data for the form control.</param>
+    /// <param name="autocompleteType">Optional. The type of the property that will be used for autocomplete functionality.
+    /// When passed, values for this property will not be loaded immediately, but when searched for.</param>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    /// <returns>An enumerable collection of FormControlViewModel objects.</returns>
+    public IEnumerable<FormControlViewModel> GenerateFormControls<TEntity>(
+        TEntity entity,
+        EntityAction entityAction,
+        IDictionary<string, Expression<Func<object, bool>>>? complexOptionFilters,
+        Type? autocompleteType)
+        => this.GeneratePrimaryKeyFormControls(entity, autocompleteType)
+            .Concat(GeneratePrimitiveFormControls(entity))
+            .Concat(this.GenerateComplexFormControls(entity, entityAction, complexOptionFilters));
 
-            var primaryKeyValues = entityType.GetPrimaryKeyValue(entity)
-                .ToList();
+    /// <summary>
+    /// Gets complex form control name for the provided entity name.
+    /// </summary>
+    /// <param name="entityName">The entity name.</param>
+    /// <returns>The name of the complex form control.</returns>
+    public string GetComplexFormControlNameForEntityName(string entityName)
+        => entityName + "Id";
 
-            if (primaryKeyValues.Count > 1)
+    private static IEnumerable<FormControlViewModel> GeneratePrimitiveFormControls<TEntity>(TEntity entity)
+    {
+        var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
+
+        return entityType.GetProperties()
+            .Where(p => !p.GetCustomAttributes<NotMappedAttribute>().Any())
+            .Where(property => IsPrimitiveProperty(property, entityType)
+                               && !IsComplexPrimaryKey(property, entityType))
+            .OrderBy(p => p.MetadataToken)
+            .Select(property => new FormControlViewModel
             {
-                return primaryKeyValues
-                    .Select(pair =>
-                    {
-                        var name = pair.Key[..^2];
-                        var property = entityType.GetProperty(name);
-                        var value = ExpressionsBuilder.ForGetPropertyValue<TEntity>(
-                            entityType.GetProperty(pair.Key))(entity);
+                Name = property.Name,
+                Type = property.PropertyType,
+                Value = ExpressionsBuilder.ForGetPropertyValue<TEntity>(property)(entity),
+            });
+    }
 
-                        var isAutocompleteFormcontrol = property.PropertyType == autocompleteType;
+    private static bool IsDbContextEntity(PropertyInfo property)
+        => Types.Contains(property.PropertyType);
 
-                        return new FormControlViewModel
-                        {
-                            Name = name,
-                            Type = property.PropertyType,
-                            Value = value,
-                            Options = isAutocompleteFormcontrol ? Enumerable.Empty<object>() : this.dbContext.Set(property.PropertyType),
-                            IsDbSet = true,
-                            IsReadOnly = false,
-                        };
-                    });
-            }
+    private static bool IsPrimitiveProperty(PropertyInfo property, Type entityType)
+        => entityType
+               .GetPrimaryKeyPropertyInfos()
+               .Any(pk => pk == property)
+           || property.PropertyType.IsEnum
+           || (PrimitiveTypes.Contains(property.PropertyType) && !property.Name.ToLower().EndsWith("id"));
 
+    private static bool IsComplexPrimaryKey(PropertyInfo property, Type entityType)
+        => entityType
+            .GetPrimaryKeyPropertyInfos()
+            .Any(p => p == property);
+
+    private IEnumerable<FormControlViewModel> GeneratePrimaryKeyFormControls<TEntity>(
+        TEntity entity,
+        Type? autocompleteType)
+    {
+        var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
+
+        var primaryKeyValues = entityType.GetPrimaryKeyValue(entity!)
+            .ToList();
+
+        if (primaryKeyValues.Count > 1)
+        {
             return primaryKeyValues
                 .Select(pair =>
                 {
-                    var name = pair.Key == SinglePrimaryKeyName
-                        ? entityType.GetPrimaryKeyPropertyInfos()
-                            .Select(pk => pk.Name)
-                            .FirstOrDefault()
-                        : pair.Key;
+                    var name = pair.Key[..^2];
+                    var property = entityType.GetProperty(name) !;
+                    var value = ExpressionsBuilder.ForGetPropertyValue<TEntity>(
+                        entityType.GetProperty(pair.Key) !)(entity);
 
-                    var value = pair.Key == SinglePrimaryKeyName
-                        ? ExpressionsBuilder.ForGetPropertyValue<TEntity>(
-                            entityType.GetPrimaryKeyPropertyInfos().FirstOrDefault())(entity)
-                        : ExpressionsBuilder.ForGetPropertyValue<TEntity>(
-                            entityType.GetProperty(pair.Key))(entity);
+                    var isAutocompleteFormControl = property.PropertyType == autocompleteType;
 
                     return new FormControlViewModel
                     {
-                        Name = name!,
-                        Type = pair.Value.GetType(),
+                        Name = name,
+                        Type = property.PropertyType,
                         Value = value,
-                        IsReadOnly = true,
+                        Options = isAutocompleteFormControl ? Enumerable.Empty<object>() : this.dbContext.Set(property.PropertyType),
+                        IsDbSet = true,
+                        IsReadOnly = false,
                     };
                 });
         }
 
-        private static IEnumerable<FormControlViewModel> GeneratePrimitiveFormControls<TEntity>(TEntity entity)
-        {
-            var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
-
-            return entityType.GetProperties()
-                .Where(p => !p.GetCustomAttributes<NotMappedAttribute>().Any())
-                .Where(property => IsPrimitiveProperty(property, entityType)
-                                   && !IsComplexPrimaryKey(property, entityType))
-                .OrderBy(p => p.MetadataToken)
-                .Select(property => new FormControlViewModel
-                {
-                    Name = property.Name,
-                    Type = property.PropertyType,
-                    Value = ExpressionsBuilder.ForGetPropertyValue<TEntity>(property)(entity),
-                });
-        }
-
-        private static bool IsDbContextEntity(PropertyInfo property)
-            => Types.Contains(property.PropertyType);
-
-        private static bool IsPrimitiveProperty(PropertyInfo property, Type entityType)
-            => entityType
-                   .GetPrimaryKeyPropertyInfos()
-                   .Any(pk => pk == property)
-               || property.PropertyType.IsEnum
-               || (PrimitiveTypes.Contains(property.PropertyType) && !property.Name.ToLower().EndsWith("id"));
-
-        private static bool IsComplexPrimaryKey(PropertyInfo property, Type entityType)
-            => entityType
-                .GetPrimaryKeyPropertyInfos()
-                .Any(p => p == property);
-
-        private bool IsPartOfPrimaryKey(PropertyInfo property, Type entityType)
-            => entityType.GetPrimaryKeyPropertyInfos()
-                .Any(pk => pk.Name == this.GetComplexFormControlNameForEntityName(property.Name));
-
-        private IEnumerable<FormControlViewModel> GenerateComplexFormControls<TEntity>(
-            TEntity entity,
-            EntityAction entityAction,
-            IDictionary<string, Expression<Func<object, bool>>>? optionFilters = null)
-        {
-            var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
-
-            return entityType.GetProperties()
-                .Where(property => IsDbContextEntity(property) && !this.IsPartOfPrimaryKey(property, entityType))
-                .Select(property =>
-                {
-                    var filter = optionFilters?.ContainsKey(property.Name) ?? false
-                        ? optionFilters[property.Name]
-                        : null;
-                    return this.GenerateFormControlForComplexProperty(entity, property, entityAction, filter);
-                })
-                .OrderBy(x => x.Name)
-                .ToList();
-        }
-
-        private FormControlViewModel GenerateFormControlForComplexProperty<TEntity>(
-            TEntity entity,
-            PropertyInfo property,
-            EntityAction entityAction,
-            Expression<Func<object, bool>>? optionsFilter = null)
-        {
-            var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
-            var valueFunc = ExpressionsBuilder.ForGetPropertyValue<TEntity>(
-                entityType.GetProperty(this.GetComplexFormControlNameForEntityName(property.Name)) !);
-            var value = valueFunc(entity);
-            var options = this.GetComplexPropertyOptionsForAction(value, property, entityAction, optionsFilter);
-
-            return new FormControlViewModel
+        return primaryKeyValues
+            .Select(pair =>
             {
-                Name = property.Name,
-                Type = property.PropertyType,
-                Value = value,
-                Options = options,
-                IsDbSet = true,
-                IsReadOnly = false,
-            };
-        }
+                var name = pair.Key == SinglePrimaryKeyName
+                    ? entityType.GetPrimaryKeyPropertyInfos()
+                        .Select(pk => pk.Name)
+                        .FirstOrDefault()
+                    : pair.Key;
 
-        private IQueryable<object> GetComplexPropertyOptionsForAction(
-            object? value,
-            PropertyInfo property,
-            EntityAction entityAction,
-            Expression<Func<object, bool>>? optionsFilter = null)
-        {
-            if (entityAction == EntityAction.Delete)
+                var value = pair.Key == SinglePrimaryKeyName
+                    ? ExpressionsBuilder.ForGetPropertyValue<TEntity>(
+                        entityType.GetPrimaryKeyPropertyInfos().FirstOrDefault() !)(entity)
+                    : ExpressionsBuilder.ForGetPropertyValue<TEntity>(
+                        entityType.GetProperty(pair.Key) !)(entity);
+
+                return new FormControlViewModel
+                {
+                    Name = name!,
+                    Type = pair.Value.GetType(),
+                    Value = value,
+                    IsReadOnly = true,
+                };
+            });
+    }
+
+    private bool IsPartOfPrimaryKey(PropertyInfo property, Type entityType)
+        => entityType.GetPrimaryKeyPropertyInfos()
+            .Any(pk => pk.Name == this.GetComplexFormControlNameForEntityName(property.Name));
+
+    private IEnumerable<FormControlViewModel> GenerateComplexFormControls<TEntity>(
+        TEntity entity,
+        EntityAction entityAction,
+        IDictionary<string, Expression<Func<object, bool>>>? optionFilters = null)
+    {
+        var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
+
+        return entityType.GetProperties()
+            .Where(property => IsDbContextEntity(property) && !this.IsPartOfPrimaryKey(property, entityType))
+            .Select(property =>
             {
-                var onlyOption = this.dbContext.Find(property.PropertyType, value);
+                var filter = optionFilters?.ContainsKey(property.Name) ?? false
+                    ? optionFilters[property.Name]
+                    : null;
+                return this.GenerateFormControlForComplexProperty(entity, property, entityAction, filter);
+            })
+            .OrderBy(x => x.Name)
+            .ToList();
+    }
 
-                return onlyOption != default
-                    ? new[] { onlyOption }.AsQueryable()
-                    : Enumerable.Empty<object>().AsQueryable();
-            }
+    private FormControlViewModel GenerateFormControlForComplexProperty<TEntity>(
+        TEntity entity,
+        PropertyInfo property,
+        EntityAction entityAction,
+        Expression<Func<object, bool>>? optionsFilter = null)
+    {
+        var entityType = ReflectionHelper.GetEntityTypeUnproxied<TEntity>();
+        var valueFunc = ExpressionsBuilder.ForGetPropertyValue<TEntity>(
+            entityType.GetProperty(this.GetComplexFormControlNameForEntityName(property.Name)) !);
+        var value = valueFunc(entity);
+        var options = this.GetComplexPropertyOptionsForAction(value, property, entityAction, optionsFilter);
 
-            return optionsFilter != null
-                ? this.dbContext.Set(property.PropertyType).Where(optionsFilter)
-                : this.dbContext.Set(property.PropertyType);
+        return new FormControlViewModel
+        {
+            Name = property.Name,
+            Type = property.PropertyType,
+            Value = value,
+            Options = options,
+            IsDbSet = true,
+            IsReadOnly = false,
+        };
+    }
+
+    private IQueryable<object> GetComplexPropertyOptionsForAction(
+        object? value,
+        PropertyInfo property,
+        EntityAction entityAction,
+        Expression<Func<object, bool>>? optionsFilter = null)
+    {
+        if (entityAction == EntityAction.Delete)
+        {
+            var onlyOption = this.dbContext.Find(property.PropertyType, value);
+
+            return onlyOption != default
+                ? new[] { onlyOption }.AsQueryable()
+                : Enumerable.Empty<object>().AsQueryable();
         }
+
+        return optionsFilter != null
+            ? this.dbContext.Set(property.PropertyType).Where(optionsFilter)
+            : this.dbContext.Set(property.PropertyType);
     }
 }
