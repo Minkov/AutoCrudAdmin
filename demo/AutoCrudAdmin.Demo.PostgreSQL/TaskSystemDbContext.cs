@@ -1,6 +1,5 @@
 ﻿namespace AutoCrudAdmin.Demo.PostgreSQL;
 
-using AutoCrudAdmin.Demo.Models;
 using AutoCrudAdmin.Demo.Models.Extensions;
 using AutoCrudAdmin.Demo.Models.Models;
 using AutoCrudAdmin.Demo.PostgreSQL.Extensions;
@@ -13,22 +12,25 @@ public class TaskSystemDbContext : DbContext
     {
     }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<EmployeeTasks>()
-            .HasKey(et => new { et.EmployeeId, et.TaskId });
-        modelBuilder.Seed();
-    }
+    public DbSet<Task> Tasks { get; set; } = default!;
+
+    public DbSet<Employee> Employees { get; set; } = default!;
+
+    public DbSet<Project> Projects { get; set; } = default!;
+
+    public DbSet<EmployeeTasks> EmployeeTasks { get; set; } = default!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
         => options.Configure();
 
-    public DbSet<Task> Tasks { get; set; }
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
 
-    public DbSet<Employee> Employees { get; set; }
+        modelBuilder
+            .Entity<EmployeeTasks>()
+            .HasKey(et => new { et.EmployeeId, et.TaskId });
 
-    public DbSet<Project> Projects { get; set; }
-
-    public DbSet<EmployeeTasks> EmployeeTasks { get; set; }
+        modelBuilder.Seed();
+    }
 }

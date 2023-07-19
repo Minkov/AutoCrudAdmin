@@ -355,3 +355,5 @@ MigrationBackup/
 
 
 global.json
+*.sqlite-shm
+*.sqlite-wal
