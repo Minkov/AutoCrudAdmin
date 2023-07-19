@@ -624,17 +624,11 @@ public class AutoCrudAdminController<TEntity>
     }
 
     private static void CopyFormPropertiesToExistingEntityFromNewEntity(TEntity existingEntity, TEntity newEntity)
-    {
-        var propertiesToCopy = typeof(TEntity)
+        => typeof(TEntity)
             .GetProperties()
             .Where(p => p.CanWrite && !p.PropertyType.IsNavigationProperty())
-            .ToList();
-
-        foreach (var property in propertiesToCopy)
-        {
-            property.SetValue(existingEntity, property.GetValue(newEntity, null), null);
-        }
-    }
+            .ToList()
+            .ForEach(property => property.SetValue(existingEntity, property.GetValue(newEntity, null), null));
 
     private TEntity DictToEntity(IDictionary<string, string> entityDict)
     {
