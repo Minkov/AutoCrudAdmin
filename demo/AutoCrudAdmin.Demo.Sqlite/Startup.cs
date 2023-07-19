@@ -13,7 +13,8 @@ public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddScoped<DbContext, TaskSystemDbContext>()
+        services
+            .AddScoped<DbContext, TaskSystemDbContext>()
             .AddDbContext<TaskSystemDbContext>(options => options
                 .Configure());
 
@@ -47,13 +48,13 @@ public class Startup
                 ApplicationName = "AutoCrudAdmin Demo",
             });
 
-        this.SetupDb(app);
+        SetupDb(app);
     }
 
-    private void SetupDb(IApplicationBuilder app)
+    private static void SetupDb(IApplicationBuilder app)
     {
         using var scope = app.ApplicationServices.CreateScope();
-        var dbContext = scope.ServiceProvider.GetService<DbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<DbContext>();
         dbContext.Database.Migrate();
     }
 }

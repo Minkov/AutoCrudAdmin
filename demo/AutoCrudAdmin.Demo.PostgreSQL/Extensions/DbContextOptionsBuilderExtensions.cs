@@ -11,9 +11,8 @@ public static class DbContextOptionsBuilderExtensions
             return options;
         }
 
-          
         options.UseNpgsql("Host=192.168.0.186;Database=AutoCrudAdminDb;Username=postgres;Password=1123QwER");
 
-        return options; 
+        return options;
     }
 }
