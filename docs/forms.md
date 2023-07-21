@@ -1,60 +1,38 @@
 
-The `AutoCrudAdmin` provides ways to customize the forms as well.
+Ways to customize forms.
 
-### Shown Fields
-
-Explicitly show fields:
+### Show/Hide Fields
 
 ```csharp
 protected override IEnumerable<string> ShownFormControlNames {
-  new[] { "Name", "Price" }
-};
-```
+  // explicit fields
+}
 
-### Hidden Fields
-
-Hide fields:
-
-```csharp
 protected override IEnumerable<string> HiddenFormControlNames {
-  new[] { "Description" }  
-};
-``` 
+  // hidden fields  
+} 
+```
 
 ### Read-only Fields
 
-Make fields read-only:
-
-```csharp  
-someFormControl.IsReadOnly = true;
+```csharp
+someFormControl.IsReadOnly = true; 
 ```
 
-### Validation
+### GenerateFormControls Methods 
 
-Validate on save:
-
-```csharp
-protected override IEnumerable<Func<TEntity, TEntity, ValidatorResult>> EntityValidators {
-
-  (existing, updated) => {
-    if (updated.Quantity < 0) {
-      return ValidatorResult.Error("Invalid quantity");
-    }
-    return ValidatorResult.Success();
-  }
-
-};
-```
+Customize form generation:
 
 ```csharp
-protected override IEnumerable<Func<TEntity, TEntity, ValidatorResult>> EntityValidators {
+protected override IEnumerable<FormControlViewModel> GenerateFormControls() {
 
-  (existing, updated) => {
-    if (updated.Quantity < 0) {
-      return ValidatorResult.Error("Invalid quantity");
-    }
-    return ValidatorResult.Success();
-  }
+  // 1. Use defaults
 
-};
+  // 2. Modify defaults   
+   
+  // 3. Add custom controls
+   
+  // 4. Override completely 
+
+}
 ```
