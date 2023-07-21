@@ -1,4 +1,3 @@
-
 Customizing the grid
 
 # Custom Columns
@@ -19,13 +18,13 @@ protected override IEnumerable<CustomGridColumn<TEntity>> CustomColumns {
 
 Explicitly specify shown columns:
 
-```csharp 
+```csharp
 protected override IEnumerable<string> ShownColumns {
   new[] { "Name", "Price" }
 };
 ```
 
-# Hidden Columns 
+# Hidden Columns
 
 Hide columns:
 

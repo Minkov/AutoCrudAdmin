@@ -2,7 +2,7 @@ The `IAutoCrudAuthFilter` interface allows implementing custom authorization log
 
 For example, to require authentication:
 
-```csharp 
+```csharp
 public class RequireAuthFilter : IAutoCrudAuthFilter {
 
   public bool Authorize(HttpContext context)   

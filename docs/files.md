@@ -14,7 +14,7 @@ public async Task<IActionResult> PostEdit(
 
 On the view, use:
 
-```html 
+```html
 <form asp-action="PostEdit" enctype="multipart/form-data">
 
 </form>

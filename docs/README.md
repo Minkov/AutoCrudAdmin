@@ -4,22 +4,22 @@ Here is an updated version of the AutoCrudAdmin documentation incorporating the 
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Installation](#installation)  
-- [Usage](#usage)
-- [Customization](#customization)
-  - [Customizing Grid](#customizing-grid)
-  - [Customizing Form Fields](#customizing-form-fields) 
-  - [GenerateFormControls Methods](#generateformcontrols-methods)
-  - [Adding Custom Actions](#adding-custom-actions)
-  - [Validating Entities](#validating-entities)
-- [Navigation Menu](#navigation-menu)  
-- [Changing Layout](#changing-layout)
-- [Authentication](#authentication)
-- [Handling Files](#handling-files)
-- [Overriding Views](#overriding-views)
-- [Customizing AutoCrudAdminController](#customizing-autocrudadmincontroller)
-- [Troubleshooting](#troubleshooting)
+*   [Overview](#overview)
+*   [Installation](#installation)
+*   [Usage](#usage)
+*   [Customization](#customization)
+    *   [Customizing Grid](#customizing-grid)
+    *   [Customizing Form Fields](#customizing-form-fields)
+    *   [GenerateFormControls Methods](#generateformcontrols-methods)
+    *   [Adding Custom Actions](#adding-custom-actions)
+    *   [Validating Entities](#validating-entities)
+*   [Navigation Menu](#navigation-menu)
+*   [Changing Layout](#changing-layout)
+*   [Authentication](#authentication)
+*   [Handling Files](#handling-files)
+*   [Overriding Views](#overriding-views)
+*   [Customizing AutoCrudAdminController](#customizing-autocrudadmincontroller)
+*   [Troubleshooting](#troubleshooting)
 
 ## Overview
 
@@ -29,21 +29,19 @@ AutoCrudAdmin is a library that provides automatic CRUD (Create, Read, Update, D
 
 Install the [AutoCrudAdmin](https://github.com/minkov/autocrudadmin) NuGet package in your ASP.NET Core project.
 
-```
-dotnet add package AutoCrudAdmin
-```
+    dotnet add package AutoCrudAdmin
 
 ## Usage
 
-1. Call `services.AddAutoCrudAdmin()` in `ConfigureServices()` in `Startup.cs`. 
+1.  Call `services.AddAutoCrudAdmin()` in `ConfigureServices()` in `Startup.cs`.
 
-2. Call `app.UseAutoCrudAdmin()` in `Configure()` in `Startup.cs`.
+2.  Call `app.UseAutoCrudAdmin()` in `Configure()` in `Startup.cs`.
 
-3. You have CRUD views and operations for each entity in your DbContexts.
+3.  You have CRUD views and operations for each entity in your DbContexts.
 
-4. You can customize the default behavior by creating a controller that inherits from `AutoCrudAdminController<TEntity>` where `TEntity` is the entity class.
+4.  You can customize the default behavior by creating a controller that inherits from `AutoCrudAdminController<TEntity>` where `TEntity` is the entity class.
 
-That's it! AutoCrudAdmin will automatically generate CRUD screens and API endpoints for the entities. 
+That's it! AutoCrudAdmin will automatically generate CRUD screens and API endpoints for the entities.
 
 The CRUD screens will be available under `/ControllerName` like `/Products`, `/Customers` etc. The API endpoints will be at `/ControllerName/Create`, `/ControllerName/Edit` etc.
 
@@ -53,7 +51,7 @@ AutoCrudAdmin provides options to customize the generated CRUD screens and API b
 
 ### Customizing Grid
 
-The grid view that lists entities on the Index screen can be customized by overriding methods in the controller. 
+The grid view that lists entities on the Index screen can be customized by overriding methods in the controller.
 
 For example, to explicitly show certain columns:
 
@@ -83,13 +81,13 @@ protected override IEnumerable<CustomGridColumn<Product>> CustomColumns =>
 
 See [Customizing Grid](grid.md) for more details and options.
 
-### Customizing Form Fields  
+### Customizing Form Fields
 
 Similarly, the forms for Create and Edit actions can be customized via methods like:
 
-- `ShownFormControlNames` 
-- `HiddenFormControlNames`
-- `ShownFormControlNamesOnCreate`
+*   `ShownFormControlNames`
+*   `HiddenFormControlNames`
+*   `ShownFormControlNamesOnCreate`
 
 For example:
 
@@ -113,13 +111,13 @@ See the [GenerateFormControls Methods](forms.md#generateformcontrols-methods) se
 
 Additional controller actions can be added and will show alongside the standard CRUD actions.
 
-See [Adding Custom Actions](actions.md). 
+See [Adding Custom Actions](actions.md).
 
-### Validating Entities 
+### Validating Entities
 
 To perform validation, override the `EntityValidators` method:
 
-```csharp 
+```csharp
 protected override IEnumerable<Func<Product, Product, ValidatorResult>> EntityValidators {
 
   (existing, updated) => {
@@ -146,11 +144,11 @@ Generate a menu with links to CRUD screens using the [`NavHelper`](https://githu
 }
 ```
 
-## Changing Layout 
+## Changing Layout
 
 The default layout is `_AutoCrudAdmin_Layout`. To use a custom layout:
 
-```csharp 
+```csharp
 services.AddAutoCrudAdmin(options => {
   options.LayoutName = "_CustomLayout";
 });
@@ -194,7 +192,7 @@ protected override IEnumerable<CustomGridColumn<TEntity>> CustomColumns {..}
 
 Add row actions:
 
-```csharp  
+```csharp
 protected override IEnumerable<GridAction> CustomActions {..}
 ```
 
@@ -209,10 +207,10 @@ protected override IEnumerable<string> HiddenFormControlNames {..}
 
 See [API Reference](https://github.com/minkov/autocrudadmin/blob/master/src/AutoCrudAdmin/Controllers/AutoCrudAdminController.cs) for full customization options.
 
-## Troubleshooting 
+## Troubleshooting
 
 Some common issues:
 
-- Ensure DbContext registered properly in `ConfigureServices()`
-- For navigation menu, controller must inherit from `AutoCrudAdminController`
-- Check for conflicts with other packages
+*   Ensure DbContext registered properly in `ConfigureServices()`
+*   For navigation menu, controller must inherit from `AutoCrudAdminController`
+*   Check for conflicts with other packages

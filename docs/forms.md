@@ -1,4 +1,3 @@
-
 Ways to customize forms.
 
 ### Show/Hide Fields
@@ -19,7 +18,7 @@ protected override IEnumerable<string> HiddenFormControlNames {
 someFormControl.IsReadOnly = true; 
 ```
 
-### GenerateFormControls Methods 
+### GenerateFormControls Methods
 
 The `GenerateFormControls` methods are the main way to customize the form fields generated for Create and Edit pages.
 
@@ -50,8 +49,8 @@ The methods return a collection of `FormControlViewModel` representing each form
 
 By default, it creates controls for:
 
-- Primitive properties like strings, numbers.
-- Navigation properties as dropdowns loaded from DbSets.
+*   Primitive properties like strings, numbers.
+*   Navigation properties as dropdowns loaded from DbSets.
 
 This requires no customization for basic cases.
 
@@ -67,7 +66,7 @@ protected override IEnumerable<string> HiddenFormControlNames {
 }
 ```
 
-**Show only certain fields** 
+**Show only certain fields**
 
 ```csharp
 protected override IEnumerable<string> ShownFormControlNames {
@@ -96,7 +95,7 @@ protected override IEnumerable<FormControlViewModel> GenerateFormControls()
 }
 ```
 
-### Overriding Completely 
+### Overriding Completely
 
 For full control, override `GenerateFormControls` and explicitly build the controls:
 
