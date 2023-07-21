@@ -1,5 +1,3 @@
-Here is an updated version of the AutoCrudAdmin documentation incorporating the suggestions:
-
 # AutoCrudAdmin Documentation
 
 ## Table of Contents
