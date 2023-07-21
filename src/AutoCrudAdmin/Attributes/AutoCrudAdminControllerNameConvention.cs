@@ -36,7 +36,7 @@ public class AutoCrudAdminControllerNameConvention : Attribute, IControllerModel
 
     /// <summary>
     /// The <see cref="Apply"/>  method is used to apply the naming convention to the ControllerModel.
-    /// It checks if a controller is an <see cref="AutoCrudAdminController"/> and whther is has been explicitly named.
+    /// It checks if a controller is an <see cref="AutoCrudAdminController"/> and whether it has been explicitly named.
     /// If not explicitly named, it sets the controller name and route to the name of the entity type in plural.
     /// </summary>
     /// <param name="controller">The <see cref="ControllerModel"/> that the convention will be applied to.</param>
