@@ -1,7 +1,6 @@
 <Project>
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>CA1819, SA1011</NoWarn>
   </PropertyGroup>
   
   <PropertyGroup>
