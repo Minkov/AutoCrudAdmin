@@ -24,6 +24,10 @@ using Microsoft.Extensions.DependencyInjection;
 using NonFactors.Mvc.Grid;
 using static Constants;
 
+/// <summary>
+/// The AutoCrudAdminController provides default CRUD operations for entities.
+/// </summary>
+/// <typeparam name="TEntity">The type of the entity that this controller operates on.</typeparam>
 [AutoCrudAdminControllerNameConvention]
 public class AutoCrudAdminController<TEntity>
     : Controller
@@ -35,39 +39,69 @@ public class AutoCrudAdminController<TEntity>
     private DbContext? db;
     private IFormControlsHelper? formControlsHelper;
 
+    /// <summary>
+    /// Gets the column names to show in the index grid view.
+    /// </summary>
     protected virtual IEnumerable<string> ShownColumnNames
         => Enumerable.Empty<string>();
 
+    /// <summary>
+    /// Gets the column names to hide in the index grid view.
+    /// </summary>
     protected virtual IEnumerable<string> HiddenColumnNames
         => Enumerable.Empty<string>();
 
+    /// <summary>
+    /// Gets the form control names to show by default.
+    /// </summary>
     protected virtual IEnumerable<string> ShownFormControlNames
         => Enumerable.Empty<string>();
 
+    /// <summary>
+    /// Gets the form control names to show on create forms.
+    /// </summary>
     protected virtual IEnumerable<string> ShownFormControlNamesOnCreate
         => Enumerable.Empty<string>();
 
+    /// <summary>
+    /// Gets the form control names to show on edit forms.
+    /// </summary>
     protected virtual IEnumerable<string> ShownFormControlNamesOnEdit
         => Enumerable.Empty<string>();
 
+    /// <summary>
+    /// Gets the form control names to hide by default.
+    /// </summary>
     protected virtual IEnumerable<string> HiddenFormControlNames
         => Enumerable.Empty<string>();
 
+    /// <summary>
+    /// Gets the form control names to hide on create forms.
+    /// </summary>
     protected virtual IEnumerable<string> HiddenFormControlNamesOnCreate
         => Enumerable.Empty<string>();
 
+    /// <summary>
+    /// Gets the form control names to hide on edit forms.
+    /// </summary>
     protected virtual IEnumerable<string> HiddenFormControlNamesOnEdit
         => Enumerable.Empty<string>();
 
+    /// <summary>
+    /// Gets the validators to run on entity save.
+    /// </summary>
     protected virtual IEnumerable<Func<TEntity, TEntity, AdminActionContext, ValidatorResult>> EntityValidators
         => Array.Empty<Func<TEntity, TEntity, AdminActionContext, ValidatorResult>>();
 
+    /// <summary>
+    /// Gets the async validators to run on entity save.
+    /// </summary>
     protected virtual IEnumerable<Func<TEntity, TEntity, AdminActionContext, Task<ValidatorResult>>> AsyncEntityValidators
         => Array.Empty<Func<TEntity, TEntity, AdminActionContext, Task<ValidatorResult>>>();
 
-    protected virtual Expression<Func<TEntity, bool>>? MasterGridFilter
-        => null;
-
+    /// <summary>
+    /// Gets the default grid actions.
+    /// </summary>
     protected virtual IEnumerable<GridAction> DefaultActions
         => new[]
         {
@@ -75,15 +109,27 @@ public class AutoCrudAdminController<TEntity>
             new GridAction { Action = nameof(this.Delete) },
         };
 
+    /// <summary>
+    /// Gets any custom grid actions.
+    /// </summary>
     protected virtual IEnumerable<GridAction> CustomActions
         => Enumerable.Empty<GridAction>();
 
+    /// <summary>
+    /// Gets any custom toolbar actions for the index grid.
+    /// </summary>
     protected virtual IEnumerable<AutoCrudAdminGridToolbarActionViewModel> CustomToolbarActions
         => Enumerable.Empty<AutoCrudAdminGridToolbarActionViewModel>();
 
+    /// <summary>
+    /// Gets any custom grid columns.
+    /// </summary>
     protected virtual IEnumerable<CustomGridColumn<TEntity>> CustomColumns
         => Enumerable.Empty<CustomGridColumn<TEntity>>();
 
+    /// <summary>
+    /// Gets the supported date time formats.
+    /// </summary>
     protected virtual IEnumerable<string> DateTimeFormats
         => new[]
         {
@@ -92,19 +138,35 @@ public class AutoCrudAdminController<TEntity>
             "dd/MM/yyyy hh:mm",
         };
 
+    /// <summary>
+    /// Gets the default rows per page.
+    /// </summary>
     protected virtual int RowsPerPage
         => this.PageSizes.Any()
             ? this.PageSizes.First().Item1
             : 20;
 
+    /// <summary>
+    /// Gets a value indicating whether to show page sizes dropdown.
+    /// By default, this depends on the size of `PageSizes` property.
+    /// </summary>
     protected virtual bool ShowPageSizes
         => this.PageSizes.Any();
 
+    /// <summary>
+    /// Gets the page size options.
+    /// </summary>
     protected virtual IEnumerable<Tuple<int, string>> PageSizes
         => Enumerable.Empty<Tuple<int, string>>();
 
+    /// <summary>
+    /// Gets the max string column length.
+    /// </summary>
     protected virtual int? ColumnStringMaxLength => Grid.DefaultColumnStringMaxLength;
 
+    /// <summary>
+    /// Gets generators for default dropdown options.
+    /// </summary>
     protected virtual IDictionary<Type, Func<object>> DefaultOptionsGenerators
         => new Dictionary<Type, Func<object>>();
 
@@ -113,6 +175,11 @@ public class AutoCrudAdminController<TEntity>
             .GetMethod(
                 nameof(GenerateColumnConfiguration),
                 BindingFlags.NonPublic | BindingFlags.Static) !;
+
+#pragma warning disable CA1822
+    private Expression<Func<TEntity, bool>>? MasterGridFilter
+        => null;
+#pragma warning restore CA1822
 
     private IEnumerable<GridAction> Actions
         => this.DefaultActions.Concat(this.CustomActions);
@@ -131,6 +198,10 @@ public class AutoCrudAdminController<TEntity>
             .RequestServices
             .GetRequiredService<IFormControlsHelper>();
 
+    /// <summary>
+    /// Called when an action is executing. Sets layout and app name.
+    /// </summary>
+    /// <param name="context">The action executing context.</param>
     public override void OnActionExecuting(ActionExecutingContext context)
     {
         this.ViewBag.LayoutName = context.HttpContext.Items["layout_name"] ?? string.Empty;
@@ -138,6 +209,12 @@ public class AutoCrudAdminController<TEntity>
         base.OnActionExecuting(context);
     }
 
+    /// <summary>
+    /// Handles autocomplete searches.
+    /// </summary>
+    /// <param name="searchTerm">The search term.</param>
+    /// <param name="searchProperty">The property to search.</param>
+    /// <returns>The autocomplete results.</returns>
     [HttpGet]
     public virtual IEnumerable<DropDownViewModel> Autocomplete([FromQuery] string searchTerm, string searchProperty)
     {
@@ -164,6 +241,10 @@ public class AutoCrudAdminController<TEntity>
         return entities;
     }
 
+    /// <summary>
+    /// Shows the index view. Contains a grid with paging, sorting and filtering.
+    /// </summary>
+    /// <returns>The index view.</returns>
     [HttpGet]
     public virtual IActionResult Index()
         => this.View(
@@ -174,6 +255,12 @@ public class AutoCrudAdminController<TEntity>
                 ToolbarActions = this.CustomToolbarActions,
             });
 
+    /// <summary>
+    /// Shows the create form.
+    /// </summary>
+    /// <param name="complexId">Relations for complex properties.</param>
+    /// <param name="postEndpointName">Optional custom post endpoint name.</param>
+    /// <returns>The create form view.</returns>
     [HttpGet]
     public virtual async Task<IActionResult> Create(
         [FromQuery] IDictionary<string, string> complexId,
@@ -184,6 +271,12 @@ public class AutoCrudAdminController<TEntity>
             complexId,
             postEndpointName);
 
+    /// <summary>
+    /// Shows the edit form.
+    /// </summary>
+    /// <param name="complexId">Relations for complex properties.</param>
+    /// <param name="postEndpointName">Optional custom post endpoint name.</param>
+    /// <returns>The edit form view.</returns>
     [HttpGet]
     public virtual async Task<IActionResult> Edit(
         [FromQuery] IDictionary<string, string> complexId,
@@ -194,6 +287,12 @@ public class AutoCrudAdminController<TEntity>
             complexId,
             postEndpointName);
 
+    /// <summary>
+    /// Shows the delete confirmation form.
+    /// </summary>
+    /// <param name="complexId">Relations for complex properties.</param>
+    /// <param name="postEndpointName">Optional custom post endpoint name.</param>
+    /// <returns>The delete confirmation form view.</returns>
     [HttpGet]
     public virtual async Task<IActionResult> Delete(
         [FromQuery] IDictionary<string, string> complexId,
@@ -204,20 +303,51 @@ public class AutoCrudAdminController<TEntity>
             complexId,
             postEndpointName);
 
+    /// <summary>
+    /// Handles HTTP POST for entity create.
+    /// </summary>
+    /// <param name="entityDict">The entity values.</param>
+    /// <param name="files">Any uploaded files.</param>
+    /// <returns>A redirect to index after save.</returns>
     [HttpPost]
     public virtual Task<IActionResult> PostCreate(IDictionary<string, string> entityDict, FormFilesContainer files)
         => this.PostEntityForm(entityDict, EntityAction.Create, files);
 
+    /// <summary>
+    /// Handles HTTP POST for entity edit.
+    /// </summary>
+    /// <param name="entityDict">The entity values.</param>
+    /// <param name="files">Any uploaded files.</param>
+    /// <returns>A redirect to index after save.</returns>
     [HttpPost]
     public virtual Task<IActionResult> PostEdit(IDictionary<string, string> entityDict, FormFilesContainer files)
         => this.PostEntityForm(entityDict, EntityAction.Edit, files);
 
+    /// <summary>
+    /// Handles HTTP POST for entity delete.
+    /// </summary>
+    /// <param name="entityDict">The entity values.</param>
+    /// <param name="files">Any uploaded files.</param>
+    /// <returns>A redirect to index after delete.</returns>
     [HttpPost]
     public virtual Task<IActionResult> PostDelete(IDictionary<string, string> entityDict, FormFilesContainer files)
         => this.PostEntityForm(entityDict, EntityAction.Delete, files);
 
+    /// <summary>
+    /// Applies eager loading / explicit includes.
+    /// </summary>
+    /// <param name="queryable">The base query.</param>
+    /// <returns>Query with includes applied.</returns>
     protected virtual IQueryable<TEntity> ApplyIncludes(IQueryable<TEntity> queryable) => queryable;
 
+    /// <summary>
+    /// Shows the form for an entity action.
+    /// </summary>
+    /// <param name="entity">The entity.</param>
+    /// <param name="action">The action.</param>
+    /// <param name="entityDict">The entity dictionary.</param>
+    /// <param name="postEndpointName">Optional custom post endpoint.</param>
+    /// <returns>The entity form view.</returns>
     protected virtual async Task<IActionResult> GetEntityForm(
         TEntity entity,
         EntityAction action,
@@ -237,33 +367,33 @@ public class AutoCrudAdminController<TEntity>
         switch (action)
         {
             case EntityAction.Create:
-                {
-                    var shownFormControls = this.ShownFormControlNames.Concat(this.ShownFormControlNamesOnCreate);
-                    var hiddenFormControls = this.HiddenFormControlNames.Concat(this.HiddenFormControlNamesOnCreate);
-                    formControls = SetFormControlsVisibility(formControls, shownFormControls, hiddenFormControls)
-                        .ToList();
-                    break;
-                }
+            {
+                var shownFormControls = this.ShownFormControlNames.Concat(this.ShownFormControlNamesOnCreate);
+                var hiddenFormControls = this.HiddenFormControlNames.Concat(this.HiddenFormControlNamesOnCreate);
+                formControls = SetFormControlsVisibility(formControls, shownFormControls, hiddenFormControls)
+                    .ToList();
+                break;
+            }
 
             case EntityAction.Edit:
-                {
-                    var shownFormControls = this.ShownFormControlNames.Concat(this.ShownFormControlNamesOnEdit);
-                    var hiddenFormControls = this.HiddenFormControlNames.Concat(this.HiddenFormControlNamesOnEdit);
-                    formControls = SetFormControlsVisibility(formControls, shownFormControls, hiddenFormControls)
-                        .ToList();
-                    break;
-                }
+            {
+                var shownFormControls = this.ShownFormControlNames.Concat(this.ShownFormControlNamesOnEdit);
+                var hiddenFormControls = this.HiddenFormControlNames.Concat(this.HiddenFormControlNamesOnEdit);
+                formControls = SetFormControlsVisibility(formControls, shownFormControls, hiddenFormControls)
+                    .ToList();
+                break;
+            }
 
             case EntityAction.Delete:
-                {
-                    formControls.ForEach(fc => fc.IsReadOnly = true);
-                    break;
-                }
+            {
+                formControls.ForEach(fc => fc.IsReadOnly = true);
+                break;
+            }
 
             default:
-                {
-                    throw new ArgumentOutOfRangeException(nameof(action), action, null);
-                }
+            {
+                throw new ArgumentOutOfRangeException(nameof(action), action, null);
+            }
         }
 
         return this.View(
@@ -335,6 +465,14 @@ public class AutoCrudAdminController<TEntity>
             ? this.GenerateFormControls(entity, action, entityDict, complexOptionFilters)
             : this.GenerateFormControls(entity, action, entityDict, complexOptionFilters, autocompleteType));
 
+    /// <summary>
+    /// Handles HTTP POST for an entity form.
+    /// </summary>
+    /// <param name="entityDict">The entity values.</param>
+    /// <param name="action">The action.</param>
+    /// <param name="files">Any uploaded files.</param>
+    /// <param name="routeValuesForRedirect">Optional redirect route values.</param>
+    /// <returns>A redirect after handling the POST.</returns>
     protected virtual async Task<IActionResult> PostEntityForm(
         IDictionary<string, string> entityDict,
         EntityAction action,
@@ -382,55 +520,254 @@ public class AutoCrudAdminController<TEntity>
         return this.RedirectToAction("Index", routeValuesForRedirect);
     }
 
+    /// <summary>
+    /// Called before saving an entity.
+    /// </summary>
+    /// <param name="entity">The entity.</param>
+    /// <param name="actionContext">The action context.</param>
     protected virtual Task BeforeEntitySaveAsync(TEntity entity, AdminActionContext actionContext)
         => Task.CompletedTask;
 
+    /// <summary>
+    /// Called before saving a new entity.
+    /// </summary>
+    /// <param name="entity">The new entity.</param>
+    /// <param name="actionContext">The action context.</param>
     protected virtual Task BeforeEntitySaveOnCreateAsync(TEntity entity, AdminActionContext actionContext)
         => Task.CompletedTask;
 
+    /// <summary>
+    /// Called before deleting an existing entity.
+    /// </summary>
+    /// <param name="entity">The entity to delete.</param>
+    /// <param name="actionContext">The action context.</param>
     protected virtual Task BeforeEntitySaveOnDeleteAsync(TEntity entity, AdminActionContext actionContext)
         => Task.CompletedTask;
 
+    /// <summary>
+    /// Called before updating an existing entity.
+    /// </summary>
+    /// <param name="existingEntity">The existing entity.</param>
+    /// <param name="newEntity">The updated entity.</param>
+    /// <param name="actionContext">The action context.</param>
     protected virtual Task BeforeEntitySaveOnEditAsync(TEntity existingEntity, TEntity newEntity, AdminActionContext actionContext)
         => Task.CompletedTask;
 
+    /// <summary>
+    /// Creates and saves a new entity.
+    /// </summary>
+    /// <param name="entity">The new entity.</param>
+    /// <param name="actionContext">The action context.</param>
     protected virtual async Task CreateEntityAndSaveAsync(TEntity entity, AdminActionContext actionContext)
     {
         await this.DbContext.AddAsync(entity);
         await this.DbContext.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Updates and saves an existing entity.
+    /// </summary>
+    /// <param name="entity">The updated entity.</param>
+    /// <param name="actionContext">The action context.</param>
     protected virtual async Task EditEntityAndSaveAsync(TEntity entity, AdminActionContext actionContext)
     {
         this.DbContext.Update(entity);
         await this.DbContext.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Deletes an entity.
+    /// </summary>
+    /// <param name="entity">The entity to delete.</param>
+    /// <param name="actionContext">The action context.</param>
     protected virtual async Task DeleteEntityAndSaveAsync(TEntity entity, AdminActionContext actionContext)
     {
         this.DbContext.Remove(entity);
         await this.DbContext.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Called after saving an entity.
+    /// </summary>
+    /// <param name="entity">The saved entity.</param>
+    /// <param name="actionContext">The action context.</param>
     protected virtual Task AfterEntitySaveAsync(TEntity entity, AdminActionContext actionContext)
         => Task.CompletedTask;
 
+    /// <summary>
+    /// Called after saving a new entity.
+    /// </summary>
+    /// <param name="entity">The new entity.</param>
+    /// <param name="actionContext">The action context.</param>
     protected virtual Task AfterEntitySaveOnCreateAsync(TEntity entity, AdminActionContext actionContext)
         => Task.CompletedTask;
 
+    /// <summary>
+    /// Called after updating an existing entity.
+    /// </summary>
+    /// <param name="oldEntity">The original entity.</param>
+    /// <param name="entity">The updated entity.</param>
+    /// <param name="actionContext">The action context.</param>
     protected virtual Task AfterEntitySaveOnEditAsync(TEntity oldEntity, TEntity entity, AdminActionContext actionContext)
         => Task.CompletedTask;
 
+    /// <summary>
+    /// Called after deleting an entity.
+    /// </summary>
+    /// <param name="entity">The deleted entity.</param>
+    /// <param name="actionContext">The action context.</param>
     protected virtual Task AfterEntitySaveOnDeleteAsync(TEntity entity, AdminActionContext actionContext)
         => Task.CompletedTask;
 
+    /// <summary>
+    /// Called before generating the entity form.
+    /// </summary>
+    /// <param name="entity">The entity.</param>
+    /// <param name="action">The action.</param>
+    /// <param name="entityDict">The entity dictionary.</param>
+    // TODO: check
     protected virtual Task BeforeGeneratingForm(
         TEntity entity,
         EntityAction action,
         IDictionary<string, string> entityDict)
         => Task.CompletedTask;
 
-    protected virtual IHtmlGrid<TEntity> GenerateGrid(IHtmlHelper<AutoCrudAdminIndexViewModel> htmlHelper)
+    /// <summary>
+    /// Parses a date time from a string based on <see cref="DateTimeFormats"/>.
+    /// </summary>
+    /// <param name="dateTimeStr">The date time string.</param>
+    /// <returns>The parsed date time.</returns>
+    protected virtual DateTime ParseDateTime(string dateTimeStr)
+    {
+        foreach (var dateTimeFormat in this.DateTimeFormats)
+        {
+            if (DateTime.TryParseExact(
+                    dateTimeStr,
+                    dateTimeFormat,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out var dateTime))
+            {
+                return dateTime;
+            }
+        }
+
+        throw new ArgumentException(
+            $"Cannot parse string date \"{dateTimeStr}\" to DateTime. Try adding another format template.");
+    }
+
+    /// <summary>
+    /// Gets default route values for redirect after entity form POST.
+    /// </summary>
+    /// <param name="newEntity">The new entity.</param>
+    /// <returns>Route values for redirect.</returns>
+    //TODO: Check fix
+    protected virtual object? GetDefaultRouteValuesForPostEntityFormRedirect(TEntity newEntity)
+        => null;
+
+    /// <summary>
+    /// Gets the complex form control name for an entity type.
+    /// </summary>
+    /// <typeparam name="T">The entity type.</typeparam>
+    /// <returns>The name of the complex form control.</returns>
+    protected string GetComplexFormControlNameFor<T>()
+        => this.FormControlsHelper.GetComplexFormControlNameForEntityName(typeof(T).Name);
+
+    /// <summary>
+    /// Redirects to an action with a number column filter.
+    /// </summary>
+    /// <param name="controllerName">The controller name.</param>
+    /// <param name="columnName">The column name.</param>
+    /// <param name="number">The number value.</param>
+    /// <param name="actionName">The action name.</param>
+    /// <param name="numberFilterType">The filter type.</param>
+    /// <returns>The redirect result.</returns>
+    protected IActionResult RedirectToActionWithNumberFilter(
+        string controllerName,
+        string columnName,
+        int number,
+        string actionName = "Index",
+        GridNumberFilterType numberFilterType = GridNumberFilterType.Equals)
+        => this.RedirectToActionWithFilter(
+            controllerName,
+            columnName,
+            number,
+            actionName,
+            numberFilterType.ToString());
+
+    /// <summary>
+    /// Redirects to an action with a string column filter.
+    /// </summary>
+    /// <param name="controllerName">The controller name.</param>
+    /// <param name="columnName">The column name.</param>
+    /// <param name="value">The string value.</param>
+    /// <param name="actionName">The action name.</param>
+    /// <param name="gridStringFilterType">The filter type.</param>
+    /// <returns>The redirect result.</returns>
+    protected IActionResult RedirectToActionWithStringFilter(
+        string controllerName,
+        string columnName,
+        string value,
+        string actionName = "Index",
+        GridStringFilterType gridStringFilterType = GridStringFilterType.Equals)
+        => this.RedirectToActionWithFilter(
+            controllerName,
+            columnName,
+            value,
+            actionName,
+            gridStringFilterType.ToString());
+
+    private static IEnumerable<FormControlViewModel> SetFormControlsVisibility(
+        List<FormControlViewModel> formControls,
+        IEnumerable<string> shownFormControlNames,
+        IEnumerable<string> hiddenFormControlNames)
+    {
+        var shownFormControlNamesList = shownFormControlNames.ToList();
+        var isAnyShownExplicitly = shownFormControlNamesList.Any();
+
+        formControls.Where(x => !x.IsHidden).ToList().ForEach(fc =>
+        {
+            if (isAnyShownExplicitly && shownFormControlNamesList.Contains(fc.Name))
+            {
+                fc.IsHidden = false;
+                return;
+            }
+
+            fc.IsHidden = isAnyShownExplicitly || hiddenFormControlNames.Contains(fc.Name);
+        });
+
+        return formControls;
+    }
+
+    private static IGridColumnsOf<TEntity> GenerateColumnConfiguration<TProperty>(
+        IGridColumnsOf<TEntity> columns,
+        PropertyInfo property,
+        int? columnStringMaxLength)
+    {
+        var lambda = ExpressionsBuilder.ForGetProperty<TEntity, TProperty>(property);
+
+        var columnBuilder = columns
+            .Add(lambda)
+            .Titled(property.Name)
+            .Filterable(true)
+            .Sortable(true);
+
+        if (property.PropertyType == typeof(string) && columnStringMaxLength.HasValue)
+        {
+            columnBuilder.RenderedAs((entity) => entity.ToString().ToEllipsis(columnStringMaxLength.Value));
+        }
+
+        return columns;
+    }
+
+    private static void CopyFormPropertiesToExistingEntityFromNewEntity(TEntity existingEntity, TEntity newEntity)
+        => typeof(TEntity)
+            .GetProperties()
+            .Where(p => p.CanWrite && !p.PropertyType.IsNavigationProperty())
+            .ToList()
+            .ForEach(property => property.SetValue(existingEntity, property.GetValue(newEntity, null), null));
+
+    private IHtmlGrid<TEntity> GenerateGrid(IHtmlHelper<AutoCrudAdminIndexViewModel> htmlHelper)
         => htmlHelper
             .Grid(this.GetQueryWithIncludes(this.MasterGridFilter))
             .Build(columns =>
@@ -449,7 +786,7 @@ public class AutoCrudAdminController<TEntity>
                 pager.RowsPerPage = this.RowsPerPage;
             });
 
-    protected virtual IGridColumnsOf<TEntity> BuildGridColumns(
+    private IGridColumnsOf<TEntity> BuildGridColumns(
         IGridColumnsOf<TEntity> columns,
         int? stringMaxLength)
     {
@@ -507,7 +844,7 @@ public class AutoCrudAdminController<TEntity>
         return columnsResult;
     }
 
-    protected virtual IGridColumnsOf<TEntity> BuildGridActions(
+    private IGridColumnsOf<TEntity> BuildGridActions(
         IGridColumnsOf<TEntity> columns,
         IHtmlHelper htmlHelper)
     {
@@ -528,107 +865,6 @@ public class AutoCrudAdminController<TEntity>
 
         return columns;
     }
-
-    protected virtual DateTime ParseDateTime(string dateTimeStr)
-    {
-        foreach (var dateTimeFormat in this.DateTimeFormats)
-        {
-            if (DateTime.TryParseExact(
-                    dateTimeStr,
-                    dateTimeFormat,
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.None,
-                    out var dateTime))
-            {
-                return dateTime;
-            }
-        }
-
-        throw new ArgumentException(
-            $"Cannot parse string date \"{dateTimeStr}\" to DateTime. Try adding another format template.");
-    }
-
-    protected virtual object? GetDefaultRouteValuesForPostEntityFormRedirect(TEntity newEntity)
-        => null;
-
-    protected string GetComplexFormControlNameFor<T>()
-        => this.FormControlsHelper.GetComplexFormControlNameForEntityName(typeof(T).Name);
-
-    protected IActionResult RedirectToActionWithNumberFilter(
-        string controllerName,
-        string columnName,
-        int number,
-        string actionName = "Index",
-        GridNumberFilterType numberFilterType = GridNumberFilterType.Equals)
-        => this.RedirectToActionWithFilter(
-            controllerName,
-            columnName,
-            number,
-            actionName,
-            numberFilterType.ToString());
-
-    protected IActionResult RedirectToActionWithStringFilter(
-        string controllerName,
-        string columnName,
-        string value,
-        string actionName = "Index",
-        GridStringFilterType gridStringFilterType = GridStringFilterType.Equals)
-        => this.RedirectToActionWithFilter(
-            controllerName,
-            columnName,
-            value,
-            actionName,
-            gridStringFilterType.ToString());
-
-    private static IEnumerable<FormControlViewModel> SetFormControlsVisibility(
-        List<FormControlViewModel> formControls,
-        IEnumerable<string> shownFormControlNames,
-        IEnumerable<string> hiddenFormControlNames)
-    {
-        var shownFormControlNamesList = shownFormControlNames.ToList();
-        var isAnyShownExplicitly = shownFormControlNamesList.Any();
-
-        formControls.Where(x => !x.IsHidden).ToList().ForEach(fc =>
-        {
-            if (isAnyShownExplicitly && shownFormControlNamesList.Contains(fc.Name))
-            {
-                fc.IsHidden = false;
-                return;
-            }
-
-            fc.IsHidden = isAnyShownExplicitly || hiddenFormControlNames.Contains(fc.Name);
-        });
-
-        return formControls;
-    }
-
-    private static IGridColumnsOf<TEntity> GenerateColumnConfiguration<TProperty>(
-        IGridColumnsOf<TEntity> columns,
-        PropertyInfo property,
-        int? columnStringMaxLength)
-    {
-        var lambda = ExpressionsBuilder.ForGetProperty<TEntity, TProperty>(property, columnStringMaxLength);
-
-        var columnBuilder = columns
-            .Add(lambda)
-            .Titled(property.Name)
-            .Filterable(true)
-            .Sortable(true);
-
-        if (property.PropertyType == typeof(string) && columnStringMaxLength.HasValue)
-        {
-            columnBuilder.RenderedAs((entity) => entity.ToString().ToEllipsis(columnStringMaxLength.Value));
-        }
-
-        return columns;
-    }
-
-    private static void CopyFormPropertiesToExistingEntityFromNewEntity(TEntity existingEntity, TEntity newEntity)
-        => typeof(TEntity)
-            .GetProperties()
-            .Where(p => p.CanWrite && !p.PropertyType.IsNavigationProperty())
-            .ToList()
-            .ForEach(property => property.SetValue(existingEntity, property.GetValue(newEntity, null), null));
 
     private TEntity DictToEntity(IDictionary<string, string> entityDict)
     {

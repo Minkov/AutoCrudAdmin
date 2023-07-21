@@ -7,6 +7,11 @@ using System.Reflection;
 using AutoCrudAdmin.Extensions;
 using Microsoft.EntityFrameworkCore;
 
+/// <summary>
+/// The ReflectionHelper static class provides a set of properties and methods for performing
+/// reflection operations in the context of the AutoCrudAdmin system.
+/// This includes operations related to DbContexts and DbSet properties.
+/// </summary>
 public static class ReflectionHelper
 {
     static ReflectionHelper()
@@ -15,13 +20,29 @@ public static class ReflectionHelper
         DbSetProperties = GetDbSetProperties();
     }
 
+    /// <summary>
+    /// Gets or sets enumerable collection of DbContext types found within the application domain.
+    /// </summary>
     public static IEnumerable<Type> DbContexts { get; set; }
 
+    /// <summary>
+    /// Gets an enumerable collection of DbSet properties found within the DbContexts.
+    /// </summary>
     public static IEnumerable<PropertyInfo> DbSetProperties { get; }
 
+    /// <summary>
+    /// Retrieves the real type of a given entity by stripping away any proxy types that may be wrapping the real type.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    /// <returns>The real type of the entity.</returns>
     public static Type GetEntityTypeUnproxied<TEntity>()
         => GetEntityTypeUnproxied(typeof(TEntity));
 
+    /// <summary>
+    /// Retrieves the real type of a given entity by stripping away any proxy types that may be wrapping the real type.
+    /// </summary>
+    /// <param name="entity">The entity whose real type is to be retrieved.</param>
+    /// <returns>The real type of the entity.</returns>
     public static Type GetEntityTypeUnproxied(object entity)
         => GetEntityTypeUnproxied(entity.GetType());
 

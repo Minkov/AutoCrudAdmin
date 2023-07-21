@@ -1,85 +1,63 @@
+Customizing the grid
 
-# The Grid page
+# Custom Columns
 
-For each entity in the `DbContext`, a page is created:
-- {PROJECT_URL}/projects
-- {PROJECT_URL}/tasks
+Add custom columns to the index grid view:
 
-For example, having the following:
-
-<table>
-<tr>
-<th>Entities</th>
-<th>DbContext</th>
-</tr>
-<tr>
-<td>
-
-```cs
-public class Project
-{
-    [Key]
-    public int Id { get; set; }
-     
-    public string Name { get; set; }
-     
-    public ICollection<Task> Tasks { get; set; }
-
-    public override string ToString()
-      => this.Name;
-}
-
-public class Task
-{
-   [Key]
-   public string Id { get; set; }
-   
-   public string Name { get; set; }
-
-   [Required]
-   public DateTime DueDate { get; set; }
-
-   [Required]
-   public TaskExecutionType ExecutionType { get; set; }
-
-   [Required]
-   public int ProjectId { get; set; }
-
-   public Project Project { get; set; }
-}
+```csharp
+protected override IEnumerable<CustomGridColumn<TEntity>> CustomColumns {
+  new CustomGridColumn<TEntity>  
+  {
+    Name = "Discount",
+    ValueFunc = e => e.CalculateDiscount() 
+  }
+};
 ```
 
-</td>
-<td>
+# Shown Columns
 
-```cs
-AutoCrudGridExampleDbContext : DbContext
-{
-  // ... setup stuff
-  public DbSet<Task> Tasks { get; set; }
+Explicitly specify shown columns:
 
-  public DbSet<Project> Projects { get; set; }
-}
+```csharp
+protected override IEnumerable<string> ShownColumns {
+  new[] { "Name", "Price" }
+};
 ```
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
 
-</td>
-</tr>
-</table>
+# Hidden Columns
+
+Hide columns:
+
+```csharp
+protected override IEnumerable<string> HiddenColumns {
+  new[] { "Description" }
+};
+```
+
+# Custom Row Actions
+
+Add custom actions for each grid row:
+
+```csharp
+protected override IEnumerable<GridAction> CustomActions {
+
+  new GridAction { 
+    Name = "Notify",
+    Action = "Notify"
+  }
+
+};
+```
+
+# Rows Per Page
+
+Customize rows per page options:
+
+```csharp
+protected override IEnumerable<Tuple<int, string>> PageSizes {
+  
+  new Tuple<int, string>(10, "10 per page"),
+  new Tuple<int, string>(50, "50 per page")
+  
+};
+```
