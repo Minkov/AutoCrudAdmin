@@ -113,7 +113,7 @@ See the [GenerateFormControls Methods](forms.md#generateformcontrols-methods) se
 
 Additional controller actions can be added and will show alongside the standard CRUD actions.
 
-See [Adding Custom Actions](custom-actions.md). 
+See [Adding Custom Actions](actions.md). 
 
 ### Validating Entities 
 
