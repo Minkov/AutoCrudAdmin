@@ -1,7 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
 	<PropertyGroup>
-		<PackageId>AutoCrudAdmin.Demo.SqlServer</PackageId>
 		<TargetFramework>net6.0</TargetFramework>
+		<NoWarn>SA1600</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -14,4 +15,5 @@
 		<ProjectReference Include="..\..\src\AutoCrudAdmin\AutoCrudAdmin.csproj" />
 		<ProjectReference Include="..\AutoCrudAdmin.Demo.Models\AutoCrudAdmin.Demo.Models.csproj" />
 	</ItemGroup>
+
 </Project>

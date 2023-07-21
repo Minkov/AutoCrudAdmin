@@ -9,7 +9,6 @@ using AutoCrudAdmin.Models;
 using AutoCrudAdmin.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NonFactors.Mvc.Grid;
 
 public class ProjectsController
     : AutoCrudAdminController<Project>
@@ -42,29 +41,31 @@ public class ProjectsController
             },
         };
 
+    protected override IEnumerable<CustomGridColumn<Project>> CustomColumns
+        => new[]
+        {
+            new CustomGridColumn<Project>
+            {
+                Name = "Tasks Count",
+                ValueFunc = p => p.Tasks.Count.ToString(),
+            },
+            new CustomGridColumn<Project>
+            {
+                Name = "Project Employees",
+                ValueFunc = p => string.Join(
+                    ", ",
+                    p.Tasks
+                        .SelectMany(t => t.EmployeeTasks)
+                        .Select(et => et.Employee)
+                        .Select(e => e.Username)),
+            },
+        };
+
     public IActionResult This()
         => this.Ok("It works!");
 
     public IActionResult That(string id)
         => this.Ok($"It works with Id: {id}");
-
-    protected override IGridColumnsOf<Project> BuildGridColumns(
-        IGridColumnsOf<Project> columns,
-        int? stringMaxLength)
-    {
-        base.BuildGridColumns(columns, stringMaxLength);
-
-        columns.Add(c => c.Tasks.Count).Titled("Tasks Count");
-        columns.Add(p => string.Join(
-                ", ",
-                p.Tasks
-                    .SelectMany(t => t.EmployeeTasks)
-                    .Select(et => et.Employee)
-                    .Select(e => e.Username)))
-            .Titled("Project Employees");
-
-        return columns;
-    }
 
     protected override IQueryable<Project> ApplyIncludes(IQueryable<Project> set)
         => set.Include(x => x.Tasks)
