@@ -65,7 +65,7 @@ public class AutoCrudAdminController<TEntity>
     protected virtual IEnumerable<Func<TEntity, TEntity, AdminActionContext, Task<ValidatorResult>>> AsyncEntityValidators
         => Array.Empty<Func<TEntity, TEntity, AdminActionContext, Task<ValidatorResult>>>();
 
-    protected virtual Expression<Func<TEntity, bool>>? MasterGridFilter
+    private Expression<Func<TEntity, bool>>? MasterGridFilter
         => null;
 
     protected virtual IEnumerable<GridAction> DefaultActions
@@ -184,6 +184,7 @@ public class AutoCrudAdminController<TEntity>
             complexId,
             postEndpointName);
 
+    
     [HttpGet]
     public virtual async Task<IActionResult> Edit(
         [FromQuery] IDictionary<string, string> complexId,
@@ -424,13 +425,14 @@ public class AutoCrudAdminController<TEntity>
     protected virtual Task AfterEntitySaveOnDeleteAsync(TEntity entity, AdminActionContext actionContext)
         => Task.CompletedTask;
 
+    // TODO: check
     protected virtual Task BeforeGeneratingForm(
         TEntity entity,
         EntityAction action,
         IDictionary<string, string> entityDict)
         => Task.CompletedTask;
 
-    protected virtual IHtmlGrid<TEntity> GenerateGrid(IHtmlHelper<AutoCrudAdminIndexViewModel> htmlHelper)
+    private IHtmlGrid<TEntity> GenerateGrid(IHtmlHelper<AutoCrudAdminIndexViewModel> htmlHelper)
         => htmlHelper
             .Grid(this.GetQueryWithIncludes(this.MasterGridFilter))
             .Build(columns =>
@@ -449,7 +451,7 @@ public class AutoCrudAdminController<TEntity>
                 pager.RowsPerPage = this.RowsPerPage;
             });
 
-    protected virtual IGridColumnsOf<TEntity> BuildGridColumns(
+    private IGridColumnsOf<TEntity> BuildGridColumns(
         IGridColumnsOf<TEntity> columns,
         int? stringMaxLength)
     {
@@ -507,7 +509,7 @@ public class AutoCrudAdminController<TEntity>
         return columnsResult;
     }
 
-    protected virtual IGridColumnsOf<TEntity> BuildGridActions(
+    private virtual IGridColumnsOf<TEntity> BuildGridActions(
         IGridColumnsOf<TEntity> columns,
         IHtmlHelper htmlHelper)
     {
