@@ -17,8 +17,6 @@ public class AutoCrudAdminOptions
     {
         this.Authorization = Enumerable.Empty<IAutoCrudAuthFilter>();
         this.AsyncAuthorization = Enumerable.Empty<IAsyncAuthCrudFilter>();
-        this.LayoutName = string.Empty;
-        this.ApplicationName = string.Empty;
     }
 
     /// <summary>
@@ -36,10 +34,10 @@ public class AutoCrudAdminOptions
     /// <summary>
     /// Gets or sets the LayoutName property, representing the layout name to be used in the AutoCrudAdmin system.
     /// </summary>
-    public string LayoutName { get; set; }
+    public string? LayoutName { get; set; }
 
     /// <summary>
     /// Gets or sets the ApplicationName property, representing the application name in the AutoCrudAdmin system.
     /// </summary>
-    public string ApplicationName { get; set; }
+    public string? ApplicationName { get; set; }
 }

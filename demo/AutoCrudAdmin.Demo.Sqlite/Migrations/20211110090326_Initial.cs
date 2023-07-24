@@ -3,6 +3,7 @@
 using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
+/// <inheritdoc />
 public partial class Initial : Migration
 {
     /// <inheritdoc />
