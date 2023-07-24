@@ -1,0 +1,839 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.6">
+    
+    
+      
+        <title>AutoCrudAdmin documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.4a0965b7.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL(".",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#autocrudadmin-documentation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="AutoCrudAdmin documentation" class="md-header__button md-logo" aria-label="AutoCrudAdmin documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AutoCrudAdmin documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              AutoCrudAdmin Documentation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="AutoCrudAdmin documentation" class="md-nav__button md-logo" aria-label="AutoCrudAdmin documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    AutoCrudAdmin documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          AutoCrudAdmin Documentation
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        AutoCrudAdmin Documentation
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    Table of Contents
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    Usage
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customization" class="md-nav__link">
+    Customization
+  </a>
+  
+    <nav class="md-nav" aria-label="Customization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#customizing-grid" class="md-nav__link">
+    Customizing Grid
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#customizing-form-fields" class="md-nav__link">
+    Customizing Form Fields
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generateformcontrols-methods" class="md-nav__link">
+    GenerateFormControls Methods
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-custom-actions" class="md-nav__link">
+    Adding Custom Actions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validating-entities" class="md-nav__link">
+    Validating Entities
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#navigation-menu" class="md-nav__link">
+    Navigation Menu
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changing-layout" class="md-nav__link">
+    Changing Layout
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    Authentication
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#handling-files" class="md-nav__link">
+    Handling Files
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overriding-views" class="md-nav__link">
+    Overriding Views
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customizing-autocrudadmincontroller" class="md-nav__link">
+    Customizing AutoCrudAdminController
+  </a>
+  
+    <nav class="md-nav" aria-label="Customizing AutoCrudAdminController">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#customize-grid" class="md-nav__link">
+    Customize Grid
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#customize-forms" class="md-nav__link">
+    Customize Forms
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    Troubleshooting
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="actions/" class="md-nav__link">
+        Actions
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="auth/" class="md-nav__link">
+        Auth
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="files/" class="md-nav__link">
+        Files
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="forms/" class="md-nav__link">
+        Forms
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="grid/" class="md-nav__link">
+        Grid
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    Table of Contents
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    Usage
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customization" class="md-nav__link">
+    Customization
+  </a>
+  
+    <nav class="md-nav" aria-label="Customization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#customizing-grid" class="md-nav__link">
+    Customizing Grid
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#customizing-form-fields" class="md-nav__link">
+    Customizing Form Fields
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generateformcontrols-methods" class="md-nav__link">
+    GenerateFormControls Methods
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-custom-actions" class="md-nav__link">
+    Adding Custom Actions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validating-entities" class="md-nav__link">
+    Validating Entities
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#navigation-menu" class="md-nav__link">
+    Navigation Menu
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changing-layout" class="md-nav__link">
+    Changing Layout
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    Authentication
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#handling-files" class="md-nav__link">
+    Handling Files
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overriding-views" class="md-nav__link">
+    Overriding Views
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customizing-autocrudadmincontroller" class="md-nav__link">
+    Customizing AutoCrudAdminController
+  </a>
+  
+    <nav class="md-nav" aria-label="Customizing AutoCrudAdminController">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#customize-grid" class="md-nav__link">
+    Customize Grid
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#customize-forms" class="md-nav__link">
+    Customize Forms
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    Troubleshooting
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+
+<h1 id="autocrudadmin-documentation">AutoCrudAdmin Documentation</h1>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#customization">Customization</a><ul>
+<li><a href="#customizing-grid">Customizing Grid</a></li>
+<li><a href="#customizing-form-fields">Customizing Form Fields</a></li>
+<li><a href="#generateformcontrols-methods">GenerateFormControls Methods</a></li>
+<li><a href="#adding-custom-actions">Adding Custom Actions</a></li>
+<li><a href="#validating-entities">Validating Entities</a></li>
+</ul>
+</li>
+<li><a href="#navigation-menu">Navigation Menu</a></li>
+<li><a href="#changing-layout">Changing Layout</a></li>
+<li><a href="#authentication">Authentication</a></li>
+<li><a href="#handling-files">Handling Files</a></li>
+<li><a href="#overriding-views">Overriding Views</a></li>
+<li><a href="#customizing-autocrudadmincontroller">Customizing AutoCrudAdminController</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+</ul>
+<h2 id="overview">Overview</h2>
+<p>AutoCrudAdmin is a library that provides automatic CRUD (Create, Read, Update, Delete) screens and API endpoints for entity classes in an ASP.NET Core application.</p>
+<h2 id="installation">Installation</h2>
+<p>Install the <a href="https://github.com/minkov/autocrudadmin">AutoCrudAdmin</a> NuGet package in your ASP.NET Core project.</p>
+<pre><code>dotnet add package AutoCrudAdmin
+</code></pre>
+<h2 id="usage">Usage</h2>
+<ol>
+<li>
+<p>Call <code>services.AddAutoCrudAdmin()</code> in <code>ConfigureServices()</code> in <code>Startup.cs</code>.</p>
+</li>
+<li>
+<p>Call <code>app.UseAutoCrudAdmin()</code> in <code>Configure()</code> in <code>Startup.cs</code>.</p>
+</li>
+<li>
+<p>You have CRUD views and operations for each entity in your DbContexts.</p>
+</li>
+<li>
+<p>You can customize the default behavior by creating a controller that inherits from <code>AutoCrudAdminController&lt;TEntity&gt;</code> where <code>TEntity</code> is the entity class.</p>
+</li>
+</ol>
+<p>That's it! AutoCrudAdmin will automatically generate CRUD screens and API endpoints for the entities.</p>
+<p>The CRUD screens will be available under <code>/ControllerName</code> like <code>/Products</code>, <code>/Customers</code> etc. The API endpoints will be at <code>/ControllerName/Create</code>, <code>/ControllerName/Edit</code> etc.</p>
+<h2 id="customization">Customization</h2>
+<p>AutoCrudAdmin provides options to customize the generated CRUD screens and API behavior.</p>
+<h3 id="customizing-grid">Customizing Grid</h3>
+<p>The grid view that lists entities on the Index screen can be customized by overriding methods in the controller.</p>
+<p>For example, to explicitly show certain columns:</p>
+<pre><code class="language-csharp">public class ProductsController : AutoCrudAdminController&lt;Product&gt;  
+{
+
+  protected override IEnumerable&lt;string&gt; ShownColumnNames =&gt; 
+    new[] { &quot;Name&quot;, &quot;Price&quot; };
+
+}
+</code></pre>
+<p>To add a custom column:</p>
+<pre><code class="language-csharp">protected override IEnumerable&lt;CustomGridColumn&lt;Product&gt;&gt; CustomColumns =&gt;
+  new[]     
+  {        
+    new CustomGridColumn&lt;Product&gt;      
+    {         
+      Name = &quot;Discount&quot;,
+      ValueFunc = p =&gt; p.CalculateDiscount().ToString(&quot;0.##&quot;) 
+    }
+  };
+</code></pre>
+<p>See <a href="grid/">Customizing Grid</a> for more details and options.</p>
+<h3 id="customizing-form-fields">Customizing Form Fields</h3>
+<p>Similarly, the forms for Create and Edit actions can be customized via methods like:</p>
+<ul>
+<li><code>ShownFormControlNames</code></li>
+<li><code>HiddenFormControlNames</code></li>
+<li><code>ShownFormControlNamesOnCreate</code></li>
+</ul>
+<p>For example:</p>
+<pre><code class="language-csharp">protected override IEnumerable&lt;string&gt; HiddenFormControlNames {
+  new[] { &quot;Description&quot; }   
+};
+</code></pre>
+<p>Hides the Description field.</p>
+<p>See <a href="forms/">Customizing Forms</a> for more details and options.</p>
+<h3 id="generateformcontrols-methods">GenerateFormControls Methods</h3>
+<p>The <a href="https://github.com/minkov/autocrudadmin/blob/master/src/AutoCrudAdmin/Controllers/AutoCrudAdminController.cs"><code>GenerateFormControls</code></a> methods are the main way to customize the form fields on Create and Edit pages.</p>
+<p>See the <a href="forms/#generateformcontrols-methods">GenerateFormControls Methods</a> section for details on customizing these methods.</p>
+<h3 id="adding-custom-actions">Adding Custom Actions</h3>
+<p>Additional controller actions can be added and will show alongside the standard CRUD actions.</p>
+<p>See <a href="actions/">Adding Custom Actions</a>.</p>
+<h3 id="validating-entities">Validating Entities</h3>
+<p>To perform validation, override the <code>EntityValidators</code> method:</p>
+<pre><code class="language-csharp">protected override IEnumerable&lt;Func&lt;Product, Product, ValidatorResult&gt;&gt; EntityValidators {
+
+  (existing, updated) =&gt; {
+    if (updated.Quantity &lt; 0) {
+      return ValidatorResult.Error(&quot;Invalid quantity&quot;); 
+    }
+    return ValidatorResult.Success();
+  }
+
+}; 
+</code></pre>
+<p>See <a href="validation.md">Validating Entities</a> for more details.</p>
+<h2 id="navigation-menu">Navigation Menu</h2>
+<p>Generate a menu with links to CRUD screens using the <a href="https://github.com/minkov/autocrudadmin/blob/master/src/AutoCrudAdmin/Helpers/NavHelper.cs"><code>NavHelper</code></a>:</p>
+<pre><code class="language-html">@foreach (var item in NavHelper.GetNavItems()) {
+  &lt;li&gt;
+    &lt;a asp-controller=&quot;@item&quot;&gt;@item&lt;/a&gt;
+  &lt;/li&gt;
+}
+</code></pre>
+<h2 id="changing-layout">Changing Layout</h2>
+<p>The default layout is <code>_AutoCrudAdmin_Layout</code>. To use a custom layout:</p>
+<pre><code class="language-csharp">services.AddAutoCrudAdmin(options =&gt; {
+  options.LayoutName = &quot;_CustomLayout&quot;;
+});
+</code></pre>
+<h2 id="authentication">Authentication</h2>
+<p>Add authentication by providing <a href="https://github.com/minkov/autocrudadmin/blob/master/src/AutoCrudAdmin/Filters/IAutoCrudAuthFilter.cs"><code>IAutoCrudAuthFilter</code></a> implementations:</p>
+<pre><code class="language-csharp">options.Authorization.Add(new MyAuthFilter()); 
+</code></pre>
+<p>See <a href="auth/">Authentication</a> for examples.</p>
+<h2 id="handling-files">Handling Files</h2>
+<p>The <a href="https://github.com/minkov/autocrudadmin/blob/master/src/AutoCrudAdmin/ViewModels/FormFilesContainer.cs"><code>FormFilesContainer</code></a> class passes files from forms to API endpoints.</p>
+<p>Files are available in <code>AdminActionContext.Files</code>.</p>
+<p>See <a href="files/">Handling Files</a> for more details.</p>
+<h2 id="overriding-views">Overriding Views</h2>
+<p>Override default AutoCrudAdmin views by placing view files in:</p>
+<p><code>/Views/AutoCrudAdmin/</code></p>
+<h2 id="customizing-autocrudadmincontroller">Customizing AutoCrudAdminController</h2>
+<p>The <code>AutoCrudAdminController</code> base class has many virtual members that can customize CRUD behavior:</p>
+<h3 id="customize-grid">Customize Grid</h3>
+<p>Customize grid columns:</p>
+<pre><code class="language-csharp">protected override IEnumerable&lt;CustomGridColumn&lt;TEntity&gt;&gt; CustomColumns {..}
+</code></pre>
+<p>Add row actions:</p>
+<pre><code class="language-csharp">protected override IEnumerable&lt;GridAction&gt; CustomActions {..}
+</code></pre>
+<h3 id="customize-forms">Customize Forms</h3>
+<p>Show/hide form fields:</p>
+<pre><code class="language-csharp">protected override IEnumerable&lt;string&gt; ShownFormControlNames {..}   
+protected override IEnumerable&lt;string&gt; HiddenFormControlNames {..}
+</code></pre>
+<p>See <a href="https://github.com/minkov/autocrudadmin/blob/master/src/AutoCrudAdmin/Controllers/AutoCrudAdminController.cs">API Reference</a> for full customization options.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<p>Some common issues:</p>
+<ul>
+<li>Ensure DbContext registered properly in <code>ConfigureServices()</code></li>
+<li>For navigation menu, controller must inherit from <code>AutoCrudAdminController</code></li>
+<li>Check for conflicts with other packages</li>
+</ul>
+
+              
+            </article>
+            
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+      
+        
+        <a href="actions/" class="md-footer__link md-footer__link--next" aria-label="Next: Actions" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Actions
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": ".", "features": [], "search": "assets/javascripts/workers/search.85cb4492.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="assets/javascripts/bundle.a877e258.min.js"></script>
+      
+    
+  </body>
+</html>
