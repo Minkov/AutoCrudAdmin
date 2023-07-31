@@ -49,7 +49,8 @@ public class ProjectsControllerTests
     [InlineData(1)]
     public void GetDelete_ReturnsViewResult(int id)
         => MyController<ProjectsController>
-            .Instance()
+            .Instance(controller => controller
+                .WithData(ProjectTestData.GetProject(id)))
             .Calling(c => c.Delete(
                 new Dictionary<string, string>
                 {
@@ -62,9 +63,19 @@ public class ProjectsControllerTests
     [Theory]
     [InlineData("Test Project")]
     public void PostCreate_SavesAndRedirects(string name)
-        => MyController<ProjectsController>
-            .Instance()
-            .Calling(c => c.PostCreate(
+        => MyPipeline
+            .Configuration()
+            .ShouldMap(request => request
+                .WithMethod(HttpMethod.Post)
+                .WithLocation("/Projects/PostCreate")
+                .WithAntiForgeryToken()
+                .WithFormFields(new Dictionary<string, string>
+                {
+                    { nameof(Project.Name), name },
+                    { nameof(Project.OpenDate), DateTime.Now.ToString() },
+                    { nameof(Project.DueDate), DateTime.Now.AddDays(1).ToString() },
+                }))
+            .To<ProjectsController>(c => c.PostCreate(
                 new Dictionary<string, string>
                 {
                     { nameof(Project.Name), name },
@@ -72,6 +83,7 @@ public class ProjectsControllerTests
                     { nameof(Project.DueDate), DateTime.Now.AddDays(1).ToString() },
                 },
                 new FormFilesContainer()))
+            .Which()
             .ShouldHave()
             .Data(data => data
                 .WithSet<Project>(set => set
@@ -79,6 +91,41 @@ public class ProjectsControllerTests
                     .ContainSingle(p => p.Name == name)))
             .AndAlso()
             .ShouldReturn()
-            .Redirect(redirect => redirect
-                .To<ProjectsController>(c => c.Index()));
+            .RedirectToAction("Index");
+
+    [Theory]
+    [InlineData(1, "Test Edit Project")]
+    public void PostEdit_SavesAndRedirects(int id, string name)
+        => MyPipeline
+            .Configuration()
+            .ShouldMap(request => request
+                .WithMethod(HttpMethod.Post)
+                .WithLocation("/Projects/PostEdit")
+                .WithAntiForgeryToken()
+                .WithFormFields(new Dictionary<string, string>
+                {
+                    { nameof(Project.Id), id.ToString() },
+                    { nameof(Project.Name), name },
+                    { nameof(Project.OpenDate), DateTime.Now.ToString() },
+                    { nameof(Project.DueDate), DateTime.Now.AddDays(1).ToString() },
+                }))
+            .To<ProjectsController>(c => c.PostEdit(
+                new Dictionary<string, string>
+                {
+                    { nameof(Project.Id), id.ToString() },
+                    { nameof(Project.Name), name },
+                    { nameof(Project.OpenDate), DateTime.Now.ToString() },
+                    { nameof(Project.DueDate), DateTime.Now.AddDays(1).ToString() },
+                },
+                new FormFilesContainer()))
+            .Which()
+            .WithData(ProjectTestData.GetProject(id))
+            .ShouldHave()
+            .Data(data => data
+                .WithSet<Project>(set => set
+                    .Should()
+                    .ContainSingle(p => p.Id == id && p.Name == name)))
+            .AndAlso()
+            .ShouldReturn()
+            .RedirectToAction("Index");
 }
