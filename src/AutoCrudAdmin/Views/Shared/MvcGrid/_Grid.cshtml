@@ -10,14 +10,14 @@
 }
 
 <div id="@Model.Id" class="mvc-grid mvc-grid-@(Model.FilterMode.ToString().ToLower())-mode" data-name="@Model.Name" data-filter-mode="@Model.FilterMode" data-url="@Model.Url">
-    <!table@(Model.Attributes)>
+    <!table @(Model.Attributes)>
         <thead>
         <tr class="mvc-grid-headers@(Model.FilterMode == GridFilterMode.Header ? " mvc-grid-row-filters" : "")">
             @foreach (var column in Model.Columns)
             {
                 var applied = (column.Filter.First ?? column.Filter.Second) == null ? "" : " applied";
 
-                <th@(column.AsAttributes())>
+                <th @(column.AsAttributes())>
                     @if (column.Filter.IsEnabled == true && !String.IsNullOrEmpty(column.Filter.Name) && Model.FilterMode != GridFilterMode.Row)
                     {
                         if (Model.FilterMode == GridFilterMode.Header)
@@ -138,7 +138,7 @@
         <tbody>
         @foreach (var row in rows)
         {
-            <!tr@(row.Attributes)>
+            <!tr @(row.Attributes)>
                 @foreach (var column in Model.Columns)
                 {
                     var classes = (column.IsHidden ? column.CssClasses + " mvc-grid-hidden" : column.CssClasses).Trim();

@@ -58,19 +58,19 @@ public static class ReflectionHelper
             .ToList();
 
         var entityTypes = dbSetTypes
-            .Select(dbSet => dbSet.PropertyType.GenericTypeArguments.FirstOrDefault())
+            .Select(dbSet => dbSet.PropertyType.GenericTypeArguments.First())
             .Distinct()
             .ToHashSet();
 
         var uniqueEntityTypes = entityTypes
             .Where(parent =>
-                parent?.IsGenericParameter == true
-                && entityTypes.All(child => child?.IsSubclassOfAnyType(parent) != true))
+                !parent.IsGenericParameter
+                && !entityTypes.Any(child => child.IsSubclassOfAnyType(parent)))
             .ToHashSet();
 
         return dbSetTypes
             .DistinctBy(x => x.PropertyType.GenericTypeArguments.FirstOrDefault())
-            .Where(x => uniqueEntityTypes.Contains(x.PropertyType.GenericTypeArguments.FirstOrDefault()))
+            .Where(x => uniqueEntityTypes.Contains(x.PropertyType.GenericTypeArguments.First()))
             .OrderBy(x => x.Name)
             .ToList();
     }
