@@ -1,4 +1,4 @@
-﻿namespace AutoCrudAdmin.Test.Infrastructure;
+﻿namespace AutoCrudAdmin.Tests.Infrastructure;
 
 using System;
 using Demo.SqlServer;

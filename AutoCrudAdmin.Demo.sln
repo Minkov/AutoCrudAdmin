@@ -20,7 +20,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analyzers", "Analyzers", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{8D4B258F-4B65-42AC-9A42-0F2254F12CCC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoCrudAdmin.Test", "tests\AutoCrudAdmin.Test\AutoCrudAdmin.Test.csproj", "{1FB1ED95-D654-4BA1-B73E-630714A99665}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoCrudAdmin.Tests", "tests\AutoCrudAdmin.Tests\AutoCrudAdmin.Tests.csproj", "{1FB1ED95-D654-4BA1-B73E-630714A99665}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

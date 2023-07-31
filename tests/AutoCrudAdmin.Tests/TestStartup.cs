@@ -1,4 +1,4 @@
-﻿namespace AutoCrudAdmin.Test;
+﻿namespace AutoCrudAdmin.Tests;
 
 using Demo.SqlServer;
 

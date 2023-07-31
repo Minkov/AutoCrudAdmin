@@ -1,4 +1,4 @@
-﻿namespace AutoCrudAdmin.Test.Extensions;
+﻿namespace AutoCrudAdmin.Tests.Extensions;
 
 using System.Linq;
 using AutoCrudAdmin.Extensions;

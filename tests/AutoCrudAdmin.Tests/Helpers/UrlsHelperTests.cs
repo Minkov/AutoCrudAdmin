@@ -1,4 +1,4 @@
-﻿namespace AutoCrudAdmin.Test.Helpers;
+﻿namespace AutoCrudAdmin.Tests.Helpers;
 
 using AutoCrudAdmin.Helpers;
 using FluentAssertions;
