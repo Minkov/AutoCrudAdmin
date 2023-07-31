@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using AutoCrudAdmin.Extensions;
 using Demo.Models.Models;
 using FluentAssertions;
+using Infrastructure;
 using Xunit;
 
-public class TypeExtensionsTests
+public class TypeExtensionsTests : TestsWithData
 {
     [Fact]
     public void GetPrimaryKeyPropertyInfos_ReturnsExpected()

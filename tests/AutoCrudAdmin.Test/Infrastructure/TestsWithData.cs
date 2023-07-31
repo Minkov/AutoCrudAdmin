@@ -15,5 +15,5 @@ public abstract class TestsWithData
         this.Data = new TaskSystemDbContext(options);
     }
 
-    public TaskSystemDbContext Data { get; }
+    protected TaskSystemDbContext Data { get; }
 }

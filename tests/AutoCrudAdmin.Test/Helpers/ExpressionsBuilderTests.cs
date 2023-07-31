@@ -27,7 +27,7 @@ public class ExpressionsBuilderTests
     }
 
     [Fact]
-    public void ForGetProperty_BuildsExpression()
+    public void ForGetProperty_BuildsPredicate()
     {
         // Arrange
         var property = typeof(Task).GetProperty(nameof(Task.Name)) !;

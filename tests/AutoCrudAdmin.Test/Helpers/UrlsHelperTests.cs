@@ -16,6 +16,6 @@ public class UrlsHelperTests
         var result = UrlsHelper.GetQueryParamForColumnAndFilter(columnName, filterName);
 
         // Assert
-        expected.Should().Be(result);
+        result.Should().Be(expected);
     }
 }
