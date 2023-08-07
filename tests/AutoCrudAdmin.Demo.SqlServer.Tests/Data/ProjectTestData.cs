@@ -8,7 +8,7 @@ using Models.Models;
 
 public static class ProjectTestData
 {
-    public static Project GetProject(int id = 1)
+    public static Project GetProject(int id)
         => new Faker<Project>()
             .CustomInstantiator(_ => new Project
             {
