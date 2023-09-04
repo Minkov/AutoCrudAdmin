@@ -11,15 +11,15 @@ namespace AutoCrudAdmin.Attributes
     /// Correct value: "/js/entities/manualJobs/create.js".
     /// Wrong value: "wwwroot/js/entities/manualJobs/create.js".
     /// </summary>
-    public class InjectScriptsAttribute : Attribute, IActionFilter
+    public class InjectScriptAttribute : Attribute, IActionFilter
     {
         private readonly string scriptPath;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="InjectScriptsAttribute"/> class.
+        /// Initializes a new instance of the <see cref="InjectScriptAttribute"/> class.
         /// </summary>
         /// <param name="scriptPath">The path to the script to inject.</param>
-        public InjectScriptsAttribute(string scriptPath)
+        public InjectScriptAttribute(string scriptPath)
         {
             this.scriptPath = scriptPath;
         }
