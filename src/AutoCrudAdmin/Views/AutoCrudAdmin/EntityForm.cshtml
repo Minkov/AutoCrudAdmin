@@ -3,6 +3,7 @@
 @{
     Layout = ViewBag.LayoutName;
     var aspAction = Model.CustomActionName ?? $"Post{ViewContext.RouteData.Values["action"]}";
+    var additionalScriptPath = this.ViewData["AdditionalScriptPath"] as string;
 }
 
 <form enctype="multipart/form-data" asp-action="@aspAction" style="display: flex; flex-direction: column">
@@ -24,3 +25,7 @@
            });
        });
 </script>
+
+@Html.Raw(additionalScriptPath != null
+    ? $"<script type=\"module\" src=\"{additionalScriptPath}\"></script>"
+    : null)
