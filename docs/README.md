@@ -205,6 +205,21 @@ protected override IEnumerable<string> HiddenFormControlNames {..}
 
 See [API Reference](https://github.com/minkov/autocrudadmin/blob/master/src/AutoCrudAdmin/Controllers/AutoCrudAdminController.cs) for full customization options.
 
+### Inject Scripts in endpoints
+
+The InjectScript attribute allows modular JavaScript injection into views by specifying the script path in the controller action.
+
+Usage example:
+```csharp
+[InjectScript("/js/tasks.js")]
+public override IActionResult Index()
+{
+    return base.Index();
+}
+```
+
+See [Injecting Scripts](inject-script-attribute.md) for more details and options.
+
 ## Troubleshooting
 
 Some common issues:

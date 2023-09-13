@@ -3,6 +3,7 @@
 
 @{
     Layout = ViewBag.LayoutName;
+    var additionalScriptPath = this.ViewData["AdditionalScriptPath"] as string;
 }
 
 <!DOCTYPE html>
@@ -54,5 +55,9 @@
 <script>
    document.querySelectorAll(".mvc-grid").forEach(element => new MvcGrid(element));
 </script>
+
+@Html.Raw(additionalScriptPath != null
+    ? $"<script type=\"module\" src=\"{additionalScriptPath}\"></script>"
+    : null)
 </body>
 </html>
