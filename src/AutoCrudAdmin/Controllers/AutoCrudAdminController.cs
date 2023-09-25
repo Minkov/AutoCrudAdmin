@@ -8,13 +8,13 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
-using Attributes;
-using Enumerations;
-using Extensions;
-using Helpers;
-using Models;
-using ViewModels;
-using ViewModels.Pages;
+using AutoCrudAdmin.Attributes;
+using AutoCrudAdmin.Enumerations;
+using AutoCrudAdmin.Extensions;
+using AutoCrudAdmin.Helpers;
+using AutoCrudAdmin.Models;
+using AutoCrudAdmin.ViewModels;
+using AutoCrudAdmin.ViewModels.Pages;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -757,7 +757,7 @@ public class AutoCrudAdminController<TEntity>
 
         if (property.PropertyType == typeof(string) && columnStringMaxLength.HasValue)
         {
-            columnBuilder.RenderedAs(entity => entity.ToString().ToEllipsis(columnStringMaxLength.Value));
+            columnBuilder.RenderedAs((entity) => entity.ToString().ToEllipsis(columnStringMaxLength.Value));
         }
 
         return columns;
@@ -789,7 +789,7 @@ public class AutoCrudAdminController<TEntity>
                 pager.RowsPerPage = this.RowsPerPage;
             });
 
-    private void BuildGridColumns(
+    private IGridColumnsOf<TEntity> BuildGridColumns(
         IGridColumnsOf<TEntity> columns,
         int? stringMaxLength)
     {
@@ -843,9 +843,11 @@ public class AutoCrudAdminController<TEntity>
 
             customGridColumn.ConfigurationFunc?.Invoke(column);
         }
+
+        return columnsResult;
     }
 
-    private void BuildGridActions(
+    private IGridColumnsOf<TEntity> BuildGridActions(
         IGridColumnsOf<TEntity> columns,
         IHtmlHelper htmlHelper)
     {
@@ -863,6 +865,8 @@ public class AutoCrudAdminController<TEntity>
                         new { }))
                     .Titled("Action");
             });
+
+        return columns;
     }
 
     private TEntity DictToEntity(IDictionary<string, string> entityDict)
