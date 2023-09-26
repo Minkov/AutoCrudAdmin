@@ -44,6 +44,28 @@ public static class TypeExtensions
     }
 
     /// <summary>
+    /// The GetForeignKeyPropertyInfos method retrieves the foreign key property information for a given type.
+    /// </summary>
+    /// <param name="type">The Type instance that this method extends.</param>
+    /// <returns>An IEnumerable of PropertyInfo instances representing the foreign key properties of the given type.</returns>
+    public static IEnumerable<PropertyInfo> GetForeignKeyPropertyInfos(this Type type)
+    {
+        var dbContextTypes = ReflectionHelper.DbContexts
+            .ToList();
+
+        var foreignKeyNames = dbContextTypes
+            .Select(CreateDbContext)
+            .Where(dbContext => dbContext != null)
+            .SelectMany(dbContext => dbContext!.Model.FindEntityType(type) !.GetForeignKeys())
+            .SelectMany(foreignKey => foreignKey.Properties)
+            .Select(property => property.Name)
+            .ToHashSet();
+
+        return type.GetProperties()
+            .Where(property => foreignKeyNames.Contains(property.Name));
+    }
+
+    /// <summary>
     /// The GetPrimaryKeyValue method retrieves the primary key value of a given object of a certain type.
     /// </summary>
     /// <param name="type">The Type instance that this method extends.</param>
