@@ -753,9 +753,16 @@ public class AutoCrudAdminController<TEntity>
             .Filterable(true)
             .Sortable(true);
 
-        if (foreignKeys.Contains(property) && property.PropertyType == typeof(string) && columnStringMaxLength.HasValue)
+        if (foreignKeys.Contains(property) || property.PropertyType == typeof(string))
         {
-            columnBuilder.RenderedAs(entity => property.GetValue(entity)?.ToString().ToEllipsis(columnStringMaxLength.Value));
+            if (columnStringMaxLength.HasValue)
+            {
+                columnBuilder.RenderedAs(entity => property.GetValue(entity)?.ToString().ToEllipsis(columnStringMaxLength.Value));
+            }
+            else
+            {
+                columnBuilder.RenderedAs(entity => property.GetValue(entity)?.ToString());
+            }
         }
 
         return columns;
