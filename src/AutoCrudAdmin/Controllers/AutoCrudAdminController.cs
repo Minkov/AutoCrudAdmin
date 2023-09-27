@@ -162,7 +162,7 @@ public class AutoCrudAdminController<TEntity>
     /// <summary>
     /// Gets the max string column length.
     /// </summary>
-    protected virtual int? ColumnStringMaxLength => Grid.DefaultColumnStringMaxLength;
+    protected virtual int ColumnStringMaxLength => Grid.DefaultColumnStringMaxLength;
 
     /// <summary>
     /// Gets generators for default dropdown options.
@@ -789,7 +789,7 @@ public class AutoCrudAdminController<TEntity>
 
     private IGridColumnsOf<TEntity> BuildGridColumns(
         IGridColumnsOf<TEntity> columns,
-        int? stringMaxLength)
+        int stringMaxLength)
     {
         if (this.ShownColumnNames.Any() && this.HiddenColumnNames.Any())
         {
@@ -830,7 +830,7 @@ public class AutoCrudAdminController<TEntity>
                 columns,
                 (currentColumns, prop) => (IGridColumnsOf<TEntity>)GenerateColumnExpressionMethod
                     .MakeGenericMethod(prop.PropertyType)
-                    .Invoke(null, new object[] { currentColumns, prop, stringMaxLength!, foreignKeys }) !);
+                    .Invoke(null, new object[] { currentColumns, prop, stringMaxLength, foreignKeys }) !);
 
         foreach (var customGridColumn in this.CustomColumns)
         {
