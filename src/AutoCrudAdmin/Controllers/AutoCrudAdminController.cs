@@ -742,8 +742,8 @@ public class AutoCrudAdminController<TEntity>
     private static IGridColumnsOf<TEntity> GenerateColumnConfiguration<TProperty>(
         IGridColumnsOf<TEntity> columns,
         PropertyInfo property,
-        int? columnStringMaxLength,
-        IEnumerable<PropertyInfo?> foreignKeys)
+        int columnStringMaxLength,
+        IEnumerable<PropertyInfo> foreignKeys)
     {
         var lambda = ExpressionsBuilder.ForGetProperty<TEntity, TProperty>(property);
 
@@ -755,14 +755,7 @@ public class AutoCrudAdminController<TEntity>
 
         if (foreignKeys.Contains(property) || property.PropertyType == typeof(string))
         {
-            if (columnStringMaxLength.HasValue)
-            {
-                columnBuilder.RenderedAs(entity => property.GetValue(entity)?.ToString().ToEllipsis(columnStringMaxLength.Value));
-            }
-            else
-            {
-                columnBuilder.RenderedAs(entity => property.GetValue(entity)?.ToString());
-            }
+            columnBuilder.RenderedAs(entity => property.GetValue(entity)?.ToString().ToEllipsis(columnStringMaxLength));
         }
 
         return columns;
