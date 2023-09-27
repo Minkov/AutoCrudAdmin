@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using AutoCrudAdmin.Helpers;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore;
 using static AutoCrudAdmin.Constants.Entity;
 
@@ -52,7 +53,7 @@ public static class TypeExtensions
         => ReflectionHelper.DbContexts
             .Select(CreateDbContext)
             .Where(dbContext => dbContext != null)
-            .SelectMany(dbContext => dbContext!.Model.FindEntityType(type) !.GetForeignKeys())
+            .SelectMany(dbContext => dbContext!.Model.FindEntityType(type)?.GetForeignKeys() ?? Array.Empty<IForeignKey>())
             .SelectMany(fk => fk.Properties.Select(p => p.PropertyInfo!))
             .ToHashSet();
 
