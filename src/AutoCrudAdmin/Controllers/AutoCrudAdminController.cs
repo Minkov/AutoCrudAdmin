@@ -170,16 +170,19 @@ public class AutoCrudAdminController<TEntity>
     protected virtual IDictionary<Type, Func<object>> DefaultOptionsGenerators
         => new Dictionary<Type, Func<object>>();
 
+#pragma warning disable CA1822
+    /// <summary>
+    /// Gets page filtering options.
+    /// </summary>
+    protected virtual Expression<Func<TEntity, bool>>? MasterGridFilter
+        => null;
+#pragma warning restore CA1822
+
     private static MethodInfo GenerateColumnExpressionMethod =>
         typeof(AutoCrudAdminController<TEntity>)
             .GetMethod(
                 nameof(GenerateColumnConfiguration),
                 BindingFlags.NonPublic | BindingFlags.Static) !;
-
-#pragma warning disable CA1822
-    private Expression<Func<TEntity, bool>>? MasterGridFilter
-        => null;
-#pragma warning restore CA1822
 
     private IEnumerable<GridAction> Actions
         => this.DefaultActions.Concat(this.CustomActions);
