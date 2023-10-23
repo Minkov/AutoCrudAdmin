@@ -162,7 +162,7 @@ public class AutoCrudAdminController<TEntity>
     /// <summary>
     /// Gets the max string column length.
     /// </summary>
-    protected virtual int? ColumnStringMaxLength => Grid.DefaultColumnStringMaxLength;
+    protected virtual int ColumnStringMaxLength => Grid.DefaultColumnStringMaxLength;
 
     /// <summary>
     /// Gets generators for default dropdown options.
@@ -728,7 +728,7 @@ public class AutoCrudAdminController<TEntity>
     /// <returns>The modified page columns.</returns>
     protected virtual IGridColumnsOf<TEntity> BuildGridColumns(
         IGridColumnsOf<TEntity> columns,
-        int? stringMaxLength)
+        int stringMaxLength)
     {
         if (this.ShownColumnNames.Any() && this.HiddenColumnNames.Any())
         {
@@ -749,6 +749,7 @@ public class AutoCrudAdminController<TEntity>
         }
 
         var primaryKeys = EntityType.GetPrimaryKeyPropertyInfos();
+        var foreignKeys = EntityType.GetForeignKeyPropertyInfos();
 
         var properties = EntityType
             .GetProperties()
@@ -768,7 +769,7 @@ public class AutoCrudAdminController<TEntity>
                 columns,
                 (currentColumns, prop) => (IGridColumnsOf<TEntity>)GenerateColumnExpressionMethod
                     .MakeGenericMethod(prop.PropertyType)
-                    .Invoke(null, new object[] { currentColumns, prop, stringMaxLength! }) !);
+                    .Invoke(null, new object[] { currentColumns, prop, stringMaxLength, foreignKeys }) !);
 
         foreach (var customGridColumn in this.CustomColumns)
         {
@@ -809,7 +810,8 @@ public class AutoCrudAdminController<TEntity>
     private static IGridColumnsOf<TEntity> GenerateColumnConfiguration<TProperty>(
         IGridColumnsOf<TEntity> columns,
         PropertyInfo property,
-        int? columnStringMaxLength)
+        int columnStringMaxLength,
+        IEnumerable<PropertyInfo> foreignKeys)
     {
         var lambda = ExpressionsBuilder.ForGetProperty<TEntity, TProperty>(property);
 
@@ -819,9 +821,9 @@ public class AutoCrudAdminController<TEntity>
             .Filterable(true)
             .Sortable(true);
 
-        if (property.PropertyType == typeof(string) && columnStringMaxLength.HasValue)
+        if (foreignKeys.Contains(property) || property.PropertyType == typeof(string))
         {
-            columnBuilder.RenderedAs((entity) => entity.ToString().ToEllipsis(columnStringMaxLength.Value));
+            columnBuilder.RenderedAs(entity => property.GetValue(entity)?.ToString().ToEllipsis(columnStringMaxLength));
         }
 
         return columns;
