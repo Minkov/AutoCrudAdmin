@@ -106,11 +106,6 @@ public static class Constants
     public static class PartialView
     {
         /// <summary>
-        /// Partial view name for the entity form control.
-        /// </summary>
-        public const string EntityFormControlPartial = "_EntityFormControlPartial";
-
-        /// <summary>
         /// Partial view name for the entity form controls.
         /// </summary>
         public const string EntityFormControlsPartial = "_EnityFormControlsPartial";
