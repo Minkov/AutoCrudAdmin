@@ -162,7 +162,7 @@ public class AutoCrudAdminController<TEntity>
     /// <summary>
     /// Gets the max string column length.
     /// </summary>
-    protected virtual int? ColumnStringMaxLength => Grid.DefaultColumnStringMaxLength;
+    protected virtual int ColumnStringMaxLength => Grid.DefaultColumnStringMaxLength;
 
     /// <summary>
     /// Gets generators for default dropdown options.
@@ -170,16 +170,19 @@ public class AutoCrudAdminController<TEntity>
     protected virtual IDictionary<Type, Func<object>> DefaultOptionsGenerators
         => new Dictionary<Type, Func<object>>();
 
+#pragma warning disable CA1822
+    /// <summary>
+    /// Gets page filtering options.
+    /// </summary>
+    protected virtual Expression<Func<TEntity, bool>>? MasterGridFilter
+        => null;
+#pragma warning restore CA1822
+
     private static MethodInfo GenerateColumnExpressionMethod =>
         typeof(AutoCrudAdminController<TEntity>)
             .GetMethod(
                 nameof(GenerateColumnConfiguration),
                 BindingFlags.NonPublic | BindingFlags.Static) !;
-
-#pragma warning disable CA1822
-    private Expression<Func<TEntity, bool>>? MasterGridFilter
-        => null;
-#pragma warning restore CA1822
 
     private IEnumerable<GridAction> Actions
         => this.DefaultActions.Concat(this.CustomActions);
@@ -717,6 +720,71 @@ public class AutoCrudAdminController<TEntity>
             actionName,
             gridStringFilterType.ToString());
 
+     /// <summary>
+    /// Builds custom grid columns.
+    /// </summary>
+    /// <param name="columns">Page columns.</param>
+    /// <param name="stringMaxLength">Given columns max length.</param>
+    /// <returns>The modified page columns.</returns>
+    protected virtual IGridColumnsOf<TEntity> BuildGridColumns(
+        IGridColumnsOf<TEntity> columns,
+        int stringMaxLength)
+    {
+        if (this.ShownColumnNames.Any() && this.HiddenColumnNames.Any())
+        {
+            throw new Exception("Both shown and hidden column names are declared. Leave only one of them");
+        }
+
+        Func<PropertyInfo, bool> filter;
+
+        if (this.ShownColumnNames.Any())
+        {
+            filter = x => this.ShownColumnNames.Contains(x.Name);
+        }
+        else
+        {
+            filter = x => !this.HiddenColumnNames.Contains(x.Name) &&
+                          !x.PropertyType.IsEnumerableExceptString() &&
+                          !x.GetCustomAttributes<NotMappedAttribute>().Any();
+        }
+
+        var primaryKeys = EntityType.GetPrimaryKeyPropertyInfos();
+        var foreignKeys = EntityType.GetForeignKeyPropertyInfos();
+
+        var properties = EntityType
+            .GetProperties()
+            .Where(filter)
+            .OrderBy(property => property != primaryKeys.FirstOrDefault());
+
+        properties = primaryKeys
+            .Skip(1)
+            .Aggregate(
+                properties,
+                (current, pk)
+                    => current.ThenBy(property => property != pk))
+            .ThenBy(property => property.Name);
+
+        var columnsResult = properties
+            .Aggregate(
+                columns,
+                (currentColumns, prop) => (IGridColumnsOf<TEntity>)GenerateColumnExpressionMethod
+                    .MakeGenericMethod(prop.PropertyType)
+                    .Invoke(null, new object[] { currentColumns, prop, stringMaxLength, foreignKeys }) !);
+
+        foreach (var customGridColumn in this.CustomColumns)
+        {
+            var column = columnsResult
+                .Add(customGridColumn.ValueFunc)
+                .Titled(customGridColumn.Name)
+                .Filterable(true)
+                .Sortable(true);
+
+            customGridColumn.ConfigurationFunc?.Invoke(column);
+        }
+
+        return columnsResult;
+    }
+
     private static IEnumerable<FormControlViewModel> SetFormControlsVisibility(
         List<FormControlViewModel> formControls,
         IEnumerable<string> shownFormControlNames,
@@ -742,7 +810,8 @@ public class AutoCrudAdminController<TEntity>
     private static IGridColumnsOf<TEntity> GenerateColumnConfiguration<TProperty>(
         IGridColumnsOf<TEntity> columns,
         PropertyInfo property,
-        int? columnStringMaxLength)
+        int columnStringMaxLength,
+        IEnumerable<PropertyInfo> foreignKeys)
     {
         var lambda = ExpressionsBuilder.ForGetProperty<TEntity, TProperty>(property);
 
@@ -752,9 +821,9 @@ public class AutoCrudAdminController<TEntity>
             .Filterable(true)
             .Sortable(true);
 
-        if (property.PropertyType == typeof(string) && columnStringMaxLength.HasValue)
+        if (foreignKeys.Contains(property) || property.PropertyType == typeof(string))
         {
-            columnBuilder.RenderedAs((entity) => entity.ToString().ToEllipsis(columnStringMaxLength.Value));
+            columnBuilder.RenderedAs(entity => property.GetValue(entity)?.ToString().ToEllipsis(columnStringMaxLength));
         }
 
         return columns;
@@ -785,64 +854,6 @@ public class AutoCrudAdminController<TEntity>
                 pager.ShowPageSizes = this.ShowPageSizes;
                 pager.RowsPerPage = this.RowsPerPage;
             });
-
-    private IGridColumnsOf<TEntity> BuildGridColumns(
-        IGridColumnsOf<TEntity> columns,
-        int? stringMaxLength)
-    {
-        if (this.ShownColumnNames.Any() && this.HiddenColumnNames.Any())
-        {
-            throw new Exception("Both shown and hidden column names are declared. Leave only one of them");
-        }
-
-        Func<PropertyInfo, bool> filter;
-
-        if (this.ShownColumnNames.Any())
-        {
-            filter = x => this.ShownColumnNames.Contains(x.Name);
-        }
-        else
-        {
-            filter = x => !this.HiddenColumnNames.Contains(x.Name) &&
-                          !x.PropertyType.IsEnumerableExceptString() &&
-                          !x.GetCustomAttributes<NotMappedAttribute>().Any();
-        }
-
-        var primaryKeys = EntityType.GetPrimaryKeyPropertyInfos();
-
-        var properties = EntityType
-            .GetProperties()
-            .Where(filter)
-            .OrderBy(property => property != primaryKeys.FirstOrDefault());
-
-        properties = primaryKeys
-            .Skip(1)
-            .Aggregate(
-                properties,
-                (current, pk)
-                    => current.ThenBy(property => property != pk))
-            .ThenBy(property => property.Name);
-
-        var columnsResult = properties
-            .Aggregate(
-                columns,
-                (currentColumns, prop) => (IGridColumnsOf<TEntity>)GenerateColumnExpressionMethod
-                    .MakeGenericMethod(prop.PropertyType)
-                    .Invoke(null, new object[] { currentColumns, prop, stringMaxLength! }) !);
-
-        foreach (var customGridColumn in this.CustomColumns)
-        {
-            var column = columnsResult
-                .Add(customGridColumn.ValueFunc)
-                .Titled(customGridColumn.Name)
-                .Filterable(true)
-                .Sortable(true);
-
-            customGridColumn.ConfigurationFunc?.Invoke(column);
-        }
-
-        return columnsResult;
-    }
 
     private IGridColumnsOf<TEntity> BuildGridActions(
         IGridColumnsOf<TEntity> columns,

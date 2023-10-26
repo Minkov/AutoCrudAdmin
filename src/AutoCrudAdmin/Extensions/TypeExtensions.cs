@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using AutoCrudAdmin.Helpers;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore;
 using static AutoCrudAdmin.Constants.Entity;
 
@@ -42,6 +43,19 @@ public static class TypeExtensions
         return type.GetProperties()
             .Where(property => primaryKeyNames != null && primaryKeyNames.Contains(property.Name));
     }
+
+    /// <summary>
+    /// The GetForeignKeyPropertyInfos method retrieves the foreign key property information for a given type.
+    /// </summary>
+    /// <param name="type">The Type instance that this method extends.</param>
+    /// <returns>An IEnumerable of PropertyInfo instances representing the foreign key properties of the given type.</returns>
+    public static IEnumerable<PropertyInfo> GetForeignKeyPropertyInfos(this Type type)
+        => ReflectionHelper.DbContexts
+            .Select(CreateDbContext)
+            .Where(dbContext => dbContext != null)
+            .SelectMany(dbContext => dbContext!.Model.FindEntityType(type)?.GetForeignKeys() ?? Array.Empty<IForeignKey>())
+            .SelectMany(fk => fk.Properties.Select(p => p.PropertyInfo!))
+            .ToHashSet();
 
     /// <summary>
     /// The GetPrimaryKeyValue method retrieves the primary key value of a given object of a certain type.
