@@ -335,7 +335,7 @@ public class FormInputTagHelper : TagHelper
 
         var checkboxes = checkboxValues.Select(x =>
         {
-            var result = this.partialViewHelper.GetViewResult(this.HttpContext, x, EntityFormControlPartial);
+            var result = this.partialViewHelper.GetViewResult(this.HttpContext, x, EntityFormControlsPartial);
 
             result = WrapExpandableComponent(x, result);
 
