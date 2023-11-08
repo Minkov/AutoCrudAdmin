@@ -216,32 +216,70 @@ public class AutoCrudAdminController<TEntity>
     /// Handles autocomplete searches.
     /// </summary>
     /// <param name="searchTerm">The search term.</param>
-    /// <param name="searchProperty">The property to search.</param>
+    /// <param name="searchProperty">The property to search is configured by FormControlViewModel.</param>
+    /// <param name="maxResults">The max autocomplete result is configured by FormControlViewModel.</param>
     /// <returns>The autocomplete results.</returns>
     [HttpGet]
-    public virtual IEnumerable<DropDownViewModel> Autocomplete([FromQuery] string searchTerm, string searchProperty)
+    public IEnumerable<DropDownViewModel> Autocomplete(
+                [FromQuery] string searchTerm,
+                string searchProperty,
+                int maxResults)
     {
+        if (string.IsNullOrWhiteSpace(searchProperty))
+        {
+            throw new ArgumentException("No search property added!");
+        }
+
         var entityType = typeof(TEntity);
         var searchedProperty = entityType.GetProperty(searchProperty);
-        var idProperty = entityType.GetProperty("Id");
 
-        if (searchedProperty == null || idProperty == null)
+        var keys = entityType.GetPrimaryKeyPropertyInfos();
+
+        if (searchedProperty == null || !keys.Any())
         {
             throw new ArgumentException("No such property exists on the entity!");
         }
 
-        var entities = this.Set
-            .AsNoTracking()
-            .Where(e => EF.Property<string>(e, searchProperty).Contains(searchTerm))
-            .Select(x => new DropDownViewModel
-            {
-                Value = idProperty.GetValue(x) !.ToString() !,
-                Name = searchedProperty.GetValue(x) !.ToString() !,
-            })
-            .Take(20)
-            .ToList();
+        var parameter = Expression.Parameter(typeof(TEntity), "e");
+        var propertyAccess = Expression.Property(parameter, searchedProperty);
+        var searchTermExpression = Expression.Constant(searchTerm, typeof(string));
 
-        return entities;
+        Expression body;
+
+        if (searchedProperty.PropertyType == typeof(string))
+        {
+            // If the property type is string, use Contains method
+            var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+            if (containsMethod != null)
+            {
+                body = Expression.Call(propertyAccess, containsMethod, searchTermExpression);
+                var lambda = Expression.Lambda<Func<TEntity, bool>>(body, parameter);
+                return this.FilterAutocompleteResults(maxResults, searchedProperty, keys, lambda);
+            }
+        }
+        else
+        {
+            // If the property type is not string, convert it to string and then use Contains method
+            var toStringMethod = typeof(object).GetMethod("ToString");
+            MethodCallExpression? toStringCall = null;
+            if (toStringMethod != null)
+            {
+                toStringCall = Expression.Call(propertyAccess, toStringMethod);
+            }
+
+            var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+            var toStringToLowerMethod = typeof(string).GetMethod("ToLower", Type.EmptyTypes);
+            if (containsMethod != null && toStringToLowerMethod != null)
+            {
+                var searchTermToLowerExpression = Expression.Call(searchTermExpression, toStringToLowerMethod);
+                var toStringToLowerCall = Expression.Call(toStringCall, toStringToLowerMethod);
+                body = Expression.Call(toStringToLowerCall, containsMethod, searchTermToLowerExpression);
+                var lambda = Expression.Lambda<Func<TEntity, bool>>(body, parameter);
+                return this.FilterAutocompleteResults(maxResults, searchedProperty, keys, lambda);
+            }
+        }
+
+        return new List<DropDownViewModel>();
     }
 
     /// <summary>
@@ -370,33 +408,33 @@ public class AutoCrudAdminController<TEntity>
         switch (action)
         {
             case EntityAction.Create:
-            {
-                var shownFormControls = this.ShownFormControlNames.Concat(this.ShownFormControlNamesOnCreate);
-                var hiddenFormControls = this.HiddenFormControlNames.Concat(this.HiddenFormControlNamesOnCreate);
-                formControls = SetFormControlsVisibility(formControls, shownFormControls, hiddenFormControls)
-                    .ToList();
-                break;
-            }
+                {
+                    var shownFormControls = this.ShownFormControlNames.Concat(this.ShownFormControlNamesOnCreate);
+                    var hiddenFormControls = this.HiddenFormControlNames.Concat(this.HiddenFormControlNamesOnCreate);
+                    formControls = SetFormControlsVisibility(formControls, shownFormControls, hiddenFormControls)
+                        .ToList();
+                    break;
+                }
 
             case EntityAction.Edit:
-            {
-                var shownFormControls = this.ShownFormControlNames.Concat(this.ShownFormControlNamesOnEdit);
-                var hiddenFormControls = this.HiddenFormControlNames.Concat(this.HiddenFormControlNamesOnEdit);
-                formControls = SetFormControlsVisibility(formControls, shownFormControls, hiddenFormControls)
-                    .ToList();
-                break;
-            }
+                {
+                    var shownFormControls = this.ShownFormControlNames.Concat(this.ShownFormControlNamesOnEdit);
+                    var hiddenFormControls = this.HiddenFormControlNames.Concat(this.HiddenFormControlNamesOnEdit);
+                    formControls = SetFormControlsVisibility(formControls, shownFormControls, hiddenFormControls)
+                        .ToList();
+                    break;
+                }
 
             case EntityAction.Delete:
-            {
-                formControls.ForEach(fc => fc.IsReadOnly = true);
-                break;
-            }
+                {
+                    formControls.ForEach(fc => fc.IsReadOnly = true);
+                    break;
+                }
 
             default:
-            {
-                throw new ArgumentOutOfRangeException(nameof(action), action, null);
-            }
+                {
+                    throw new ArgumentOutOfRangeException(nameof(action), action, null);
+                }
         }
 
         return this.View(
@@ -720,7 +758,7 @@ public class AutoCrudAdminController<TEntity>
             actionName,
             gridStringFilterType.ToString());
 
-     /// <summary>
+    /// <summary>
     /// Builds custom grid columns.
     /// </summary>
     /// <param name="columns">Page columns.</param>
@@ -835,6 +873,25 @@ public class AutoCrudAdminController<TEntity>
             .Where(p => p.CanWrite && !p.PropertyType.IsNavigationProperty())
             .ToList()
             .ForEach(property => property.SetValue(existingEntity, property.GetValue(newEntity, null), null));
+
+    private IEnumerable<DropDownViewModel> FilterAutocompleteResults(int maxResults, PropertyInfo searchedProperty, IEnumerable<PropertyInfo> keys, Expression<Func<TEntity, bool>> lambda)
+    {
+        var entities = this.Set
+            .AsNoTracking()
+            .Where(lambda)
+            .Take(maxResults)
+            .ToList();
+
+        return entities
+            .Select(x => new DropDownViewModel
+            {
+                Value = keys!.Count() == 1
+                ? keys.First().GetValue(x) !.ToString() !
+                : keys.Select(k => k.GetValue(x) !.ToString()),
+                Name = searchedProperty.GetValue(x) !.ToString() !,
+            })
+            .ToList();
+    }
 
     private IHtmlGrid<TEntity> GenerateGrid(IHtmlHelper<AutoCrudAdminIndexViewModel> htmlHelper)
         => htmlHelper

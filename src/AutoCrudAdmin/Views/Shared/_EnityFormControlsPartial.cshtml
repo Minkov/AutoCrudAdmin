@@ -73,8 +73,10 @@
                    type: "GET",
            
                    url: `/${controllerName}/Autocomplete`,
-                   data: { 
-                     searchTerm: request.term
+                   data: {
+                        searchTerm: request.term,
+                        searchProperty: '@formControl.SearchByPropertyAutocompleteConfiguration',
+                        maxResults: @formControl.NumberOfAutocompleteItemsShownConfiguration,
                    },
                    success: function (data) {
                          response($.map(data, function (item) {
