@@ -112,6 +112,42 @@ public static class ExpressionsBuilder
             instanceParam).Compile();
     }
 
+    /// <summary>
+    /// Constructs a method for getting values that contains specific search term.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    /// <param name="property">The property for which we construct the method.</param>
+    /// <param name="searchTerm">The search term.</param>
+    /// <returns>All matching obejects.</returns>
+    public static Expression<Func<TEntity, bool>> ForGetPropertyContains<TEntity>(PropertyInfo property, string searchTerm)
+    {
+        var entityType = typeof(TEntity);
+        var parameter = Expression.Parameter(entityType, "model");
+
+        var propertyAccess = Expression.Property(parameter, property);
+        var searchTermExpression = Expression.Constant(searchTerm, typeof(string));
+
+        var containsMethod = Extensions.TypeExtensions.GetStringContainsMethodInfo();
+
+        if (property.PropertyType == typeof(string))
+        {
+            // model.Property.Contains(searchTerm)
+            var containsCall = Expression.Call(propertyAccess, containsMethod !, searchTermExpression);
+
+            // model => model.Property.Contains(searchTerm)
+            return Expression.Lambda<Func<TEntity, bool>>(containsCall, parameter);
+        }
+
+        // If the property type is not string, convert it to string and then use Contains method
+        var toStringMethod = Extensions.TypeExtensions.GetObjectToStringMethodInfo();
+
+        MethodCallExpression? toStringCall = null;
+        toStringCall = Expression.Call(propertyAccess, toStringMethod !);
+
+        var body = Expression.Call(toStringCall, containsMethod !, searchTermExpression);
+        return Expression.Lambda<Func<TEntity, bool>>(body, parameter);
+    }
+
     private static Expression ForPrimaryKeySubExpression(
         string name,
         string value,

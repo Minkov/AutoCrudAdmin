@@ -56,44 +56,11 @@
 
     if (formControl.FormControlType == FormControlType.Autocomplete)
     {
-        @Html.Hidden("AutocompleteId", "#" + formControl.Name + "Id")
-        var controllerName = formControl.FormControlAutocompleteController;
-        @Html.Hidden("ControllerName", controllerName)
-        @Html.Hidden(formControl.FormControlAutocompleteEntityId, "")
-
-        <script type="text/javascript">
-           $(function() {
-               const autocompleteId= $('#AutocompleteId').val();
-               const controllerName = $('#ControllerName').val();
-               const hiddenId = '@formControl.FormControlAutocompleteEntityId';
-               
-             $(autocompleteId).autocomplete({
-               source: function(request, response) {
-                 $.ajax({
-                   type: "GET",
-           
-                   url: `/${controllerName}/Autocomplete`,
-                   data: { 
-                     searchTerm: request.term
-                   },
-                   success: function (data) {
-                         response($.map(data, function (item) {
-                             return { label: item.name, value: item.value };
-                         }));
-                     },
-                   error: function(error){
-                       console.log(error);
-                    },
-                  });
-                 },
-               select: function(event, ui) {
-                    event.preventDefault();
-                    $(`#${hiddenId}`).val(ui.item.value);
-                    $(autocompleteId).val(ui.item.label);
-                   },
-               });
-           });
-        </script>
+        @await Html.PartialAsync("Autocomplete/_AutocompletePartial", formControl);
+    }
+    else if (formControl.FormControlType == FormControlType.AutocompleteExtended)
+    {
+        @await Html.PartialAsync("Autocomplete/_AutocompleteExtendedPartial", formControl);
     }
 }
 

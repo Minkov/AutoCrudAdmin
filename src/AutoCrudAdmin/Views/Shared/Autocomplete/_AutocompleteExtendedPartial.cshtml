@@ -1,0 +1,44 @@
+﻿@model AutoCrudAdmin.ViewModels.FormControlViewModel
+
+@{
+    var controllerName = Model.FormControlAutocompleteController;
+}
+
+@Html.Hidden("AutocompleteId", "#" + Model.Name + "Id")
+@Html.Hidden("ControllerName", controllerName)
+@Html.Hidden(Model.FormControlAutocompleteEntityId, "")
+
+<script type="text/javascript">
+    $(function () {
+        const autocompleteId = $('#AutocompleteId').val();
+        const controllerName = $('#ControllerName').val();
+        const hiddenId = '@Model.FormControlAutocompleteEntityId';
+
+        $(autocompleteId).autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    type: "GET",
+                    url: `/${controllerName}/AutocompleteExtended`,
+                    data: {
+                        searchTerm: request.term,
+                        searchProperty: '@Model.SearchByPropertyAutocompleteConfiguration',
+                        maxResults: @Model.NumberOfAutocompleteItemsShownConfiguration,
+                    },
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return { label: item.name, value: item.value };
+                        }));
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    },
+                });
+            },
+            select: function (event, ui) {
+                event.preventDefault();
+                $(`#${hiddenId}`).val(ui.item.value);
+                $(autocompleteId).val(ui.item.label);
+            },
+        });
+    });
+</script>

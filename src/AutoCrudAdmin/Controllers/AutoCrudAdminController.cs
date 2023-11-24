@@ -219,6 +219,7 @@ public class AutoCrudAdminController<TEntity>
     /// <param name="searchProperty">The property to search.</param>
     /// <returns>The autocomplete results.</returns>
     [HttpGet]
+    [Obsolete]
     public virtual IEnumerable<DropDownViewModel> Autocomplete([FromQuery] string searchTerm, string searchProperty)
     {
         var entityType = typeof(TEntity);
@@ -242,6 +243,38 @@ public class AutoCrudAdminController<TEntity>
             .ToList();
 
         return entities;
+    }
+
+    /// <summary>
+    /// Handles autocomplete extended searches.
+    /// </summary>
+    /// <param name="searchTerm">The search term.</param>
+    /// <param name="searchProperty">The property to search is configured by FormControlViewModel.</param>
+    /// <param name="maxResults">The max autocomplete result is configured by FormControlViewModel.</param>
+    /// <returns>The autocomplete results.</returns>
+    [HttpGet]
+    public IEnumerable<DropDownViewModel> AutocompleteExtended(
+                [FromQuery] string searchTerm,
+                string searchProperty,
+                int maxResults)
+    {
+        if (string.IsNullOrWhiteSpace(searchProperty))
+        {
+            throw new ArgumentException("No search property added!");
+        }
+
+        var entityType = typeof(TEntity);
+        var searchedProperty = entityType.GetProperty(searchProperty);
+
+        var keys = entityType.GetPrimaryKeyPropertyInfos();
+
+        if (searchedProperty == null || !keys.Any())
+        {
+            throw new ArgumentException("No such property exists on the entity!");
+        }
+
+        var containsExpression = ExpressionsBuilder.ForGetPropertyContains<TEntity>(searchedProperty, searchTerm);
+        return this.FilterAutocompleteResults(maxResults, searchedProperty, keys, containsExpression);
     }
 
     /// <summary>
@@ -720,7 +753,7 @@ public class AutoCrudAdminController<TEntity>
             actionName,
             gridStringFilterType.ToString());
 
-     /// <summary>
+    /// <summary>
     /// Builds custom grid columns.
     /// </summary>
     /// <param name="columns">Page columns.</param>
@@ -835,6 +868,23 @@ public class AutoCrudAdminController<TEntity>
             .Where(p => p.CanWrite && !p.PropertyType.IsNavigationProperty())
             .ToList()
             .ForEach(property => property.SetValue(existingEntity, property.GetValue(newEntity, null), null));
+
+    private IEnumerable<DropDownViewModel> FilterAutocompleteResults(int maxResults, PropertyInfo searchedProperty, IEnumerable<PropertyInfo> keys, Expression<Func<TEntity, bool>> expression)
+    {
+        var entities = this.Set
+            .AsNoTracking()
+            .Where(expression)
+            .Take(maxResults)
+            .ToList();
+
+        return entities
+            .Select(x => new DropDownViewModel
+            {
+                Value = keys.Select(k => k.GetValue(x) !.ToString()),
+                Name = searchedProperty.GetValue(x) !.ToString() !,
+            })
+            .ToList();
+    }
 
     private IHtmlGrid<TEntity> GenerateGrid(IHtmlHelper<AutoCrudAdminIndexViewModel> htmlHelper)
         => htmlHelper

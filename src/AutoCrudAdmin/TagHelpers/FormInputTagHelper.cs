@@ -138,7 +138,7 @@ public class FormInputTagHelper : TagHelper
         {
             this.PrepareExpandableMultiChoiceCheckBox(output);
         }
-        else if (this.FormControlType == FormControlType.Autocomplete)
+        else if (this.FormControlType == FormControlType.Autocomplete || this.FormControlType == FormControlType.AutocompleteExtended)
         {
             this.PrepareAutocompleteDropdown(output);
         }
