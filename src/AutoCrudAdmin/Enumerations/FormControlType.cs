@@ -29,4 +29,9 @@ public enum FormControlType
     /// Represents an autocomplete control, where the user's input is completed automatically as they type.
     /// </summary>
     Autocomplete = 4,
+
+    /// <summary>
+    /// Represents an autocomplete control, where the user's input is completed automatically as they type. Extended to work with more then just strings and configure results received.
+    /// </summary>
+    AutocompleteExtended = 5,
 }

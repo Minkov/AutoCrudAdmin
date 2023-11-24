@@ -84,12 +84,12 @@ public class FormControlViewModel
     public string? FormControlAutocompleteEntityId { get; set; }
 
     /// <summary>
-    /// Gets or sets the entity property that autocomplete will search by.
+    /// Gets or sets the entity property that autocomplete will search by. (Autocomplete Extended).
     /// </summary>
     public string? SearchByPropertyAutocompleteConfiguration { get; set; }
 
     /// <summary>
-    /// Gets or sets how much autocomplete results will be shown (20 by default).
+    /// Gets or sets how much autocomplete results will be shown (20 by default). (Autocomplete Extended).
     /// </summary>
     public int NumberOfAutocompleteItemsShownConfiguration { get; set; } = 20;
 }

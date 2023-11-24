@@ -149,6 +149,18 @@ public static class TypeExtensions
     public static bool IsEnumerableExceptString(this Type type)
         => typeof(IEnumerable).IsAssignableFrom(type) && type != typeof(string);
 
+    /// <summary>
+    /// This method returns the MethodInfo object for the ToString method of the Object class.
+    /// </summary>
+    /// <returns>Returns MethodInfo? (object.ToString()).</returns>
+    public static MethodInfo? GetObjectToStringMethodInfo() => typeof(object).GetMethod(nameof(string.ToString));
+
+    /// <summary>
+    /// This method returns the MethodInfo object for the Contains method of the String class.
+    /// </summary>
+    /// <returns>Returns MethodInfo? (string.Contains()).</returns>
+    public static MethodInfo? GetStringContainsMethodInfo() => typeof(string).GetMethod(nameof(string.Contains), new[] { typeof(string) });
+
     private static DbContext? CreateDbContext(Type type)
     {
         try
