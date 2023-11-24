@@ -66,7 +66,7 @@ public static class ControllerExtensions
         }
         else if (int.TryParse(idAsString, out var entityIdInt))
         {
-            id = entityIdInt.ToString().Trim();
+            id = entityIdInt;
             isSuccessful = true;
         }
 
