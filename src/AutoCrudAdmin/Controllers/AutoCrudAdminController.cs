@@ -818,13 +818,6 @@ public class AutoCrudAdminController<TEntity>
         return formControls;
     }
 
-    private static void CopyFormPropertiesToExistingEntityFromNewEntity(TEntity existingEntity, TEntity newEntity)
-        => typeof(TEntity)
-            .GetProperties()
-            .Where(p => p.CanWrite && !p.PropertyType.IsNavigationProperty())
-            .ToList()
-            .ForEach(property => property.SetValue(existingEntity, property.GetValue(newEntity, null), null));
-
     private IGridColumnsOf<TEntity> GenerateColumnConfiguration<TProperty>(
     IGridColumnsOf<TEntity> columns,
     PropertyInfo property,
@@ -998,7 +991,7 @@ public class AutoCrudAdminController<TEntity>
         var existingEntity = this.GetExistingEntity(originalEntity);
 
         // Copy properties from new entity to the existing entity.
-        CopyFormPropertiesToExistingEntityFromNewEntity(existingEntity, newEntity);
+        existingEntity.CopyFormPropertiesToExistingEntityFromNewEntity(newEntity);
 
         // Return original entity and modified existing entity.
         // This approach allows for lazy loading to work on the new entity.
