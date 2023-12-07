@@ -64,7 +64,7 @@ public static class ReflectionHelper
 
         var uniqueEntityTypes = entityTypes
             .Where(parent =>
-                parent?.IsGenericParameter == true
+                parent?.IsGenericParameter == false
                 && entityTypes.All(child => child?.IsSubclassOfAnyType(parent) != true))
             .ToHashSet();
 
