@@ -1,5 +1,5 @@
 @using AutoCrudAdmin.Enumerations
-@using static AutoCrudAdmin.Constants.CssClassNames
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model IEnumerable<AutoCrudAdmin.ViewModels.FormControlViewModel>
 
 <style>
@@ -31,36 +31,15 @@
 
 @foreach (var formControl in Model)
 {
-    var isCheckbox = formControl.Value is bool;
-    var inputClassName = isCheckbox ? FormCheckboxInput : FormControl;
-    var labelClassName = isCheckbox ? FormCheckboxLabel : string.Empty;
-    var hiddenAttribute = formControl.IsHidden ? "hidden" : string.Empty;
-
-
-    <div class="@FormGroup" @hiddenAttribute>
-        <label class="@labelClassName">@formControl.DisplayName</label>
-        <formInput
-            for-type="@formControl.Type"
-            for-form-control-type="@formControl.FormControlType"
-            for-name="@formControl.Name"
-            with-value="@formControl.Value"
-            with-options="@formControl.Options"
-            is-hidden="@formControl.IsHidden"
-            is-db-set="@formControl.IsDbSet"
-            is-readonly="@formControl.IsReadOnly"
-            http-context="@Context"
-            readonly="@formControl.IsReadOnly"
-            class="@inputClassName">
-        </formInput>
-    </div>
-
+    <partial model="@formControl" name="@AutoCrudAdmin.Constants.PartialView.EntityFormControlPartial"/>
+    
     if (formControl.FormControlType == FormControlType.Autocomplete)
     {
-        @Html.Hidden("AutocompleteId", "#" + formControl.Name + "Id")
+        @Html.Hidden("AutocompleteId", "#" + formControl.Name + "Id");
         var controllerName = formControl.FormControlAutocompleteController;
-        @Html.Hidden("ControllerName", controllerName)
-        @Html.Hidden(formControl.FormControlAutocompleteEntityId, "")
-
+        @Html.Hidden("ControllerName", controllerName);
+        @Html.Hidden(formControl.FormControlAutocompleteEntityId, "");
+        
         <script type="text/javascript">
            $(function() {
                const autocompleteId= $('#AutocompleteId').val();
