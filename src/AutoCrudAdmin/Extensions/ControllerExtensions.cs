@@ -61,7 +61,7 @@ public static class ControllerExtensions
 
         if (typeof(TEntityId) == typeof(string) && !string.IsNullOrWhiteSpace(idAsString))
         {
-            id = idAsString;
+            id = idAsString.Trim();
             isSuccessful = true;
         }
         else if (int.TryParse(idAsString, out var entityIdInt))
