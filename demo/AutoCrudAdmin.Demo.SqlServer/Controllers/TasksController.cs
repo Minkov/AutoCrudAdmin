@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoCrudAdmin.Controllers;
 using AutoCrudAdmin.Demo.Models.Models;
+using AutoCrudAdmin.Attributes;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 
 public class TasksController
     : AutoCrudAdminController<Task>
@@ -36,6 +38,12 @@ public class TasksController
             "M/d/yyyy H:mm:ss tt",
             "MM/dd/yyyy hh:mm:ss tt",
         };
+
+    [InjectScript("/js/tasks.js")]
+    public override IActionResult Index()
+    {
+        return base.Index();
+    }
 
     protected override IQueryable<Task> ApplyIncludes(IQueryable<Task> set)
         => set.Include(x => x.Project);
