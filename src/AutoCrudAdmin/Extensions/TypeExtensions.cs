@@ -8,6 +8,7 @@ using System.Reflection;
 using AutoCrudAdmin.Helpers;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using static AutoCrudAdmin.Constants.Entity;
 
 /// <summary>
@@ -149,11 +150,11 @@ public static class TypeExtensions
     public static bool IsEnumerableExceptString(this Type type)
         => typeof(IEnumerable).IsAssignableFrom(type) && type != typeof(string);
 
-    private static DbContext? CreateDbContext(Type type)
+    private static DbContext? CreateDbContext(Type dbContextType)
     {
         try
         {
-            return Activator.CreateInstance(type) as DbContext;
+            return DbContextActivator.CreateInstance(dbContextType);
         }
         catch
         {
