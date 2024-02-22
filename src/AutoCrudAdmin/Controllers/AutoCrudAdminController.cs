@@ -178,11 +178,11 @@ public class AutoCrudAdminController<TEntity>
         => null;
 #pragma warning restore CA1822
 
-    private static MethodInfo GenerateColumnExpressionMethod =>
+    private MethodInfo GenerateColumnExpressionMethod =>
         typeof(AutoCrudAdminController<TEntity>)
             .GetMethod(
-                nameof(GenerateColumnConfiguration),
-                BindingFlags.NonPublic | BindingFlags.Static) !;
+                nameof(this.GenerateColumnConfiguration),
+                BindingFlags.NonPublic | BindingFlags.Instance) !;
 
     private IEnumerable<GridAction> Actions
         => this.DefaultActions.Concat(this.CustomActions);
@@ -767,9 +767,9 @@ public class AutoCrudAdminController<TEntity>
         var columnsResult = properties
             .Aggregate(
                 columns,
-                (currentColumns, prop) => (IGridColumnsOf<TEntity>)GenerateColumnExpressionMethod
+                (currentColumns, prop) => (IGridColumnsOf<TEntity>)this.GenerateColumnExpressionMethod
                     .MakeGenericMethod(prop.PropertyType)
-                    .Invoke(null, new object[] { currentColumns, prop, stringMaxLength, foreignKeys }) !);
+                    .Invoke(this, new object[] { currentColumns, prop, stringMaxLength, foreignKeys }) !);
 
         foreach (var customGridColumn in this.CustomColumns)
         {
@@ -783,6 +783,17 @@ public class AutoCrudAdminController<TEntity>
         }
 
         return columnsResult;
+    }
+
+    /// <summary>
+    /// Allows to modify lambda expression from inherited controller.
+    /// </summary>
+    /// <typeparam name="TProperty">Type property.</typeparam>
+    /// <param name="property">The property.</param>
+    /// <returns>Returns created expression.</returns>
+    protected virtual Expression<Func<TEntity, TProperty>> GenerateColumnLambda<TProperty>(PropertyInfo property)
+    {
+        return ExpressionsBuilder.ForGetProperty<TEntity, TProperty>(property);
     }
 
     private static IEnumerable<FormControlViewModel> SetFormControlsVisibility(
@@ -807,13 +818,13 @@ public class AutoCrudAdminController<TEntity>
         return formControls;
     }
 
-    private static IGridColumnsOf<TEntity> GenerateColumnConfiguration<TProperty>(
-        IGridColumnsOf<TEntity> columns,
-        PropertyInfo property,
-        int columnStringMaxLength,
-        IEnumerable<PropertyInfo> foreignKeys)
+    private IGridColumnsOf<TEntity> GenerateColumnConfiguration<TProperty>(
+    IGridColumnsOf<TEntity> columns,
+    PropertyInfo property,
+    int columnStringMaxLength,
+    IEnumerable<PropertyInfo> foreignKeys)
     {
-        var lambda = ExpressionsBuilder.ForGetProperty<TEntity, TProperty>(property);
+        Expression<Func<TEntity, TProperty>> lambda = this.GenerateColumnLambda<TProperty>(property);
 
         var columnBuilder = columns
             .Add(lambda)
@@ -828,13 +839,6 @@ public class AutoCrudAdminController<TEntity>
 
         return columns;
     }
-
-    private static void CopyFormPropertiesToExistingEntityFromNewEntity(TEntity existingEntity, TEntity newEntity)
-        => typeof(TEntity)
-            .GetProperties()
-            .Where(p => p.CanWrite && !p.PropertyType.IsNavigationProperty())
-            .ToList()
-            .ForEach(property => property.SetValue(existingEntity, property.GetValue(newEntity, null), null));
 
     private IHtmlGrid<TEntity> GenerateGrid(IHtmlHelper<AutoCrudAdminIndexViewModel> htmlHelper)
         => htmlHelper
@@ -987,7 +991,7 @@ public class AutoCrudAdminController<TEntity>
         var existingEntity = this.GetExistingEntity(originalEntity);
 
         // Copy properties from new entity to the existing entity.
-        CopyFormPropertiesToExistingEntityFromNewEntity(existingEntity, newEntity);
+        existingEntity.CopyFormPropertiesToExistingEntityFromNewEntity(newEntity);
 
         // Return original entity and modified existing entity.
         // This approach allows for lazy loading to work on the new entity.
